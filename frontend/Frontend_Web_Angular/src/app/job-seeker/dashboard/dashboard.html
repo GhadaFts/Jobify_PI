@@ -1,0 +1,10 @@
+<div class="flex h-screen">
+  <app-sidebar [activeSection]="activeSection" (sectionChange)="onSectionChange($event)"></app-sidebar>
+  <div class="flex-1 p-6 bg-gray-100">
+    <ng-container [ngSwitch]="activeSection">
+      <app-cv-correction *ngSwitchCase="'cv-correction'"></app-cv-correction>
+      <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
+      <app-job-analyse *ngSwitchCase="'job-analyse'"></app-job-analyse>
+    </ng-container>
+  </div>
+</div>
