@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6;
+  transition: background-color 0.3s ease;
+}
+
+.border-light-gray {
+  border-color: #e5e7eb;
+}
+
+.text-primary {
+  color: #3b82f6; // Tailwind's blue-600 as an example
+}

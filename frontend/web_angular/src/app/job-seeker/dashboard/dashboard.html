@@ -1,0 +1,16 @@
+<div class="flex h-screen">
+  <!-- Left Sidebar (Full Height, No Margin) -->
+  <app-sidebar [activeSection]="activeSection" (sectionChange)="onSectionChange($event)" class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto" style="left: 0;"></app-sidebar>
+
+  <!-- Main Content Area with Proper Margins -->
+  <main class="ml-64 mr-80 p-4 " style="background-color: #F3F4F6; width: calc(100% - 36rem); margin-left: 16rem; margin-right: 20rem;">
+    <ng-container [ngSwitch]="activeSection">
+      <app-cv-correction *ngSwitchCase="'cv-correction'"></app-cv-correction>
+      <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
+      <app-job-analyse *ngSwitchCase="'job-analyse'"></app-job-analyse>
+    </ng-container>
+  </main>
+
+  <!-- Right Sidebar -->
+  <app-job-seeker-sidebar class="w-80 bg-white p-4 fixed right-0 top-0 h-screen overflow-y-auto border-l z-10" style="border-color: #E5E7EB;"></app-job-seeker-sidebar>
+</div>
