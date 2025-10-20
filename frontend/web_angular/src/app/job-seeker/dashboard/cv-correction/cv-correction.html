@@ -85,6 +85,14 @@
           <p class="text-base text-gray-700">{{ profile.title || 'Not provided' }}</p>
         </div>
         <div>
+          <div class="text-sm font-medium text-gray-500">Nationality</div>
+          <p class="text-base text-gray-700">{{ profile.nationality || 'Not provided' }}</p>
+        </div>
+        <div>
+          <div class="text-sm font-medium text-gray-500">Date of Birth</div>
+          <p class="text-base text-gray-700">{{ profile.dateOfBirth || 'Not provided' }}</p>
+        </div>
+        <div>
           <div class="text-sm font-medium text-gray-500">Skills</div>
           <div class="flex flex-wrap gap-2 mt-2">
             <span *ngFor="let skill of profile.skills" class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm">{{ skill }}</span>

@@ -21,7 +21,8 @@ export class CvCorrection {
     title: 'Software Engineer',
     email: 'john.doe@example.com',
     phone: '+1-555-123-4567',
-    location: 'New York, NY',
+    nationality: 'American', // Remplace location
+    dateOfBirth: '1990-05-15', // Ajouté
     summary: 'Experienced software engineer with a focus on web development and team collaboration.',
     skills: ['JavaScript', 'React', 'Node.js'],
     experience: [
@@ -101,7 +102,8 @@ export class CvCorrection {
         title: 'Software Engineer',
         email: 'john.doe@example.com',
         phone: '+1-555-123-4567',
-        location: 'New York, NY',
+        nationality: 'American', // Changé de location
+        dateOfBirth: '1990-05-15', // Ajouté
         summary: 'Experienced software engineer with a focus on web development and team collaboration.',
         skills: ['JavaScript', 'React', 'Node.js'],
         experience: [

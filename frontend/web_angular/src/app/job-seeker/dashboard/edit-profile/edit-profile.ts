@@ -18,7 +18,8 @@ export class EditProfile implements OnInit {
     title: '',
     email: '',
     phone: '',
-    location: '',
+    nationality: '', // Changé de location
+    dateOfBirth: '', // Ajouté
     summary: '',
     skills: [],
     experience: [],

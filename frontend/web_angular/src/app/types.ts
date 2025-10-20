@@ -19,11 +19,11 @@ export interface UserProfile {
   title: string;
   email: string;
   phone: string;
-  location: string;
+  nationality: string; 
+  dateOfBirth: string; 
   summary: string;
   skills: string[];
   experience: { position: string; company: string; startDate: string; endDate: string; description: string }[];
   education: { degree: string; field: string; school: string; graduationDate: string }[];
   profilePhoto?: string; // Added to store base64 image string
-
 }

@@ -24,7 +24,7 @@ export class ApplicationDialog {
     setTimeout(() => {
       const cv = `${this.data.profile.name}
 ${this.data.profile.title}
-${this.data.profile.email} | ${this.data.profile.phone} | ${this.data.profile.location}
+${this.data.profile.email} | ${this.data.profile.phone} 
 
 PROFESSIONAL SUMMARY
 ${this.data.profile.summary}
