@@ -7,16 +7,13 @@ export interface JobOffer {
   type: string;
   salary: string;
   description: string;
-  requirements?: string[]; // Changed to optional
+  requirements?: string[]; 
   experience: string;
   applicants: number;
-  posted: string; // date string
-  urgent?: boolean; // Replace with status ("urgent", "normal", "closed")
-  verified?: boolean; // Eliminate
-  remote?: boolean; // Eliminate
+  posted: string; 
+  status?: 'open' | 'new' | 'hot job' | 'limited openings' | 'actively hiring' | 'urgent hiring'; // Remplace urgent
   skills: string[];
 }
-
 export interface UserProfile {
   name: string;
   title: string;

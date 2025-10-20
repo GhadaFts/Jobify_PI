@@ -24,9 +24,7 @@ export class FindJob {
       skills: ['JavaScript', 'React', 'Node.js'],
       posted: '2 days ago',
       applicants: 50,
-      remote: true,
-      verified: true,
-      urgent: false,
+      status: 'open',
     },
     {
       id: '2',
@@ -41,9 +39,7 @@ export class FindJob {
       skills: ['Python', 'SQL', 'Excel'],
       posted: '5 days ago',
       applicants: 30,
-      remote: false,
-      verified: false,
-      urgent: true,
+      status: 'urgent hiring',
     },
     {
       id: '3',
@@ -58,9 +54,52 @@ export class FindJob {
       skills: ['Figma', 'Adobe XD', 'Prototyping'],
       posted: '1 week ago',
       applicants: 20,
-      remote: true,
-      verified: true,
-      urgent: false,
+      status: 'hot job',
+    },
+    {
+      id: '4',
+      title: 'Product Manager',
+      company: 'Innovate Inc',
+      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
+      location: 'Chicago',
+      type: 'Full-time',
+      experience: '5+ years',
+      salary: '$140,000',
+      description: 'Lead product development...',
+      skills: ['Product Strategy', 'Agile', 'User Research'],
+      posted: '1 day ago',
+      applicants: 15,
+      status: 'new',
+    },
+    {
+      id: '5',
+      title: 'DevOps Engineer',
+      company: 'Cloud Solutions',
+      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
+      location: 'Austin',
+      type: 'Full-time',
+      experience: '4+ years',
+      salary: '$130,000',
+      description: 'Manage cloud infrastructure...',
+      skills: ['AWS', 'Docker', 'Kubernetes'],
+      posted: '3 days ago',
+      applicants: 25,
+      status: 'limited openings',
+    },
+    {
+      id: '6',
+      title: 'Frontend Developer',
+      company: 'Web Masters',
+      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
+      location: 'Miami',
+      type: 'Full-time',
+      experience: '2+ years',
+      salary: '$110,000',
+      description: 'Build responsive web applications...',
+      skills: ['TypeScript', 'React', 'CSS'],
+      posted: '4 days ago',
+      applicants: 40,
+      status: 'actively hiring',
     },
   ];
   appliedJobs: Set<string> = new Set();
@@ -83,7 +122,7 @@ export class FindJob {
   }
 
   handleApplyJob(jobId: string) {
-    this.appliedJobs.add(jobId); // Add the job ID to the appliedJobs Set
+    this.appliedJobs.add(jobId);
   }
 
   handleBookmarkJob(jobId: string) {
@@ -92,5 +131,18 @@ export class FindJob {
     } else {
       this.bookmarkedJobs.add(jobId);
     }
+  }
+
+  // Méthode pour obtenir la couleur selon le statut
+  getStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'open': '#10B981', // Vert
+      'new': '#3B82F6', // Bleu
+      'hot job': '#DC2626', // Rouge
+      'limited openings': '#F59E0B', // Orange
+      'actively hiring': '#8B5CF6', // Violet
+      'urgent hiring': '#EF4444' // Rouge vif
+    };
+    return colors[status] || '#6B7280'; // Gris par défaut
   }
 }

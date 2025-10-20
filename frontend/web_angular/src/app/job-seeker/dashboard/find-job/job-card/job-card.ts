@@ -19,6 +19,19 @@ export class JobCard {
 
   constructor(public dialog: MatDialog) {}
 
+  // Méthode pour obtenir la couleur selon le statut
+  getStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'open': '#10B981', // Vert
+      'new': '#3B82F6', // Bleu
+      'hot job': '#DC2626', // Rouge
+      'limited openings': '#F59E0B', // Orange
+      'actively hiring': '#8B5CF6', // Violet
+      'urgent hiring': '#EF4444' // Rouge vif
+    };
+    return colors[status] || '#6B7280'; // Gris par défaut
+  }
+
   openDetailsModal(job: JobOffer) {
     const dialogRef = this.dialog.open(JobDetailsDialog, {
       width: '600px',
