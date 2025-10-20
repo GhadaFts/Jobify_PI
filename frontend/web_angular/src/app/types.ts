@@ -11,9 +11,9 @@ export interface JobOffer {
   experience: string;
   applicants: number;
   posted: string; // date string
-  urgent?: boolean;// remplacer par status ("urgent", "normal", "closed")
-  verified?: boolean;// eleminer
-  remote?: boolean;// eleminer
+  urgent?: boolean; // Replace with status ("urgent", "normal", "closed")
+  verified?: boolean; // Eliminate
+  remote?: boolean; // Eliminate
   skills: string[];
 }
 
@@ -27,4 +27,6 @@ export interface UserProfile {
   skills: string[];
   experience: { position: string; company: string; startDate: string; endDate: string; description: string }[];
   education: { degree: string; field: string; school: string; graduationDate: string }[];
+  profilePhoto?: string; // Added to store base64 image string
+
 }

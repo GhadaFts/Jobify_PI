@@ -26,6 +26,10 @@ export class Dashboard {
       case 'job-analyse':
         this.router.navigate(['/job-seeker/dashboard/job-analyse']);
         break;
+      case 'edit-profile':
+        this.router.navigate(['/job-seeker/dashboard/edit-profile']);
+        break;
+      
     }
   }
 
