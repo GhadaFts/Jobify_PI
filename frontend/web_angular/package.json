@@ -33,7 +33,10 @@
     "@angular/router": "^20.3.0",
     "@fortawesome/angular-fontawesome": "^3.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@google/genai": "^1.25.0",
     "lucide-angular": "^0.546.0",
+    "marked": "^16.4.1",
+    "pdfjs-dist": "^5.4.296",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

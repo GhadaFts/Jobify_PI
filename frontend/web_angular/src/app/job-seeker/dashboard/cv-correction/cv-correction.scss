@@ -14,3 +14,16 @@
 .text-primary {
   color: #3b82f6; // Tailwind's blue-600 as an example
 }
+
+/* Red X for missing fields */
+.missing-x {
+  color: #ef4444; /* red-500 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.missing-x svg {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem;
+}
