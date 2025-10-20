@@ -11,8 +11,8 @@ export class Sidebar {
   @Output() sectionChange = new EventEmitter<string>(); // Ensure output emits string
 
   navigationItems = [
-    { id: 'cv-correction', label: 'CV Correction' },
     { id: 'find-job', label: 'Find Job' },
+    { id: 'cv-correction', label: 'CV Correction' },
     { id: 'job-analyse', label: 'Job Analyse' }
   ];
 

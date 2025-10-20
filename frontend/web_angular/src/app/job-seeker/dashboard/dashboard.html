@@ -5,8 +5,8 @@
   <!-- Main Content Area with Proper Margins -->
   <main class="ml-64 mr-80 p-4 " style="background-color: #F3F4F6; width: calc(100% - 36rem); margin-left: 16rem; margin-right: 20rem;">
     <ng-container [ngSwitch]="activeSection">
+       <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
       <app-cv-correction *ngSwitchCase="'cv-correction'"></app-cv-correction>
-      <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
       <app-job-analyse *ngSwitchCase="'job-analyse'"></app-job-analyse>
     </ng-container>
   </main>
