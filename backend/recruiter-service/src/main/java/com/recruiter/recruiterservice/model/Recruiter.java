@@ -36,5 +36,6 @@ public class Recruiter {
     @ElementCollection
     private List<String> service;
 
+    @Column(nullable = false)
     private boolean deleted = false; // soft delete
 }
