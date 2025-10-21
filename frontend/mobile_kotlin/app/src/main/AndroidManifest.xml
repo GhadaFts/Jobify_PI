@@ -31,6 +31,9 @@
             android:exported="false"/>
 
         <activity android:name=".JobOpportunitiesActivity" />
+        <activity android:name=".PostsActivity" />
+        <activity android:name=".AddPostActivity" />
+
 
     </application>
 
