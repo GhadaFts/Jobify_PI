@@ -10,6 +10,7 @@ const routes: Routes = [
    { path: 'signup', component: Signup },
   { path: 'job-seeker', loadChildren: () => import('./job-seeker/job-seeker-module').then(m => m.JobSeekerModule) },
   { path: 'recruiter', loadChildren: () => import('./recruiter/recruiter-module').then(m => m.RecruiterModule) },
+   { path: 'recruiter', loadChildren: () => import('./recruiter/recruiter-module').then(m => m.RecruiterModule) },
   { path: '**', redirectTo: '' }
 ];
 
