@@ -34,6 +34,31 @@ public class JobSeekerService {
         JobSeeker saved = repository.save(jobSeeker);
         return mapToResponse(saved);
     }
+    public JobSeeker updatePartial(Integer id, JobSeekerRequestDTO dto) {
+        JobSeeker jobSeeker = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found with id " + id));
+
+        if (dto.getEmail() != null) jobSeeker.setEmail(dto.getEmail());
+        if (dto.getFullName() != null) jobSeeker.setFullName(dto.getFullName());
+        if (dto.getRole() != null) jobSeeker.setRole(dto.getRole());
+        if (dto.getPhotoProfil() != null) jobSeeker.setPhotoProfil(dto.getPhotoProfil());
+        if (dto.getTwitterLink() != null) jobSeeker.setTwitterLink(dto.getTwitterLink());
+        if (dto.getWebLink() != null) jobSeeker.setWebLink(dto.getWebLink());
+        if (dto.getGithubLink() != null) jobSeeker.setGithubLink(dto.getGithubLink());
+        if (dto.getFacebookLink() != null) jobSeeker.setFacebookLink(dto.getFacebookLink());
+        if (dto.getDescription() != null) jobSeeker.setDescription(dto.getDescription());
+        if (dto.getPhoneNumber() != null) jobSeeker.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getNationality() != null) jobSeeker.setNationality(dto.getNationality());
+        if (dto.getTitle() != null) jobSeeker.setTitle(dto.getTitle());
+        if (dto.getDateOfBirth() != null) jobSeeker.setDateOfBirth(dto.getDateOfBirth());
+        if (dto.getGender() != null) jobSeeker.setGender(dto.getGender());
+        if (dto.getSkills() != null) jobSeeker.setSkills(dto.getSkills());
+        if (dto.getExperience() != null) jobSeeker.setExperience(dto.getExperience());
+        if (dto.getEducation() != null) jobSeeker.setEducation(dto.getEducation());
+
+        return repository.save(jobSeeker);
+    }
+
 
     public void delete(Integer id) {
         JobSeeker jobSeeker = repository.findById(id)

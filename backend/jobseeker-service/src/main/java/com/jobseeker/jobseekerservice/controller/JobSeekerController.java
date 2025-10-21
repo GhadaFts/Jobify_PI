@@ -3,6 +3,7 @@ package com.jobseeker.jobseekerservice.controller;
 
 import com.jobseeker.jobseekerservice.dto.JobSeekerRequestDTO;
 import com.jobseeker.jobseekerservice.dto.JobSeekerResponseDTO;
+import com.jobseeker.jobseekerservice.model.JobSeeker;
 import com.jobseeker.jobseekerservice.service.JobSeekerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,10 @@ public class JobSeekerController {
     @PostMapping
     public ResponseEntity<JobSeekerResponseDTO> create(@RequestBody JobSeekerRequestDTO dto) {
         return ResponseEntity.ok(service.create(dto));
+    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<JobSeeker> update(@PathVariable Integer id, @RequestBody JobSeekerRequestDTO dto) {
+        return ResponseEntity.ok(service.updatePartial(id,dto));
     }
 
     @DeleteMapping("/{id}")
