@@ -12,6 +12,8 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import java.util.*
 import android.content.Intent
+import android.widget.LinearLayout
+import android.widget.TextView
 
 
 
@@ -49,6 +51,11 @@ class RecruiterProfileActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
+        }
+
+        val menuHomeLayout = findViewById<LinearLayout>(R.id.menuHomeLayout)
+        menuHomeLayout.setOnClickListener {
+            startActivity(Intent(this, PostsActivity::class.java))
         }
 
 
@@ -167,39 +174,39 @@ class RecruiterProfileActivity : AppCompatActivity() {
                     inputPostName.error = "Please enter a post title"
                     return@setOnClickListener
                 }
-
                 if(description.isEmpty()){
                     inputDescription.error = "Please enter a post description"
                     return@setOnClickListener
                 }
                 if(location.isEmpty()){
-                    inputLocation.error = "Please enter a localisation"
+                    inputLocation.error = "Please enter a location"
                     return@setOnClickListener
                 }
-
                 if(contractType.isEmpty()){
-                    inputContractType.error = "Please enter a post description"
+                    inputContractType.error = "Please enter contract type"
                     return@setOnClickListener
                 }
                 if(deadline.isEmpty()){
-                    inputDeadline.error = "Please enter a post description"
+                    inputDeadline.error = "Please enter a deadline"
                     return@setOnClickListener
                 }
 
                 txtNoPost.visibility = View.GONE
                 val inflater = LayoutInflater.from(this)
                 val postItem = inflater.inflate(R.layout.item_post, postsGrid, false)
-                postItem.findViewById<TextView>(R.id.postTitle).text = postName
-                postItem.findViewById<TextView>(R.id.postDescription).text = description
-                postItem.findViewById<TextView>(R.id.postLocation).text = location
-                postItem.findViewById<TextView>(R.id.postContractType).text = contractType
-                postItem.findViewById<TextView>(R.id.postDeadline).text = deadline
+
+                postItem.findViewById<TextView>(R.id.tvTitle).text = postName
+                postItem.findViewById<TextView>(R.id.tvPosition).text = "" // placeholder
+                postItem.findViewById<TextView>(R.id.tvExperience).text = "" // placeholder
+                postItem.findViewById<TextView>(R.id.tvSalary).text = "" // placeholder
+                postItem.findViewById<TextView>(R.id.tvDescription).text = description
 
                 postsGrid.addView(postItem)
                 dialog.dismiss()
             }
 
             dialog.show()
+
         }
 
     }

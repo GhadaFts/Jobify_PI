@@ -71,7 +71,6 @@ The JSON must strictly follow this structure:
     "email": string,
     "phone": string,
     "nationality": string,
-    "dateOfBirth": string,
     "summary": string,
     "skills": string[],
     
