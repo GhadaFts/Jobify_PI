@@ -74,6 +74,7 @@ The JSON must strictly follow this structure:
     "dateOfBirth": string,
     "summary": string,
     "skills": string[],
+    
     "experience": [
       {
         "position": string,

@@ -1,14 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/**/*.{html,ts}', // Scans all HTML and TypeScript files in src/
+    "./src/**/*.{html,ts}",
+    // Ajoutez ces chemins si vous avez une structure différente
+    "./projects/**/*.{html,ts}",
+    "./libs/**/*.{html,ts}",
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: '#336781', // Single color
-      },
-    },
+    extend: {},
   },
   plugins: [],
-};
+}

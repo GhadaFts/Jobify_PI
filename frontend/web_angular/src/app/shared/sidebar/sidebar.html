@@ -1,13 +1,14 @@
 <div class="h-full bg-white border-r p-6 flex flex-col" [style.border-color]="'#E5E7EB'">
   <!-- Logo -->
-  <!-- Logo with Title (Updated) -->
   <div class="mb-8 flex items-center gap-4">
     <img src="/assets/logo.png" alt="Job Portal Logo" class="w-10 h-auto" />
     <div>
       <h1 class="text-xl font-bold" [style.color]="'#336781'">Jobify</h1>
-      <p class="text-xs opacity-70" [style.color]="'#6B7280'">Career Network</p>
+      <!-- Subtitle dynamique -->
+      <p class="text-xs opacity-70" [style.color]="'#6B7280'">{{ subtitle }}</p>
     </div>
   </div>
+  
   <!-- Main Navigation -->
   <nav class="flex-1 space-y-2">
     <ng-container *ngFor="let item of navigationItems">
@@ -39,6 +40,7 @@
       </button>
     </ng-container>
   </nav>
+
   <!-- Secondary Navigation -->
   <div class="space-y-2 pt-4" [style.border-color]="'#E5E7EB'">
     <ng-container *ngFor="let item of secondaryItems">
@@ -66,13 +68,21 @@
       </button>
     </ng-container>
   </div>
-  <!-- Profile Section (Integrated below secondary navigation) -->
+
+  <!-- Profile Section dynamique -->
   <div class="w-full border-t pt-4" [style.border-color]="'#E5E7EB'">
     <div class="flex items-center gap-3 px-4 py-3 text-left">
-      <img src="/assets/img.png" alt="Profile" class="w-10 h-10 rounded-full object-cover" />
+      <!-- Photo de profil dynamique -->
+      <img 
+        [src]="profileImage" 
+        alt="Profile" 
+        class="w-10 h-10 rounded-full object-cover" 
+      />
       <div>
-        <h4 class="text-base font-medium" [style.color]="'#111827'">John Doe</h4>
-        <p class="text-sm text-gray-500">Software Engineer</p>
+        <!-- Nom dynamique -->
+        <h4 class="text-base font-medium" [style.color]="'#111827'">{{ profileName }}</h4>
+        <!-- Titre dynamique -->
+        <p class="text-sm text-gray-500">{{ profileTitle }}</p>
       </div>
     </div>
   </div>
