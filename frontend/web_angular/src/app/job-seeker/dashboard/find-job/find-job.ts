@@ -22,6 +22,7 @@ export class FindJob {
       salary: '$120,000',
       description: 'Develop web applications...',
       skills: ['JavaScript', 'React', 'Node.js'],
+      requirements: ['Bachelor\'s degree in Computer Science', '3+ years of experience in software development'],
       posted: '2 days ago',
       applicants: 50,
       status: 'open',

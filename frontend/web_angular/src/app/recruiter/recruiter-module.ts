@@ -9,6 +9,9 @@ import { PublishJob } from './dashboard/publish-job/publish-job';
 import { EditProfile } from './dashboard/edit-profile/edit-profile';
 import { SharedModule } from '../shared/shared-module';
 import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sidebar';
+import { JobCardRecruiter } from './dashboard/publish-job/job-card-recruiter/job-card-recruiter';
+import { RecruiterJobDetailsDialog } from './dashboard/publish-job/job-card-recruiter/recruiter-job-details-dialog/recruiter-job-details-dialog';
+import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-job-dialog/edit-job-dialog';
 
 @NgModule({
   declarations: [
@@ -17,6 +20,9 @@ import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sideba
     PublishJob,
     EditProfile,
     RecruiterSidebar,
+    JobCardRecruiter,
+    RecruiterJobDetailsDialog,
+    EditJobDialog,
   ],
   imports: [
     CommonModule,

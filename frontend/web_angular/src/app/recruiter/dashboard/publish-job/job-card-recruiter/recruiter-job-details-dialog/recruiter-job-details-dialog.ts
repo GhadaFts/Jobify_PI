@@ -1,19 +1,20 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { JobOffer } from '../../../../../types'; // Adjust the import path
+import { JobOffer } from '../../../../../types';
 import {  faCheck, faListCheck, } from '@fortawesome/free-solid-svg-icons';
 
+
 @Component({
-  selector: 'app-job-details-dialog',
+  selector: 'app-recruiter-job-details-dialog',
   standalone: false,
-  templateUrl: './job-details-dialog.html',
-  styleUrls: ['./job-details-dialog.scss']
+  templateUrl: './recruiter-job-details-dialog.html',
+  styleUrls: ['./recruiter-job-details-dialog.scss']
 })
-export class JobDetailsDialog {
+export class RecruiterJobDetailsDialog {
   faListCheck = faListCheck;
     faCheck = faCheck;
   constructor(
-    public dialogRef: MatDialogRef<JobDetailsDialog>,
+    public dialogRef: MatDialogRef<RecruiterJobDetailsDialog>,
     @Inject(MAT_DIALOG_DATA) public data: { job: JobOffer }
   ) {}
 }
