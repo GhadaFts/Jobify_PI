@@ -3,19 +3,34 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Required for ngModel and ngForm
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'; // Required for fa-icon
 import { ProfileInitial} from './profile-initial/profile-initial';
-import { Dashboard } from './dashboard/dashboard';
 import { RecruiterRoutingModule } from './recruiter-routing-module';
+import { RecruiterDashboard } from './dashboard/dashboard';
+import { PublishJob } from './dashboard/publish-job/publish-job';
+import { EditProfile } from './dashboard/edit-profile/edit-profile';
+import { SharedModule } from '../shared/shared-module';
+import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sidebar';
+import { JobCardRecruiter } from './dashboard/publish-job/job-card-recruiter/job-card-recruiter';
+import { RecruiterJobDetailsDialog } from './dashboard/publish-job/job-card-recruiter/recruiter-job-details-dialog/recruiter-job-details-dialog';
+import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-job-dialog/edit-job-dialog';
 
 @NgModule({
   declarations: [
     ProfileInitial,
-    Dashboard
+    RecruiterDashboard,
+    PublishJob,
+    EditProfile,
+    RecruiterSidebar,
+    JobCardRecruiter,
+    RecruiterJobDetailsDialog,
+    EditJobDialog,
   ],
   imports: [
     CommonModule,
     FormsModule, // Add this for template-driven forms
     FontAwesomeModule, // Add this for FontAwesome icons
-    RecruiterRoutingModule
+    RecruiterRoutingModule,
+    SharedModule
+    
     // Add SharedModule if needed for ToastService or other shared components
   ],
   exports: []

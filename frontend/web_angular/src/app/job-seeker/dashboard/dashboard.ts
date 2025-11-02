@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router'; 
+import { NavigationItem } from '../../shared/sidebar/sidebar';
+
 
 
 @Component({
@@ -10,6 +12,17 @@ import { Router } from '@angular/router';
 })
 export class Dashboard {
   activeSection = 'find-job';
+
+  navItems: NavigationItem[] = [
+    { id: 'find-job', label: 'Find Job' },
+    { id: 'cv-correction', label: 'CV Correction' },
+    { id: 'job-analyse', label: 'Job Analyse' },
+  ];
+
+  secondaryNavItems: NavigationItem[] = [
+    { id: 'edit-profile', label: 'Settings' },
+    { id: 'logout', label: 'Logout' }
+  ];
 
   constructor(private router: Router) {}
 

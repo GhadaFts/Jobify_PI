@@ -13,6 +13,7 @@ export interface JobOffer {
   posted: string; 
   status?: 'open' | 'new' | 'hot job' | 'limited openings' | 'actively hiring' | 'urgent hiring'; // Remplace urgent
   skills: string[];
+  published?: boolean; 
 }
 export interface UserProfile {
   name: string;

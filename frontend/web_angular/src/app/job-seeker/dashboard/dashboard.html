@@ -1,7 +1,16 @@
 <div class="flex h-screen">
   <!-- Left Sidebar (Full Height, No Margin) -->
-  <app-sidebar [activeSection]="activeSection" (sectionChange)="onSectionChange($event)" class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto" style="left: 0;"></app-sidebar>
-
+<app-sidebar 
+  [activeSection]="activeSection" 
+  (sectionChange)="onSectionChange($event)"
+  [navigationItems]="navItems"
+  [secondaryItems]="secondaryNavItems"
+  subtitle="Career Network"
+  profileName="John Doe"
+  profileTitle="Software Engineer"
+  profileImage="/assets/img.png"
+  class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto" style="left: 0;">
+</app-sidebar>
   <!-- Main Content Area with Proper Margins -->
   <main class="ml-64 mr-80 p-4 " style="background-color: #F3F4F6; width: calc(100% - 36rem); margin-left: 16rem; margin-right: 20rem;">
     <ng-container [ngSwitch]="activeSection">
