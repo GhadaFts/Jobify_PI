@@ -1,90 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#F9FAFB">
 
-    <!-- Content Layout -->
+    <!-- MAIN CONTENT -->
     <LinearLayout
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:gravity="center_horizontal"
+        android:padding="24dp">
 
-        <!-- Header: Menu + Dark Mode -->
+        <!-- HEADER: MENU + DARK MODE ICON -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
 
             <ImageView
                 android:id="@+id/btnMenu"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:contentDescription="@string/tod"
                 android:src="@drawable/ic_menu"
-                android:contentDescription="menu"
-                android:clickable="true"
-                android:focusable="true"
-                />
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <ImageView
                 android:id="@+id/btnTheme"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:contentDescription="@string/todo4"
                 android:src="@drawable/ic_sun"
-                android:contentDescription="theme toggle"/>
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
         </LinearLayout>
 
-        <!-- Search bar -->
-        <EditText
-            android:id="@+id/search_bar"
-            android:layout_width="match_parent"
+        <!-- TITLE -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Search schemes and jobs..."
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:padding="12dp"
-            android:background="@drawable/search_background"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
+            android:text="CV Correction"
+            android:textColor="#2563EB"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:layout_marginBottom="8dp" />
 
-        <!-- Tabs -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            android:layout_width="match_parent"
+        <!-- SUBTITLE -->
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:tabIndicatorColor="#1F4E5F"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextColor="#1F4E5F">
+            android:text="Upload your CV and get AI-powered suggestions to improve it"
+            android:textColor="#6B7280"
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_schemes"
+        <!-- UPLOAD ZONE -->
+        <LinearLayout
+            android:id="@+id/upload_zone"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/dashed_border"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/upload_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All jobs (50)" />
+                android:text="Upload Your CV"
+                android:textColor="#9CA3AF"
+                android:textSize="16sp" />
+        </LinearLayout>
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_jobs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Applied (1)" />
-        </com.google.android.material.tabs.TabLayout>
+        <!-- FILE NAME -->
+        <TextView
+            android:id="@+id/file_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#111827"
+            android:layout_marginBottom="16dp" />
 
-        <!-- Job list -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_jobs"
+        <!-- ANALYZE BUTTON -->
+        <Button
+            android:id="@+id/analyze_button"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp"/>
+            android:layout_height="wrap_content"
+            android:text="Analyze CV"
+            android:backgroundTint="#F97316"
+            android:textColor="@android:color/white"
+            android:enabled="false" />
     </LinearLayout>
 
     <!-- DRAWER MENU -->
@@ -101,7 +119,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Main Section -->
+            <!-- MAIN SECTION -->
             <TextView
                 android:text="@string/main"
                 android:textSize="14sp"
@@ -160,7 +178,7 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <!-- Account Section -->
+            <!-- ACCOUNT SECTION -->
             <TextView
                 android:text="@string/account"
                 android:textSize="14sp"
@@ -194,7 +212,7 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <!-- Dark Mode -->
+            <!-- DARK MODE -->
             <LinearLayout
                 android:id="@+id/menuDarkModeLayout"
                 android:layout_width="match_parent"
@@ -221,7 +239,7 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <!-- Support Section -->
+            <!-- SUPPORT -->
             <TextView
                 android:text="@string/support"
                 android:textSize="14sp"
@@ -255,7 +273,7 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <!-- AI Section -->
+            <!-- AI SECTION -->
             <TextView
                 android:text="@string/ai"
                 android:textSize="14sp"
@@ -341,5 +359,4 @@
 
         </LinearLayout>
     </ScrollView>
-
 </androidx.drawerlayout.widget.DrawerLayout>

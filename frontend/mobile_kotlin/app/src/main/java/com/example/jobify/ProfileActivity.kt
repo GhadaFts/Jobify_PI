@@ -102,6 +102,13 @@ class ProfileActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
+        findViewById<LinearLayout>(R.id.menuCorrectCVLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, CvCorrectionActivity::class.java))
+
+        }
+
+
         val darkModeLayout = findViewById<LinearLayout>(R.id.menuDarkModeLayout)
         val darkModeIcon = findViewById<ImageView>(R.id.menuDarkModeIcon)
 

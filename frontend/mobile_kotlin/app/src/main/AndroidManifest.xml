@@ -33,7 +33,7 @@
         <activity android:name=".JobOpportunitiesActivity" />
         <activity android:name=".PostsActivity" />
         <activity android:name=".AddPostActivity" />
-
+        <activity android:name=".CvCorrectionActivity" />
 
     </application>
 

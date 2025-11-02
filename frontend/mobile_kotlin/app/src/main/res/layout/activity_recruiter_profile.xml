@@ -203,53 +203,6 @@
                 android:orientation="vertical"
                 android:layout_marginTop="8dp"/>
 
-
-            <!-- POSTS -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="16dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:text="Posts"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#1F4E5F"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <ImageView
-                    android:id="@+id/btnAddPost"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add"
-                    android:contentDescription="Add Post"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtNoPost"
-                android:text="No posts added yet"
-                android:textColor="#9AA1A8"
-                android:layout_marginTop="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"/>
-            <GridLayout
-                android:id="@+id/postsGrid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp">
-            </GridLayout>
-
-
         </LinearLayout>
     </ScrollView>
 

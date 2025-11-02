@@ -1,5 +1,6 @@
 package com.example.jobify
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
@@ -9,6 +10,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 class JobOpportunitiesActivity : AppCompatActivity() {
 
@@ -23,7 +25,7 @@ class JobOpportunitiesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_job_opportunities)
 
-        // Drawer menu setup
+        // Drawer setup
         drawerLayout = findViewById(R.id.drawer_layout)
         btnMenu = findViewById(R.id.btnMenu)
 
@@ -31,22 +33,19 @@ class JobOpportunitiesActivity : AppCompatActivity() {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-
-        // زر فتح drawer
-        findViewById<ImageView>(R.id.btnMenu).setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        // عناصر القائمة
+        // Drawer item clicks
         findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
-            // هنا تقدر تعمل action للـ Home
         }
 
         findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        findViewById<LinearLayout>(R.id.menuCorrectCVLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, CvCorrectionActivity::class.java))
         }
 
         findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
@@ -56,7 +55,6 @@ class JobOpportunitiesActivity : AppCompatActivity() {
 
         findViewById<LinearLayout>(R.id.menuHelpLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
-            // هنا action للـ Help
         }
 
         // RecyclerView setup
@@ -66,22 +64,81 @@ class JobOpportunitiesActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         loadFakeJobs()
+        loadSavedPosts() // ✅ زيدنا هذا السطر
     }
 
     private fun loadFakeJobs() {
         jobList.add(
             JobPost(
-                "Product Manager",
-                "Flipkart",
-                "Bangalore, Karnataka",
-                "Full-time",
-                "Lead product strategy and development for e-commerce platform.",
-                "3–5 years",
-                "₹15–25 LPA",
-                "45 applied",
-                listOf("Product Strategy", "Analytics", "User Research", "Agile")
+                id = 1,
+                title = "Product Manager",
+                jobPosition = "Senior Product Manager",
+                experience = "3–5 years",
+                salary = "₹15–25 LPA",
+                description = "Lead product strategy and development for our growing e-commerce platform.",
+                type = "Full-time",
+                createdAt = Date(),
+                status = "Active",
+                requirements = listOf(
+                    "Bachelor’s degree in Business or related field",
+                    "Experience with agile product development",
+                    "Strong analytical and leadership skills"
+                ),
+                skills = listOf("Product Strategy", "Analytics", "User Research", "Agile"),
+                published = true
             )
         )
+
+        jobList.add(
+            JobPost(
+                id = 2,
+                title = "Mobile Developer",
+                jobPosition = "Android Developer",
+                experience = "2–4 years",
+                salary = "₹10–18 LPA",
+                description = "Develop and maintain Android apps with Kotlin and Jetpack Compose.",
+                type = "Full-time",
+                createdAt = Date(),
+                status = "Active",
+                requirements = listOf(
+                    "Proficient in Kotlin and Android SDK",
+                    "Experience with REST APIs",
+                    "Knowledge of clean architecture patterns"
+                ),
+                skills = listOf("Kotlin", "Jetpack Compose", "MVVM", "Firebase"),
+                published = true
+            )
+        )
+
+        adapter.notifyDataSetChanged()
+    }
+
+    // ✅ دالة جديدة لاسترجاع الـ posts المتسجّلين
+    private fun loadSavedPosts() {
+        val sharedPref = getSharedPreferences("job_posts", Context.MODE_PRIVATE)
+        val allPosts = sharedPref.all
+
+        for ((id, value) in allPosts) {
+            val parts = (value as String).split("|")
+            if (parts.size >= 6) {
+                val post = JobPost(
+                    id = id.toInt(),
+                    title = parts[0],
+                    jobPosition = parts[1],
+                    experience = parts[2],
+                    salary = parts[3],
+                    description = parts[4],
+                    type = parts[5],
+                    createdAt = Date(),
+                    status = "Active",
+                    requirements = emptyList(),
+                    skills = emptyList(),
+                    published = true
+                )
+                jobList.add(post)
+            }
+        }
+
         adapter.notifyDataSetChanged()
     }
 }
