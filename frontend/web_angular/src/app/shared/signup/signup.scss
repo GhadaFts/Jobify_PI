@@ -1,4 +1,120 @@
-// Shared auth styles
+// Role selection styles
+.role-selection {
+  width: 60%;
+  margin: 20px auto;
+  text-align: left;
+}
+
+.role-label {
+  color: #073642;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+  display: block;
+  font-weight: normal;
+  text-align: left;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  gap: 20px; // Increased gap for better spacing
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #073642;
+  font-size: 0.9em;
+  position: relative;
+  padding-left: 25px;
+  margin: 0; // Remove any default margins
+  white-space: nowrap; // Prevent text from wrapping
+}
+
+.radio-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-checkmark {
+  position: absolute;
+  left: 0;
+  height: 16px;
+  width: 16px;
+  background-color: #fdf6e3;
+  border: 2px solid #073642;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.radio-option input[type="radio"]:checked ~ .radio-checkmark {
+  background-color: #078080;
+  border-color: #078080;
+}
+
+.radio-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: white;
+}
+
+.radio-option input[type="radio"]:checked ~ .radio-checkmark:after {
+  display: block;
+}
+
+.radio-option:hover .radio-checkmark {
+  border-color: #078080;
+}
+// Error messages
+.error-messages {
+  width: 60%;
+  margin: 10px auto;
+}
+
+.error-message {
+  background: #ff6b6b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+// Loading states
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #078080;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Shared auth styles (keep existing)
 .auth-body {
   margin: 0;
   padding: 0;
@@ -71,7 +187,6 @@ button:hover {
   color: #078080;
 }
 
-// Signup specific styles
 .signup {
   position: relative;
   width: 100%;
@@ -102,6 +217,7 @@ button:hover {
 #chk:checked ~ .signup label {
   transform: scale(.6);
 }
+
 .forgot-password-link {
   text-align: center;
   margin-top: 15px;

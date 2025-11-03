@@ -5,54 +5,114 @@
     <div class="signup">
       <form (ngSubmit)="onSignup()">
         <label for="chk" aria-hidden="true">Sign up</label>
+        
+        <!-- Full Name -->
         <input 
           type="text" 
-          name="firstName" 
-          [(ngModel)]="signupData.firstName"
-          placeholder="First Name" 
+          name="fullName" 
+          [(ngModel)]="signupData.fullName"
+          placeholder="Full Name" 
           required>
-        <input 
-          type="text" 
-          name="lastName" 
-          [(ngModel)]="signupData.lastName"
-          placeholder="Last Name" 
-          required>
-        <input 
-          type="text" 
-          name="address" 
-          [(ngModel)]="signupData.address"
-          placeholder="Address" 
-          required>
-        <input 
-          type="tel" 
-          name="phoneNumber" 
-          [(ngModel)]="signupData.phoneNumber"
-          placeholder="Phone Number" 
-          required>
+        
+        <!-- Email -->
         <input 
           type="email" 
           name="email" 
           [(ngModel)]="signupData.email"
           placeholder="Email" 
           required>
+        
+        <!-- Password -->
         <input 
           type="password" 
           name="password" 
           [(ngModel)]="signupData.password"
           placeholder="Password" 
-          required>
-        <button type="submit">Sign up</button>
+          required
+          minlength="6">
+        
+        <!-- Confirm Password -->
+        <input 
+          type="password" 
+          name="confirmPassword" 
+          [(ngModel)]="signupData.confirmPassword"
+          placeholder="Confirm Password" 
+          required
+          minlength="6">
+        
+        <!-- Role Selection -->
+        <div class="role-selection">
+          <label class="role-label">I am a:</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input 
+                type="radio" 
+                name="role" 
+                value="jobseeker" 
+                [(ngModel)]="signupData.role"
+                checked>
+              <span class="radio-checkmark"></span>
+              Job Seeker
+            </label>
+            <label class="radio-option">
+              <input 
+                type="radio" 
+                name="role" 
+                value="recruiter" 
+                [(ngModel)]="signupData.role">
+              <span class="radio-checkmark"></span>
+              Recruiter
+            </label>
+          </div>
+        </div>
+
+        <!-- Error Messages -->
+        <div *ngIf="errors.length > 0" class="error-messages">
+          <div *ngFor="let error of errors" class="error-message">
+            {{ error }}
+          </div>
+        </div>
+
+        <button type="submit" [class.loading]="isLoading" [disabled]="isLoading">
+          <span class="loading-spinner" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Creating Account...' : 'Sign up' }}
+        </button>
       </form>
     </div>
 
     <div class="login">
-      <form (ngSubmit)="onLoginNavigate()">
+      <!-- ✅ Add proper form with data binding and event handling -->
+      <form (ngSubmit)="onLogin()">
         <label for="chk" aria-hidden="true">Login</label>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="pswd" placeholder="Password" required>
-        <button type="submit">Login</button>
+        
+        <input 
+          type="email" 
+          name="email" 
+          [(ngModel)]="loginData.email"
+          placeholder="Email" 
+          required>
+        
+        <input 
+          type="password" 
+          name="password" 
+          [(ngModel)]="loginData.password"
+          placeholder="Password" 
+          required>
+        
+        <!-- Error Messages -->
+        <div *ngIf="loginErrors.length > 0" class="error-messages">
+          <div *ngFor="let error of loginErrors" class="error-message">
+            {{ error }}
+          </div>
+        </div>
+
+        <button type="submit" [class.loading]="isLoginLoading" [disabled]="isLoginLoading">
+          <span class="loading-spinner" *ngIf="isLoginLoading"></span>
+          {{ isLoginLoading ? 'Signing in...' : 'Login' }}
+        </button>
+        
         <div class="forgot-password-link">
-          <a href="javascript:void(0)" (click)="navigateToLogin.emit()">Forgot Password?</a>
+          <a href="javascript:void(0)" (click)="onLoginNavigate()">Forgot Password?</a>
         </div>
       </form>
     </div>
