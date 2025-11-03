@@ -1,11 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  styleUrl: './login.scss'
+  styleUrls: ['./login.scss']
 })
-export class Login {
+export class LoginComponent {
+  @Input() errors: string[] = [];
+  @Output() loginSubmit = new EventEmitter<{ email: string; password: string }>();
+  @Output() forgotPassword = new EventEmitter<string>();
 
+  email: string = '';
+  password: string = '';
+
+  onLogin() {
+    this.loginSubmit.emit({
+      email: this.email,
+      password: this.password
+    });
+  }
+
+  closeErrorModal() {
+    this.errors = [];
+  }
 }

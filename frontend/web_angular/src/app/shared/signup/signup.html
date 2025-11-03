@@ -1,1 +1,60 @@
-<p>signup works!</p>
+<div class="auth-body">
+  <div class="main">
+    <input type="checkbox" id="chk" aria-hidden="true">
+
+    <div class="signup">
+      <form (ngSubmit)="onSignup()">
+        <label for="chk" aria-hidden="true">Sign up</label>
+        <input 
+          type="text" 
+          name="firstName" 
+          [(ngModel)]="signupData.firstName"
+          placeholder="First Name" 
+          required>
+        <input 
+          type="text" 
+          name="lastName" 
+          [(ngModel)]="signupData.lastName"
+          placeholder="Last Name" 
+          required>
+        <input 
+          type="text" 
+          name="address" 
+          [(ngModel)]="signupData.address"
+          placeholder="Address" 
+          required>
+        <input 
+          type="tel" 
+          name="phoneNumber" 
+          [(ngModel)]="signupData.phoneNumber"
+          placeholder="Phone Number" 
+          required>
+        <input 
+          type="email" 
+          name="email" 
+          [(ngModel)]="signupData.email"
+          placeholder="Email" 
+          required>
+        <input 
+          type="password" 
+          name="password" 
+          [(ngModel)]="signupData.password"
+          placeholder="Password" 
+          required>
+        <button type="submit">Sign up</button>
+      </form>
+    </div>
+
+    <div class="login">
+      <form (ngSubmit)="onLoginNavigate()">
+        <label for="chk" aria-hidden="true">Login</label>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="pswd" placeholder="Password" required>
+        <button type="submit">Login</button>
+        <div class="forgot-password-link">
+          <a href="javascript:void(0)" (click)="navigateToLogin.emit()">Forgot Password?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
