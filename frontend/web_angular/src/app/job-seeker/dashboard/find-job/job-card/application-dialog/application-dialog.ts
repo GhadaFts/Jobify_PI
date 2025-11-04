@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { JobOffer, UserProfile } from '../../../../../types';
+import { JobOffer, JobSeeker } from '../../../../../types';
 
 @Component({
   selector: 'app-application-dialog',
@@ -16,18 +16,19 @@ export class ApplicationDialog {
 
   constructor(
     public dialogRef: MatDialogRef<ApplicationDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { job: JobOffer, profile: UserProfile }
+    @Inject(MAT_DIALOG_DATA) public data: { job: JobOffer, profile: JobSeeker }
   ) {}
 
   generateTailoredCV() {
     this.isGenerating = true;
     setTimeout(() => {
-      const cv = `${this.data.profile.name}
+      const cv = `${this.data.profile.fullName}
 ${this.data.profile.title}
-${this.data.profile.email} | ${this.data.profile.phone} 
+${this.data.profile.email} | ${this.data.profile.phone_number} 
+${this.data.profile.nationality}
 
 PROFESSIONAL SUMMARY
-${this.data.profile.summary}
+${this.data.profile.description}
 
 KEY SKILLS RELEVANT TO ${this.data.job.title.toUpperCase()}
 ${this.data.profile.skills.filter((_: string, i: number) => i < 6).join(' • ')}
@@ -44,6 +45,12 @@ ${this.data.profile.education.map((edu: { degree: string; field: string; school:
 ${edu.degree} in ${edu.field}
 ${edu.school}, ${edu.graduationDate}
 `).join('\n')}
+
+SOCIAL LINKS
+${this.data.profile.github_link ? `GitHub: ${this.data.profile.github_link}` : ''}
+${this.data.profile.web_link ? `Website: ${this.data.profile.web_link}` : ''}
+${this.data.profile.twitter_link ? `Twitter: ${this.data.profile.twitter_link}` : ''}
+${this.data.profile.facebook_link ? `Facebook: ${this.data.profile.facebook_link}` : ''}
 
 ---
 This CV has been automatically optimized for the ${this.data.job.title} position at ${this.data.job.company}.
@@ -68,6 +75,11 @@ Key skills highlighted based on job requirements.`;
       alert('Please generate your CV or upload a file first');
       return;
     }
-    this.dialogRef.close({ jobId: this.data.job.id, generatedCV: this.generatedCV, uploadedFile: this.uploadedFile });
+    this.dialogRef.close({ 
+      jobId: this.data.job.id, 
+      generatedCV: this.generatedCV, 
+      uploadedFile: this.uploadedFile,
+      coverLetter: this.coverLetter 
+    });
   }
 }

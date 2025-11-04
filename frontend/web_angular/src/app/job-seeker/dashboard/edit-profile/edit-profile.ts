@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ToastService } from '../../../services/toast.service';
-import { UserProfile } from '../../../types';
+import { JobSeeker, User } from '../../../types'; // Import des nouveaux types
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { faCamera, faXmark } from '@fortawesome/free-solid-svg-icons';
 
@@ -13,21 +13,31 @@ import { faCamera, faXmark } from '@fortawesome/free-solid-svg-icons';
 export class EditProfile implements OnInit {
   faCamera = faCamera;
   faXmark = faXmark;
-  @Input() profile: UserProfile = {
-    name: '',
-    title: '',
+  
+  @Input() profile: JobSeeker = {
+    id: 0,
     email: '',
-    phone: '',
-    nationality: '', // Changé de location
-    dateOfBirth: '', // Ajouté
-    summary: '',
+    password: '',
+    fullName: '',
+    role: 'jobseeker',
+    photo_profil: '',
+    twitter_link: '',
+    web_link: '',
+    github_link: '',
+    facebook_link: '',
+    description: '',
+    phone_number: '',
+    nationality: '',
     skills: [],
     experience: [],
     education: [],
-    profilePhoto: ''
+    title: '',
+    date_of_birth: '',
+    gender: ''
   };
-  @Output() save = new EventEmitter<UserProfile>();
-  editedProfile: UserProfile;
+
+  @Output() save = new EventEmitter<JobSeeker>();
+  editedProfile: JobSeeker;
   newSkill: string = '';
 
   constructor(public toastService: ToastService, private iconLibrary: FaIconLibrary) {
@@ -40,8 +50,8 @@ export class EditProfile implements OnInit {
   }
 
   getInitials(): string {
-    if (!this.editedProfile.name) return 'N/A';
-    const words = this.editedProfile.name.split(' ').filter(word => word.length > 0);
+    if (!this.editedProfile.fullName) return 'N/A';
+    const words = this.editedProfile.fullName.split(' ').filter(word => word.length > 0);
     return words.length > 0 ? words.map(word => word[0]).join('') : 'N/A';
   }
 
@@ -66,7 +76,7 @@ export class EditProfile implements OnInit {
       reader.onload = () => {
         this.editedProfile = {
           ...this.editedProfile,
-          profilePhoto: reader.result as string
+          photo_profil: reader.result as string
         };
         this.toastService.success('Profile photo uploaded successfully!');
       };
@@ -104,12 +114,18 @@ export class EditProfile implements OnInit {
   addExperience() {
     this.editedProfile = {
       ...this.editedProfile,
-      experience: [...this.editedProfile.experience, { position: '', company: '', startDate: '', endDate: '', description: '' }]
+      experience: [...this.editedProfile.experience, { 
+        position: '', 
+        company: '', 
+        startDate: '', 
+        endDate: '', 
+        description: '' 
+      }]
     };
     this.toastService.success('Experience added successfully!');
   }
 
-  updateExperience(index: number, field: keyof UserProfile['experience'][0], value: string) {
+  updateExperience(index: number, field: keyof JobSeeker['experience'][0], value: string) {
     this.editedProfile = {
       ...this.editedProfile,
       experience: this.editedProfile.experience.map((exp, i) =>
@@ -129,12 +145,17 @@ export class EditProfile implements OnInit {
   addEducation() {
     this.editedProfile = {
       ...this.editedProfile,
-      education: [...this.editedProfile.education, { degree: '', field: '', school: '', graduationDate: '' }]
+      education: [...this.editedProfile.education, { 
+        degree: '', 
+        field: '', 
+        school: '', 
+        graduationDate: '' 
+      }]
     };
     this.toastService.success('Education added successfully!');
   }
 
-  updateEducation(index: number, field: keyof UserProfile['education'][0], value: string) {
+  updateEducation(index: number, field: keyof JobSeeker['education'][0], value: string) {
     this.editedProfile = {
       ...this.editedProfile,
       education: this.editedProfile.education.map((edu, i) =>
@@ -155,6 +176,7 @@ export class EditProfile implements OnInit {
   testToast() {
     this.toastService.success('Test toast!');
   }
+  
   testToastErreur() {
     this.toastService.error('Test toast erreur!');
   }
