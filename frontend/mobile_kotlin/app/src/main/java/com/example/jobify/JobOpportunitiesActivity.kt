@@ -57,6 +57,10 @@ class JobOpportunitiesActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
+        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
+        }
         // RecyclerView setup
         recyclerView = findViewById(R.id.recycler_jobs)
         recyclerView.layoutManager = LinearLayoutManager(this)

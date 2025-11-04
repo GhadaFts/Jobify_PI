@@ -107,6 +107,10 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(Intent(this, CvCorrectionActivity::class.java))
 
         }
+        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
+        }
 
 
         val darkModeLayout = findViewById<LinearLayout>(R.id.menuDarkModeLayout)
