@@ -31,14 +31,11 @@ class AICareerAdvisorActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.drawerLayout)
         rootLayout = findViewById(R.id.scrollViewRoot)
         btnTheme = findViewById(R.id.btnTheme)
-
         inputCountry = findViewById(R.id.inputCountry)
         inputEducation = findViewById(R.id.inputEducation)
         inputCertificate = findViewById(R.id.inputCertificate)
         btnGetAdvice = findViewById(R.id.btnGetAdvice)
         tvAdviceResult = findViewById(R.id.tvAdviceResult)
-        val instructionsContainer = findViewById<LinearLayout>(R.id.instructionsContainer)
-        val btnAddInstruction = findViewById<Button>(R.id.btnAddInstruction)
         val skillsContainer = findViewById<LinearLayout>(R.id.skillsContainer)
         val btnAddSkill = findViewById<Button>(R.id.btnAddSkill)
         val btnGetAdvice = findViewById<Button>(R.id.btnGetAdvice)
@@ -47,14 +44,6 @@ class AICareerAdvisorActivity : AppCompatActivity() {
         val btnMenu = findViewById<ImageView>(R.id.btnMenu)
 
         // Dynamic Instruction Field
-        btnAddInstruction.setOnClickListener {
-            val newInput = EditText(this)
-            newInput.hint = "Add another instruction..."
-            newInput.setPadding(10, 10, 10, 10)
-            newInput.setBackgroundResource(android.R.drawable.edit_text)
-            newInput.inputType = android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
-            instructionsContainer.addView(newInput)
-        }
 
         // Dynamic Skill Field
         btnAddSkill.setOnClickListener {
