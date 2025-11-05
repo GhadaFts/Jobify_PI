@@ -26,6 +26,8 @@ export class FindJob {
       posted: '2 days ago',
       applicants: 50,
       status: 'open',
+      published: true,
+      applications: []
     },
     {
       id: '2',
@@ -38,9 +40,12 @@ export class FindJob {
       salary: '$95,000',
       description: 'Analyze data to provide actionable insights...',
       skills: ['Python', 'SQL', 'Excel'],
+      requirements: ['Bachelor\'s degree in Statistics or related field', '2+ years of data analysis experience'],
       posted: '5 days ago',
       applicants: 30,
       status: 'urgent hiring',
+      published: true,
+      applications: []
     },
     {
       id: '3',
@@ -53,9 +58,12 @@ export class FindJob {
       salary: '$80,000',
       description: 'Design user-friendly interfaces and experiences...',
       skills: ['Figma', 'Adobe XD', 'Prototyping'],
+      requirements: ['Portfolio demonstrating UI/UX skills', 'Experience with design tools'],
       posted: '1 week ago',
       applicants: 20,
       status: 'hot job',
+      published: true,
+      applications: []
     },
     {
       id: '4',
@@ -68,9 +76,12 @@ export class FindJob {
       salary: '$140,000',
       description: 'Lead product development...',
       skills: ['Product Strategy', 'Agile', 'User Research'],
+      requirements: ['5+ years of product management experience', 'Strong analytical skills'],
       posted: '1 day ago',
       applicants: 15,
       status: 'new',
+      published: true,
+      applications: []
     },
     {
       id: '5',
@@ -83,9 +94,12 @@ export class FindJob {
       salary: '$130,000',
       description: 'Manage cloud infrastructure...',
       skills: ['AWS', 'Docker', 'Kubernetes'],
+      requirements: ['Experience with cloud platforms', 'Knowledge of containerization technologies'],
       posted: '3 days ago',
       applicants: 25,
       status: 'limited openings',
+      published: true,
+      applications: []
     },
     {
       id: '6',
@@ -98,9 +112,12 @@ export class FindJob {
       salary: '$110,000',
       description: 'Build responsive web applications...',
       skills: ['TypeScript', 'React', 'CSS'],
+      requirements: ['Proficiency in modern frontend frameworks', 'Understanding of responsive design'],
       posted: '4 days ago',
       applicants: 40,
       status: 'actively hiring',
+      published: true,
+      applications: []
     },
   ];
   appliedJobs: Set<string> = new Set();
@@ -145,5 +162,10 @@ export class FindJob {
       'urgent hiring': '#EF4444' // Rouge vif
     };
     return colors[status] || '#6B7280'; // Gris par défaut
+  }
+
+  // Méthode pour formater le nombre d'applicants
+  formatCount(count: number): string {
+    return count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count.toString();
   }
 }
