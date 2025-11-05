@@ -1,4 +1,4 @@
-// Shared auth styles
+// Shared auth styles - CLEAN LIGHT MODE
 .auth-body {
   margin: 0;
   padding: 0;
@@ -7,15 +7,15 @@
   align-items: center;
   min-height: 100vh;
   font-family: 'Jost', sans-serif;
-  background: linear-gradient(to bottom, #073642, #586e75, #eee8d5);
+  background: linear-gradient(to bottom, #ffffff, #23526a);
 }
 
 .main {
   width: 350px;
   height: 650px;
-  background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center / cover;
+  background: #ffffff;
   border-radius: 10px;
-  box-shadow: 5px 20px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(51, 103, 129, 0.15);
   overflow: hidden;
 }
 
@@ -24,7 +24,7 @@
 }
 
 label {
-  color: #eee8d5;
+  color: #336781;
   font-size: 2.3em;
   justify-content: center;
   display: flex;
@@ -37,15 +37,24 @@ label {
 input {
   width: 60%;
   height: 20px;
-  background: #fdf6e3;
+  background: #ffffff;
   justify-content: center;
   display: flex;
   margin: 20px auto;
   padding: 17px;
-  border: none;
+  border: 2px solid #D4DDE2;
   outline: none;
   border-radius: 5px;
-  color: #073642;
+  color: #336781;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #336781;
+}
+
+input::placeholder {
+  color: #99a8b0;
 }
 
 button {
@@ -54,21 +63,31 @@ button {
   margin: 10px auto;
   justify-content: center;
   display: block;
-  color: #fff;
-  background: #078080;
+  color: #ffffff;
+  background: #336781;
   font-size: 1em;
   font-weight: bold;
   margin-top: 20px;
   outline: none;
   border: none;
   border-radius: 5px;
-  transition: .2s ease-in;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
-
+.signup button {
+  background-color: #d5dcdf;
+  color: #336781;
+}
+.signup button:hover {
+  background-color: #F45522;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 85, 34, 0.3);
+  color : #ffffff;
+}
 button:hover {
-  background-color: rgba(255, 255, 255, 0.555);
-  color: #078080;
+  background-color: #F45522;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 85, 34, 0.3);
 }
 
 // Login specific styles
@@ -76,6 +95,11 @@ button:hover {
   position: relative;
   width: 100%;
   height: 100%;
+  background: linear-gradient(to bottom, #ffffff, #23526a);
+}
+
+.login label {
+  color: #336781;
 }
 
 #email {
@@ -84,15 +108,25 @@ button:hover {
 
 .signup {
   height: 600px;
-  background: #eee8d5;
+  background: #2f637d;
   border-radius: 60% / 10%;
   transform: translateY(-200px);
   transition: .8s ease-in-out;
 }
 
 .signup label {
-  color: #078080;
+  color: #eaeef0;
   transform: scale(.6);
+}
+
+.signup input {
+  background: #ffffff;
+  border: 2px solid #b8c5cc;
+  color: #336781;
+}
+
+.signup input:focus {
+  border-color: #336781;
 }
 
 #chk:checked ~ .signup {
@@ -114,15 +148,15 @@ button:hover {
 }
 
 .forgot-password-link a {
-  color: #eee8d5;
+  color: #336781;
   text-decoration: none;
   font-size: 0.9em;
   transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .forgot-password-link a:hover {
-  color: #078080;
-  text-decoration: underline;
+  color: #F45522;
 }
 
 // Role selection styles
@@ -133,18 +167,18 @@ button:hover {
 }
 
 .role-label {
-  color: #073642;
+  color: #336781;
   font-size: 0.9em;
   margin-bottom: 15px;
   display: block;
-  font-weight: normal;
+  font-weight: 600;
   text-align: left;
 }
 
 .radio-group {
   display: flex;
   flex-direction: row;
-  gap: 20px; // Increased gap for better spacing
+  gap: 20px;
   justify-content: flex-start;
   align-items: center;
 }
@@ -153,12 +187,13 @@ button:hover {
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: #073642;
+  color: #F45522;
   font-size: 0.9em;
   position: relative;
   padding-left: 25px;
-  margin: 0; // Remove any default margins
-  white-space: nowrap; // Prevent text from wrapping
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .radio-option input[type="radio"] {
@@ -172,15 +207,15 @@ button:hover {
   left: 0;
   height: 16px;
   width: 16px;
-  background-color: #fdf6e3;
-  border: 2px solid #fdf6e3;
+  background-color: #ffffff;
+  border: 2px solid #D4DDE2;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
 .radio-option input[type="radio"]:checked ~ .radio-checkmark {
-  background-color: #078080;
-  border-color: #078080;
+  background-color: #F45522;
+  border-color: #F45522;
 }
 
 .radio-checkmark:after {
@@ -201,7 +236,7 @@ button:hover {
 }
 
 .radio-option:hover .radio-checkmark {
-  border-color: #078080;
+  border-color: #F45522;
 }
 
 // Error modal styles
@@ -209,11 +244,11 @@ button:hover {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #ff6b6b;
+  background: #F45522;
   color: white;
   padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(244, 85, 34, 0.3);
   z-index: 1000;
   max-width: 300px;
 }
@@ -232,8 +267,8 @@ button:hover {
 }
 
 .loading-spinner {
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #078080;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
   border-radius: 50%;
   width: 16px;
   height: 16px;

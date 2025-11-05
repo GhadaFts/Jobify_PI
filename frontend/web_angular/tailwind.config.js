@@ -6,8 +6,14 @@ module.exports = {
     "./projects/**/*.{html,ts}",
     "./libs/**/*.{html,ts}",
   ],
-  theme: {
-    extend: {},
+   theme: {
+    extend: {
+      colors: {
+        jobiBlue: "#336781",
+        jobiOrange: "#F45522",
+        jobiGray: "#D4DDE2",
+      }
+    },
   },
   plugins: [],
 }
