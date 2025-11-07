@@ -1,121 +1,81 @@
 <div class="auth-body">
-  <div *ngIf="errors && errors.length > 0" class="error-message">
-    <span class="error-close" (click)="closeErrorModal()">&times;</span>
-    <p *ngFor="let error of errors">{{ error }}</p>
-  </div>
-  
-  <div class="main">
-    <input type="checkbox" id="chk" aria-hidden="true">
-
-    <div class="login">
+  <img class="wave" src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/wave.png" alt="wave">
+  <div class="container">
+    <div class="img">
+      <img src="/assets/login1.svg" alt="authentication">
+    </div>
+    <div class="login-container">
       <form (ngSubmit)="onLogin()">
-        <label for="chk" aria-hidden="true">Login</label>
+        <h2>Login</h2>
+        <p>Welcome back!</p>
         
-        <!-- Email -->
-        <input 
-          type="email" 
-          name="email" 
-          [(ngModel)]="email"
-          placeholder="Email" 
-          required>
+        <!-- Email Input -->
+        <div class="input-div one" [class.focus]="emailFocused || email">
+          <div class="i">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <h5>Email</h5>
+            <input 
+              class="input" 
+              type="email" 
+              name="email" 
+              [(ngModel)]="email"
+              (focus)="emailFocused = true"
+              (blur)="emailFocused = false"
+              required>
+          </div>
+        </div>
         
-        <!-- Password -->
-        <input 
-          type="password" 
-          name="password" 
-          [(ngModel)]="password"
-          placeholder="Password" 
-          required>
+        <!-- Password Input -->
+        <div class="input-div two" [class.focus]="passwordFocused || password">
+          <div class="i">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="password-wrapper">
+            <h5>Password</h5>
+            <input 
+              class="input" 
+              [type]="showPassword ? 'text' : 'password'" 
+              name="password" 
+              [(ngModel)]="password"
+              (focus)="passwordFocused = true"
+              (blur)="passwordFocused = false"
+              required>
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Error Messages -->
+        <div *ngIf="errors && errors.length > 0" class="error-messages">
+          <div *ngFor="let error of errors" class="error-item">
+            {{ error }}
+          </div>
+        </div>
         
         <!-- Login Button -->
-        <button type="submit" [class.loading]="isLoading" [disabled]="isLoading">
+        <button type="submit" class="btn" [class.loading]="isLoading" [disabled]="isLoading">
           <span class="loading-spinner" *ngIf="isLoading"></span>
           {{ isLoading ? 'Signing in...' : 'Login' }}
         </button>
         
         <!-- Forgot Password Link -->
-        <div class="forgot-password-link">
-          <a href="javascript:void(0)" (click)="onForgotPassword()">Forgot Password?</a>
-        </div>
-      </form>
-    </div>
-    
-    <div class="signup">
-      <!-- ✅ Add proper form with data binding and event handling -->
-      <form (ngSubmit)="onSignup()">
-        <label for="chk" aria-hidden="true">Sign up</label>
+        <a class="forgot" href="javascript:void(0)" (click)="onForgotPassword()">Forgot your password?</a>
         
-        <!-- Full Name -->
-        <input 
-          type="text" 
-          name="fullName" 
-          [(ngModel)]="signupData.fullName"
-          placeholder="Full Name" 
-          required>
-        
-        <!-- Email -->
-        <input 
-          type="email" 
-          name="email" 
-          [(ngModel)]="signupData.email"
-          placeholder="Email" 
-          required>
-        
-        <!-- Password -->
-        <input 
-          type="password" 
-          name="password" 
-          [(ngModel)]="signupData.password"
-          placeholder="Password" 
-          required
-          minlength="6">
-        
-        <!-- Confirm Password -->
-        <input 
-          type="password" 
-          name="confirmPassword" 
-          [(ngModel)]="signupData.confirmPassword"
-          placeholder="Confirm Password" 
-          required
-          minlength="6">
-        
-        <!-- Role Selection -->
-        <div class="role-selection">
-          <label class="role-label">I am a:</label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input 
-                type="radio" 
-                name="role" 
-                value="jobseeker" 
-                [(ngModel)]="signupData.role"
-                checked>
-              <span class="radio-checkmark"></span>
-              Job Seeker
-            </label>
-            <label class="radio-option">
-              <input 
-                type="radio" 
-                name="role" 
-                value="recruiter" 
-                [(ngModel)]="signupData.role">
-              <span class="radio-checkmark"></span>
-              Recruiter
-            </label>
-          </div>
-        </div>
-
-        <!-- Error Messages -->
-        <div *ngIf="signupErrors.length > 0" class="error-messages">
-          <div *ngFor="let error of signupErrors" class="error-message">
-            {{ error }}
-          </div>
+        <!-- Divider -->
+        <div class="others">
+          <hr>
+          <p>OR</p>
+          <hr>
         </div>
         
-        <button type="submit" [class.loading]="isSignupLoading" [disabled]="isSignupLoading">
-          <span class="loading-spinner" *ngIf="isSignupLoading"></span>
-          {{ isSignupLoading ? 'Creating Account...' : 'Sign up' }}
-        </button>
+        <!-- Account Link -->
+        <div class="account">
+          <p>Don't have an account?</p>
+          <a href="javascript:void(0)" (click)="navigateToSignup()">Sign up</a>
+        </div>
       </form>
     </div>
   </div>

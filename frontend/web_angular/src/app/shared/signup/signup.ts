@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, SignupData, LoginCredentials } from '../services/auth.service'; // ✅ Import LoginCredentials
+import { AuthService, SignupData } from '../services/auth.service';
 import { ErrorService } from '../services/error.service';
 import { Router } from '@angular/router';
 
@@ -13,9 +13,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./signup.scss']
 })
 export class SignupComponent {
-  @Output() signupSubmit = new EventEmitter<any>();
-  @Output() navigateToLogin = new EventEmitter<void>();
-
   // Signup form data
   signupData = {
     fullName: '',
@@ -27,13 +24,13 @@ export class SignupComponent {
   errors: string[] = [];
   isLoading: boolean = false;
 
-  // ✅ Add login form data for the hidden form
-  loginData = {
-    email: '',
-    password: ''
-  };
-  loginErrors: string[] = [];
-  isLoginLoading: boolean = false;
+  // Focus states for floating labels
+  fullNameFocused: boolean = false;
+  emailFocused: boolean = false;
+  passwordFocused: boolean = false;
+  confirmPasswordFocused: boolean = false;
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -41,6 +38,14 @@ export class SignupComponent {
     private router: Router
   ) {}
 
+   togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+  
   onSignup() {
     this.isLoading = true;
     this.errors = [];
@@ -84,38 +89,8 @@ export class SignupComponent {
     });
   }
 
-  // ✅ Add login method for the hidden form
-  onLogin() {
-    this.isLoginLoading = true;
-    this.loginErrors = [];
-
-    const credentials: LoginCredentials = {
-      email: this.loginData.email,
-      password: this.loginData.password
-    };
-
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        this.isLoginLoading = false;
-        if (response.success) {
-          console.log('Login successful:', response);
-          if (response.user.role === 'recruiter') {
-            this.router.navigate(['/recruiter/dashboard/publish-job']);
-          } else {
-            this.router.navigate(['/jobseeker/dashboard/find-job']);
-          }
-        }
-      },
-      error: (error) => {
-        this.isLoginLoading = false;
-        this.loginErrors = this.errorService.handleAuthError(error);
-        console.error('Login failed:', error);
-      }
-    });
-  }
-
-  onLoginNavigate() {
-    this.navigateToLogin.emit();
+  navigateToLogin() {
+    this.router.navigate(['/login']);
   }
 
   private passwordMismatch(): boolean {
