@@ -1,45 +1,94 @@
 <div class="auth-body">
-  <div class="main">
-    <input type="checkbox" id="chk" aria-hidden="true">
-
-    <div class="signup">
+  <img class="wave" src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/wave.png" alt="wave">
+  <div class="container">
+    <div class="img">
+      <img src="/assets/signup.svg" alt="signup">
+    </div>
+    <div class="login-container">
       <form (ngSubmit)="onSignup()">
-        <label for="chk" aria-hidden="true">Sign up</label>
+        <h2>Sign up</h2>
+        <p>Create your account</p>
         
-        <!-- Full Name -->
-        <input 
-          type="text" 
-          name="fullName" 
-          [(ngModel)]="signupData.fullName"
-          placeholder="Full Name" 
-          required>
+        <!-- Full Name Input -->
+        <div class="input-div one" [class.focus]="fullNameFocused || signupData.fullName">
+          <div class="i">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <h5>Full Name</h5>
+            <input 
+              class="input" 
+              type="text" 
+              name="fullName" 
+              [(ngModel)]="signupData.fullName"
+              (focus)="fullNameFocused = true"
+              (blur)="fullNameFocused = false"
+              required>
+          </div>
+        </div>
         
-        <!-- Email -->
-        <input 
-          type="email" 
-          name="email" 
-          [(ngModel)]="signupData.email"
-          placeholder="Email" 
-          required>
+        <!-- Email Input -->
+        <div class="input-div two" [class.focus]="emailFocused || signupData.email">
+          <div class="i">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <div>
+            <h5>Email</h5>
+            <input 
+              class="input" 
+              type="email" 
+              name="email" 
+              [(ngModel)]="signupData.email"
+              (focus)="emailFocused = true"
+              (blur)="emailFocused = false"
+              required>
+          </div>
+        </div>
         
-        <!-- Password -->
-        <input 
-          type="password" 
-          name="password" 
-          [(ngModel)]="signupData.password"
-          placeholder="Password" 
-          required
-          minlength="6">
+        <!-- Password Input -->
+        <div class="input-div one" [class.focus]="passwordFocused || signupData.password">
+          <div class="i">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="password-wrapper">
+            <h5>Password</h5>
+            <input 
+              class="input" 
+              [type]="showPassword ? 'text' : 'password'" 
+              name="password" 
+              [(ngModel)]="signupData.password"
+              (focus)="passwordFocused = true"
+              (blur)="passwordFocused = false"
+              required
+              minlength="6">
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </span>
+          </div>
+        </div>
         
-        <!-- Confirm Password -->
-        <input 
-          type="password" 
-          name="confirmPassword" 
-          [(ngModel)]="signupData.confirmPassword"
-          placeholder="Confirm Password" 
-          required
-          minlength="6">
-        
+        <!-- Confirm Password Input -->
+        <div class="input-div two" [class.focus]="confirmPasswordFocused || signupData.confirmPassword">
+          <div class="i">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="password-wrapper">
+            <h5>Confirm Password</h5>
+            <input 
+              class="input" 
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              name="confirmPassword" 
+              [(ngModel)]="signupData.confirmPassword"
+              (focus)="confirmPasswordFocused = true"
+              (blur)="confirmPasswordFocused = false"
+              required
+              minlength="6">
+            <span class="password-toggle" (click)="toggleConfirmPasswordVisibility()">
+              <i class="fas" [class.fa-eye]="!showConfirmPassword" [class.fa-eye-slash]="showConfirmPassword"></i>
+            </span>
+          </div>
+        </div>
+
         <!-- Role Selection -->
         <div class="role-selection">
           <label class="role-label">I am a:</label>
@@ -68,51 +117,21 @@
 
         <!-- Error Messages -->
         <div *ngIf="errors.length > 0" class="error-messages">
-          <div *ngFor="let error of errors" class="error-message">
+          <div *ngFor="let error of errors" class="error-item">
             {{ error }}
           </div>
         </div>
 
-        <button type="submit" [class.loading]="isLoading" [disabled]="isLoading">
+        <!-- Signup Button -->
+        <button type="submit" class="btn" [class.loading]="isLoading" [disabled]="isLoading">
           <span class="loading-spinner" *ngIf="isLoading"></span>
           {{ isLoading ? 'Creating Account...' : 'Sign up' }}
         </button>
-      </form>
-    </div>
-
-    <div class="login">
-      <!-- ✅ Add proper form with data binding and event handling -->
-      <form (ngSubmit)="onLogin()">
-        <label for="chk" aria-hidden="true">Login</label>
         
-        <input 
-          type="email" 
-          name="email" 
-          [(ngModel)]="loginData.email"
-          placeholder="Email" 
-          required>
-        
-        <input 
-          type="password" 
-          name="password" 
-          [(ngModel)]="loginData.password"
-          placeholder="Password" 
-          required>
-        
-        <!-- Error Messages -->
-        <div *ngIf="loginErrors.length > 0" class="error-messages">
-          <div *ngFor="let error of loginErrors" class="error-message">
-            {{ error }}
-          </div>
-        </div>
-
-        <button type="submit" [class.loading]="isLoginLoading" [disabled]="isLoginLoading">
-          <span class="loading-spinner" *ngIf="isLoginLoading"></span>
-          {{ isLoginLoading ? 'Signing in...' : 'Login' }}
-        </button>
-        
-        <div class="forgot-password-link">
-          <a href="javascript:void(0)" (click)="onLoginNavigate()">Forgot Password?</a>
+        <!-- Account Link -->
+        <div class="account">
+          <p>Already have an account?</p>
+          <a href="javascript:void(0)" (click)="navigateToLogin()">Login</a>
         </div>
       </form>
     </div>

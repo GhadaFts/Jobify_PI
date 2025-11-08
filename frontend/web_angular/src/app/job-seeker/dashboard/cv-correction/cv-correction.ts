@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserProfile } from '../../../types';
+import { JobSeeker } from '../../../types';
 import { AiService } from '../../../ai-service/ai-service';
 import * as pdfjsLib from 'pdfjs-dist';
 import { marked } from 'marked';
@@ -22,7 +22,7 @@ interface GeminiResponse {
   cvScore: number;
   cvSuggestions: CvSuggestion[];
   improvedSummary: ImprovedSummary;
-  profile: UserProfile;
+  profile: JobSeeker;
 }
 
 @Component({
@@ -66,14 +66,20 @@ The JSON must strictly follow this structure:
     "improvements": string[]
   },
   "profile": {
-    "name": string,
-    "title": string,
+    "id": number,
     "email": string,
-    "phone": string,
+    "password": string,
+    "fullName": string,
+    "role": string,
+    "photo_profil": string,
+    "twitter_link": string,
+    "web_link": string,
+    "github_link": string,
+    "facebook_link": string,
+    "description": string,
+    "phone_number": string,
     "nationality": string,
-    "summary": string,
     "skills": string[],
-    
     "experience": [
       {
         "position": string,
@@ -90,7 +96,10 @@ The JSON must strictly follow this structure:
         "school": string,
         "graduationDate": string
       }
-    ]
+    ],
+    "title": string,
+    "date_of_birth": string,
+    "gender": string
   }
 }
 
@@ -111,7 +120,27 @@ Now analyze this CV:
   }
 
   cvSuggestions: CvSuggestion[] = [];
-  profile: UserProfile = {} as UserProfile;
+  profile: JobSeeker = {
+    id: 0,
+    email: '',
+    password: '',
+    fullName: '',
+    role: 'jobseeker',
+    photo_profil: '',
+    twitter_link: '',
+    web_link: '',
+    github_link: '',
+    facebook_link: '',
+    description: '',
+    phone_number: '',
+    nationality: '',
+    skills: [],
+    experience: [],
+    education: [],
+    title: '',
+    date_of_birth: '',
+    gender: ''
+  };
   pdfText = '';
 
   onDragOver(event: DragEvent) {
@@ -193,6 +222,27 @@ Now analyze this CV:
     this.cvScore = null;
     this.cvSuggestions = [];
     this.pdfText = '';
+    this.profile = {
+      id: 0,
+      email: '',
+      password: '',
+      fullName: '',
+      role: 'jobseeker',
+      photo_profil: '',
+      twitter_link: '',
+      web_link: '',
+      github_link: '',
+      facebook_link: '',
+      description: '',
+      phone_number: '',
+      nationality: '',
+      skills: [],
+      experience: [],
+      education: [],
+      title: '',
+      date_of_birth: '',
+      gender: ''
+    };
   }
 
   calculateExperienceYears(): number {

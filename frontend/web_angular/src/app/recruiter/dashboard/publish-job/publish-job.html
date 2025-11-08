@@ -329,6 +329,7 @@
           [job]="job"
           (publish)="handlePublishJob($event)"
           (edit)="handleEditJob($event)"
+          (applicationStatusChange)="handleApplicationStatusChange($event)"
           [published]="job.published ?? false"
         ></app-recruiter-job-card>
       </div>
@@ -355,6 +356,7 @@
             [job]="job"
             (publish)="handlePublishJob($event)"
             (edit)="handleEditJob($event)"
+            (applicationStatusChange)="handleApplicationStatusChange($event)"
             [published]="false"
           ></app-recruiter-job-card>
         </ng-template>

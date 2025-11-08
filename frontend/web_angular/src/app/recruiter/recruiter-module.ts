@@ -12,6 +12,9 @@ import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sideba
 import { JobCardRecruiter } from './dashboard/publish-job/job-card-recruiter/job-card-recruiter';
 import { RecruiterJobDetailsDialog } from './dashboard/publish-job/job-card-recruiter/recruiter-job-details-dialog/recruiter-job-details-dialog';
 import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-job-dialog/edit-job-dialog';
+import { ApplicationDetailsDialog } from './dashboard/publish-job/job-card-recruiter/application-details-dialog/application-details-dialog';
+import { InterviewScheduleDialog } from './dashboard/publish-job/job-card-recruiter/interview-schedule-dialog/interview-schedule-dialog';
+import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/take-action-dialog/take-action-dialog';
 
 @NgModule({
   declarations: [
@@ -23,6 +26,9 @@ import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-j
     JobCardRecruiter,
     RecruiterJobDetailsDialog,
     EditJobDialog,
+    ApplicationDetailsDialog,
+    InterviewScheduleDialog,
+    TakeActionDialog,
   ],
   imports: [
     CommonModule,

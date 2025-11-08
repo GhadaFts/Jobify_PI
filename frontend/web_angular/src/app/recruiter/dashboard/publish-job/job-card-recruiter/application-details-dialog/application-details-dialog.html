@@ -1,0 +1,180 @@
+<div class="p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Détails de la Candidature</h2>
+    <button
+      (click)="close()"
+      class="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="bg-white rounded-lg">
+    <!-- Informations du candidat -->
+    <div class="flex items-start gap-6 mb-8">
+      <img
+        [src]="data.application.jobSeeker.photo_profil"
+        [alt]="data.application.jobSeeker.fullName"
+        class="w-20 h-20 rounded-full object-cover"
+      />
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <h3 class="text-2xl font-semibold text-gray-900">
+            {{ data.application.jobSeeker.fullName }}
+          </h3>
+          <span [class]="getStatusColor(data.application.status) + ' px-3 py-1 rounded-full text-sm font-medium'">
+            {{ data.application.status }}
+          </span>
+        </div>
+        <p class="text-lg text-gray-600 mb-2">{{ data.application.jobSeeker.title }}</p>
+        <p class="text-gray-500">
+          {{ data.application.jobSeeker.nationality }} • {{ data.application.jobSeeker.phone_number }}
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Colonne gauche - Informations personnelles -->
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3">Informations Personnelles</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Email:</span>
+              <span class="text-gray-900">{{ data.application.jobSeeker.email }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Date de naissance:</span>
+              <span class="text-gray-900">
+                {{ formatDate(data.application.jobSeeker.date_of_birth) }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Genre:</span>
+              <span class="text-gray-900">{{ data.application.jobSeeker.gender }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3">Compétences</h4>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let skill of data.application.jobSeeker.skills"
+              class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+            >
+              {{ skill }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite - Candidature -->
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3">Détails de la Candidature</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Date de candidature:</span>
+              <span class="text-gray-900">{{ formatDate(data.application.applicationDate) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">CV:</span>
+              <a
+                [href]="data.application.cv_link"
+                class="text-blue-600 hover:text-blue-800 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Télécharger le CV
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3">Lettre de Motivation</h4>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-gray-700 text-sm leading-relaxed">
+              {{ data.application.motivation_lettre }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expérience Professionnelle -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <h4 class="font-semibold text-gray-900 mb-4">Expérience Professionnelle</h4>
+      <div class="space-y-4">
+        <div 
+          *ngFor="let exp of data.application.jobSeeker.experience"
+          class="p-4 bg-gray-50 rounded-lg"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <h5 class="font-medium text-gray-900">{{ exp.position }}</h5>
+            <span class="text-sm text-gray-500">{{ getExperiencePeriod(exp) }}</span>
+          </div>
+          <p class="text-sm text-gray-700 mb-2">{{ exp.company }}</p>
+          <p class="text-sm text-gray-600">{{ exp.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Éducation -->
+    <div class="mt-6 pt-6 border-t border-gray-200">
+      <h4 class="font-semibold text-gray-900 mb-4">Éducation</h4>
+      <div class="space-y-4">
+        <div 
+          *ngFor="let edu of data.application.jobSeeker.education"
+          class="p-4 bg-gray-50 rounded-lg"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <h5 class="font-medium text-gray-900">{{ edu.degree }} en {{ edu.field }}</h5>
+            <span class="text-sm text-gray-500">{{ formatDate(edu.graduationDate) }}</span>
+          </div>
+          <p class="text-sm text-gray-700">{{ edu.school }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liens sociaux -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <h4 class="font-semibold text-gray-900 mb-3">Liens Sociaux</h4>
+      <div class="flex gap-4">
+        <a
+          *ngIf="data.application.jobSeeker.github_link"
+          [href]="data.application.jobSeeker.github_link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+        >
+          GitHub
+        </a>
+        <a
+          *ngIf="data.application.jobSeeker.web_link"
+          [href]="data.application.jobSeeker.web_link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+        >
+          Site Web
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+    <button
+      (click)="close()"
+      class="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+    >
+      Fermer
+    </button>
+    <button class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+      Contacter le candidat
+    </button>
+  </div>
+</div>
