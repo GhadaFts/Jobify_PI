@@ -1,9 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Network permission for Gemini API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
+        android:largeHeap="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -25,11 +28,12 @@
         <!-- Profile Activities -->
         <activity
             android:name=".ProfileActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".RecruiterProfileActivity"
-            android:exported="false"/>
+            android:exported="false" />
 
+        <!-- Other App Activities -->
         <activity android:name=".JobOpportunitiesActivity" />
         <activity android:name=".PostsActivity" />
         <activity android:name=".AICareerAdvisorActivity" />
