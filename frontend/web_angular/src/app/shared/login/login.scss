@@ -3,15 +3,16 @@
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   min-height: 100vh;
   font-family: 'Jost', sans-serif;
-  background: linear-gradient(to bottom, #ffffff, #23526a);
+  background: #ffffff;
+  margin-left: 100px;
 }
 
 .main {
-  width: 350px;
+  width: 700px;
   height: 650px;
   background: #ffffff;
   border-radius: 10px;
@@ -36,7 +37,7 @@ label {
 
 input {
   width: 60%;
-  height: 20px;
+  height: 40px;
   background: #ffffff;
   justify-content: center;
   display: flex;
@@ -74,6 +75,7 @@ button {
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
 .signup button {
   background-color: #d5dcdf;
   color: #336781;
