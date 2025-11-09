@@ -33,7 +33,7 @@ export class AuthService {
   
   // Mock user storage (remove when backend is ready)
   private mockUsers = [
-    { email: 'test@example.com', password: 'password123', Fullname: 'Test User', role: 'recruiter' }
+    { email: 'test@example.com', password: 'password123', Fullname: 'Test User', role: 'jobseeker' }
   ];
 
   constructor(private http: HttpClient) {}

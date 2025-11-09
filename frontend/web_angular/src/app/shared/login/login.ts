@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, LoginCredentials, SignupData } from '../services/auth.service'; // ✅ Import SignupData
+import { AuthService, LoginCredentials } from '../services/auth.service';
 import { ErrorService } from '../services/error.service';
 import { Router } from '@angular/router';
 
@@ -13,25 +13,16 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.scss']
 })
 export class LoginComponent {
-  @Input() errors: string[] = [];
-  @Output() loginSubmit = new EventEmitter<{ email: string; password: string }>();
-  @Output() forgotPassword = new EventEmitter<string>();
-
   // Login form data
   email: string = '';
   password: string = '';
   isLoading: boolean = false;
+  errors: string[] = [];
 
-  // ✅ Add signup form data for the hidden form
-  signupData = {
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'jobseeker'
-  };
-  signupErrors: string[] = [];
-  isSignupLoading: boolean = false;
+  // Focus states for floating labels
+  emailFocused: boolean = false;
+  passwordFocused: boolean = false;
+  showPassword: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -68,51 +59,6 @@ export class LoginComponent {
     });
   }
 
-  // ✅ Add signup method for the hidden form
-  onSignup() {
-    this.isSignupLoading = true;
-    this.signupErrors = [];
-
-    // Frontend validation
-    if (this.signupData.password !== this.signupData.confirmPassword) {
-      this.signupErrors.push('Passwords do not match');
-      this.isSignupLoading = false;
-      return;
-    }
-
-    if (this.signupData.password.length < 6) {
-      this.signupErrors.push('Password must be at least 6 characters long');
-      this.isSignupLoading = false;
-      return;
-    }
-
-    const backendData: SignupData = {
-      fullName: this.signupData.fullName,
-      email: this.signupData.email,
-      password: this.signupData.password,
-      role: this.signupData.role
-    };
-
-    this.authService.signup(backendData).subscribe({
-      next: (response) => {
-        this.isSignupLoading = false;
-        if (response.success) {
-          console.log('Signup successful:', response);
-          if (this.signupData.role === 'jobseeker') {
-            this.router.navigate(['/job-seeker/profile-initial']);
-          } else if (this.signupData.role === 'recruiter') {
-            this.router.navigate(['/recruiter/profile-initial']);
-          }
-        }
-      },
-      error: (error) => {
-        this.isSignupLoading = false;
-        this.signupErrors = this.errorService.handleAuthError(error);
-        console.error('Signup failed:', error);
-      }
-    });
-  }
-
   onForgotPassword() {
     if (this.email) {
       this.isLoading = true;
@@ -121,7 +67,6 @@ export class LoginComponent {
           this.isLoading = false;
           if (response.success) {
             alert(response.message);
-            this.forgotPassword.emit(this.email);
           }
         },
         error: (error) => {
@@ -134,7 +79,10 @@ export class LoginComponent {
     }
   }
 
-  closeErrorModal() {
-    this.errors = [];
+  navigateToSignup() {
+    this.router.navigate(['/signup']);
+  }
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 }

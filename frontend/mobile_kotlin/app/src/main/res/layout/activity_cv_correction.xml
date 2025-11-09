@@ -6,357 +6,338 @@
     android:layout_height="match_parent"
     android:background="#F9FAFB">
 
-    <!-- MAIN CONTENT -->
-    <LinearLayout
-        android:id="@+id/rootLayout"
+    <!-- ROOT CONTENT: use NestedScrollView so results flow under upload area -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/main_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="24dp">
+        android:fillViewport="true"
+        android:padding="16dp">
 
-        <!-- HEADER: MENU + DARK MODE ICON -->
         <LinearLayout
+            android:id="@+id/rootLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
-
-            <ImageView
-                android:id="@+id/btnMenu"
-                android:contentDescription="@string/tod"
-                android:src="@drawable/ic_menu"
-                android:layout_width="28dp"
-                android:layout_height="28dp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <ImageView
-                android:id="@+id/btnTheme"
-                android:contentDescription="@string/todo4"
-                android:src="@drawable/ic_sun"
-                android:layout_width="28dp"
-                android:layout_height="28dp" />
-        </LinearLayout>
-
-        <!-- TITLE -->
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CV Correction"
-            android:textColor="#2563EB"
-            android:textStyle="bold"
-            android:textSize="24sp"
-            android:layout_marginBottom="8dp" />
-
-        <!-- SUBTITLE -->
-        <TextView
-            android:id="@+id/subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Upload your CV and get AI-powered suggestions to improve it"
-            android:textColor="#6B7280"
-            android:textSize="14sp"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
-
-        <!-- UPLOAD ZONE -->
-        <LinearLayout
-            android:id="@+id/upload_zone"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/dashed_border"
-            android:layout_marginBottom="24dp">
+            android:gravity="center_horizontal">
+
+            <!-- HEADER -->
+            <LinearLayout
+                android:id="@+id/header_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:id="@+id/btnMenu"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_menu"
+                        android:contentDescription="@string/menu" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/btnTheme"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_sun"
+                        android:contentDescription="@string/toggle_theme" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cv_correction_title"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:textSize="24sp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/subtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cv_correction_subtitle"
+                    android:textColor="#6B7280"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="12dp" />
+            </LinearLayout>
+
+            <!-- UPLOAD ZONE -->
+            <LinearLayout
+                android:id="@+id/upload_zone"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/dashed_border"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/upload_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/upload_your_cv"
+                    android:textColor="#9CA3AF"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/upload_text"
-                android:layout_width="wrap_content"
+                android:id="@+id/file_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload Your CV"
-                android:textColor="#9CA3AF"
-                android:textSize="16sp" />
+                android:text=""
+                android:textColor="#111827"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/analyze_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/analyze_cv"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:enabled="false" />
+
+            <!-- Loading overlay (centered) -->
+            <ProgressBar
+                android:id="@+id/loading_indicator"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginTop="12dp" />
+
+            <!-- RESULTS WRAPPER (initially GONE) -->
+            <LinearLayout
+                android:id="@+id/results_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="16dp">
+
+                <!-- Profile Summary Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/profile_summary_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_summary_title"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#111827"/>
+
+                        <TextView
+                            android:id="@+id/profile_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_provided_label"
+                            android:layout_marginTop="12dp"
+                            style="@style/ProfileField"/>
+
+                        <TextView
+                            android:id="@+id/profile_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_provided_label"
+                            style="@style/ProfileField"/>
+
+                        <TextView
+                            android:id="@+id/profile_nationality"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_provided_label"
+                            style="@style/ProfileField"/>
+
+                        <TextView
+                            android:id="@+id/profile_summary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/no_professional_summary"
+                            android:layout_marginTop="8dp"
+                            android:background="#F3F4F6"
+                            android:padding="12dp"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/profile_skills"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_provided_label"
+                            style="@style/ProfileField"/>
+
+                        <TextView
+                            android:id="@+id/profile_experience"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/experience_count"
+                            style="@style/ProfileField"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- CV Review & Recommendations -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/review_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/review_recommendations"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="#111827"/>
+
+                            <TextView
+                                android:id="@+id/cv_score"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0%"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorPrimary"
+                                android:layout_alignParentEnd="true"/>
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:id="@+id/cv_suggestions_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="12dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- CV Analysis Summary -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cv_analysis_summary"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#111827"
+                            android:layout_marginBottom="12dp" />
+
+                        <TextView
+                            android:id="@+id/overall_assessment"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="#DBEAFE"
+                            android:padding="12dp"
+                            android:text="@string/assessment_placeholder"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/key_strengths"
+                            android:layout_marginTop="12dp"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#059669"/>
+
+                        <LinearLayout
+                            android:id="@+id/strengths_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/areas_improvement"
+                            android:layout_marginTop="12dp"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#D97706"/>
+
+                        <LinearLayout
+                            android:id="@+id/improvements_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- FILE NAME -->
-        <TextView
-            android:id="@+id/file_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#111827"
-            android:layout_marginBottom="16dp" />
-
-        <!-- ANALYZE BUTTON -->
-        <Button
-            android:id="@+id/analyze_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Analyze CV"
-            android:backgroundTint="#F97316"
-            android:textColor="@android:color/white"
-            android:enabled="false" />
-    </LinearLayout>
-
-    <!-- DRAWER MENU -->
+    <!-- Drawer menu (you already have one; keep existing content) -->
     <ScrollView
-        android:layout_width="240dp"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="#FFFFFF">
-
+        <!-- Keep drawer contents as before (menus, icons...) -->
         <LinearLayout
             android:id="@+id/drawerMenu"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
-
-            <!-- MAIN SECTION -->
-            <TextView
-                android:text="@string/main"
-                android:textSize="14sp"
-                android:textColor="#9AA1A8"
-                android:paddingVertical="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <LinearLayout
-                android:id="@+id/menuHomeLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_home"
-                    android:contentDescription="@string/home_icon"/>
-
-                <TextView
-                    android:id="@+id/menuHome"
-                    android:text="Find job"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/menuProfileLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile"
-                    android:contentDescription="@string/profile_icon"/>
-
-                <TextView
-                    android:id="@+id/menuProfile"
-                    android:text="@string/profile"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <!-- ACCOUNT SECTION -->
-            <TextView
-                android:text="@string/account"
-                android:textSize="14sp"
-                android:textColor="#9AA1A8"
-                android:paddingVertical="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <LinearLayout
-                android:id="@+id/menuLogoutLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_logout"
-                    android:contentDescription="@string/logout_icon"/>
-
-                <TextView
-                    android:id="@+id/menuLogout"
-                    android:text="@string/log_out"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <!-- DARK MODE -->
-            <LinearLayout
-                android:id="@+id/menuDarkModeLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:id="@+id/menuDarkModeIcon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_dark_mode"
-                    android:contentDescription="@string/dark_mode_icon"/>
-
-                <TextView
-                    android:id="@+id/menuDarkMode"
-                    android:text="@string/dark_mode"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <!-- SUPPORT -->
-            <TextView
-                android:text="@string/support"
-                android:textSize="14sp"
-                android:textColor="#9AA1A8"
-                android:paddingVertical="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <LinearLayout
-                android:id="@+id/menuHelpLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_help"
-                    android:contentDescription="@string/help_icon"/>
-
-                <TextView
-                    android:id="@+id/menuHelp"
-                    android:text="@string/help"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <!-- AI SECTION -->
-            <TextView
-                android:text="@string/ai"
-                android:textSize="14sp"
-                android:textColor="#9AA1A8"
-                android:paddingVertical="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <LinearLayout
-                android:id="@+id/menuCorrectCVLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_cv"
-                    android:contentDescription="@string/correct_cv_icon"/>
-
-                <TextView
-                    android:id="@+id/menuCorrectCV"
-                    android:text="@string/correct_cv"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/menuInterviewTrainingLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_interview"
-                    android:contentDescription="@string/interview_training_icon"/>
-
-                <TextView
-                    android:id="@+id/menuInterviewTraining"
-                    android:text="@string/interview_training"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/menuJobMarketAnalyseLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_market"
-                    android:contentDescription="@string/job_market_analyse_icon"/>
-
-                <TextView
-                    android:id="@+id/menuJobMarketAnalyse"
-                    android:text="@string/job_market_analyse"
-                    android:textSize="16sp"
-                    android:textColor="#1F4E5F"
-                    android:layout_marginStart="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
+            <!-- ... existing items ... -->
         </LinearLayout>
     </ScrollView>
+
 </androidx.drawerlayout.widget.DrawerLayout>
