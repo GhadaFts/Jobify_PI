@@ -4,6 +4,7 @@ import { Recruiter } from './recruiter';
 import { ProfileInitial } from './profile-initial/profile-initial';
 import { RecruiterDashboard } from './dashboard/dashboard';
 import { PublishJob } from './dashboard/publish-job/publish-job';
+import { Interviews } from './dashboard/interviews/interviews';
 const routes: Routes = [
   { path: 'profile-initial', component: ProfileInitial },
   { 
@@ -11,6 +12,7 @@ const routes: Routes = [
     component: RecruiterDashboard, 
     children: [
       { path: 'publish-job', component: PublishJob },
+      {path: 'interviews', component: Interviews },
       // Vous pourrez ajouter d'autres routes plus tard
       { path: '', redirectTo: 'publish-job', pathMatch: 'full' }
     ]

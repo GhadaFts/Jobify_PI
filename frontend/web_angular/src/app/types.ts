@@ -79,3 +79,23 @@ export interface JobOffer {
   published: boolean;
   applications?: Application[];
 }
+export interface Interview {
+  id: string;
+  candidateName: string;
+  candidateTitle: string;
+  candidatePhoto: string;
+  jobOfferTitle: string;
+  jobOfferId: string;
+  applicationId: number;
+  interviewDate: string; // ISO string
+  interviewTime: string;
+  interviewDuration: number; // in minutes
+  interviewType: string;
+  interviewLocation: string;
+  interviewStatus: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  interviewer: string;
+  notes?: string;
+  meetingLink?: string;
+  rating?: number;
+  feedback?: string;
+}

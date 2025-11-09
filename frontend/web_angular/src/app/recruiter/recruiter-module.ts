@@ -16,6 +16,8 @@ import { ApplicationDetailsDialog } from './dashboard/publish-job/job-card-recru
 import { InterviewScheduleDialog } from './dashboard/publish-job/job-card-recruiter/interview-schedule-dialog/interview-schedule-dialog';
 import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/take-action-dialog/take-action-dialog';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { Interviews } from './dashboard/interviews/interviews';
+import { InterviewCard } from './dashboard/interviews/interview-card/interview-card';
 
 
 @NgModule({
@@ -31,6 +33,8 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     ApplicationDetailsDialog,
     InterviewScheduleDialog,
     TakeActionDialog,
+    Interviews,
+    InterviewCard,
   ],
   imports: [
     CommonModule,
