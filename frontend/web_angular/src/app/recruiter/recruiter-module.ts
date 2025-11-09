@@ -15,6 +15,8 @@ import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-j
 import { ApplicationDetailsDialog } from './dashboard/publish-job/job-card-recruiter/application-details-dialog/application-details-dialog';
 import { InterviewScheduleDialog } from './dashboard/publish-job/job-card-recruiter/interview-schedule-dialog/interview-schedule-dialog';
 import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/take-action-dialog/take-action-dialog';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+
 
 @NgModule({
   declarations: [
@@ -35,7 +37,8 @@ import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/tak
     FormsModule, // Add this for template-driven forms
     FontAwesomeModule, // Add this for FontAwesome icons
     RecruiterRoutingModule,
-    SharedModule
+    SharedModule,
+    PdfViewerModule,
     
     // Add SharedModule if needed for ToastService or other shared components
   ],

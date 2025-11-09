@@ -94,23 +94,23 @@ export class JobCardRecruiter {
   }
 
   openApplicationDetails(application: Application): void {
-    if (application.status === 'new') {
-      this.scheduleStatusChange(application.id);
-    }
-
-    const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
-      width: '800px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
-      data: { application }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (this.statusChangeTimeout) {
-        clearTimeout(this.statusChangeTimeout);
-      }
-    });
+  if (application.status === 'new') {
+    this.scheduleStatusChange(application.id);
   }
+
+  const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
+    width: '80vw', // Changé de 800px à 95vw
+    maxWidth: '1800px', // Ajouté
+    maxHeight: '90vh',
+    data: { application }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (this.statusChangeTimeout) {
+      clearTimeout(this.statusChangeTimeout);
+    }
+  });
+}
 
   private scheduleStatusChange(applicationId: number): void {
     this.statusChangeTimeout = setTimeout(() => {

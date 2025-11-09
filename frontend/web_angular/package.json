@@ -36,6 +36,7 @@
     "@google/genai": "^1.25.0",
     "lucide-angular": "^0.546.0",
     "marked": "^16.4.1",
+    "ng2-pdf-viewer": "^10.4.0",
     "pdfjs-dist": "^5.4.296",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
