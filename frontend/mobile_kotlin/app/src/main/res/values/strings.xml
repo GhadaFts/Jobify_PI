@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jobify</string>
+
+    <!-- General -->
+    <string name="menu">Menu</string>
+    <string name="posts">Posts</string>
+    <string name="cv_correction">CV Correction</string>
+    <string name="todo">TODO</string>
+    <string name="tod">TODO</string>
+    <string name="todo1">TODO</string>
+    <string name="todo2">TODO</string>
+    <string name="todo4">TODO</string>
+    <string name="todo6">TODO</string>
+    <string name="remove">Remove</string>
+
+    <!-- CV Correction Screen (Original) -->
+    <string name="upload_your_cv_and_get_ai_powered_suggestions">Upload your CV and get AI-powered suggestions to improve it.</string>
+    <string name="analyze_cv">Analyze CV</string>
+
+    <!-- Candidate Profile Screen -->
+    <string name="meriem_bejaoui">Meriem Bejaoui</string>
+    <string name="tunisia">Tunisia</string>
+    <string name="applied_n12">Applied\n12</string>
+    <string name="reviewed_n8">Reviewed\n8</string>
+    <string name="interview_n3">Interview\n3</string>
+    <string name="a_motivated_android_developer_seeking_new_challenges">A motivated Android developer seeking new challenges.</string>
+    <string name="experiences">Experiences</string>
+    <string name="add_experience">Add Experience</string>
+    <string name="no_experiences_added_yet">No experiences added yet.</string>
+    <string name="educations">Educations</string>
+    <string name="add_education">Add Education</string>
+    <string name="no_educations_added_yet">No educations added yet.</string>
+    <string name="skills">Skills</string>
+    <string name="no_skills_added_yet">No skills added yet.</string>
+    <string name="languages">Languages</string>
+    <string name="no_languages_added_yet">No languages added yet.</string>
+
+    <!-- Add Education Dialog -->
+    <string name="add_edu">Add Education</string>
+    <string name="university">University</string>
+    <string name="degree">Degree</string>
+    <string name="field_of_study">Field of Study</string>
+    <string name="startDate">Start Date</string>
+    <string name="enddate">End Date</string>
+    <string name="add_ed">Add</string>
+
+    <!-- Add Experience Dialog -->
+    <string name="add_expe">Add Experience</string>
+    <string name="job_position">Job Position</string>
+    <string name="company_name">Company Name</string>
+    <string name="company_address">Company Address</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="add_exp">Add</string>
+
+    <!-- Navigation Menu -->
+    <string name="main">Main</string>
+    <string name="home_icon">Home Icon</string>
+    <string name="find_job">Find job</string>
+    <string name="profile_icon">Profile Icon</string>
+    <string name="profile">Profile</string>
+    <string name="account">Account</string>
+    <string name="logout_icon">Logout Icon</string>
+    <string name="log_out">Log out</string>
+    <string name="dark_mode_icon">Dark Mode Icon</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="support">Support</string>
+    <string name="help_icon">Help Icon</string>
+    <string name="help">Help</string>
+    <string name="ai">AI</string>
+    <string name="correct_cv_icon">Correct CV Icon</string>
+    <string name="correct_cv">Correct CV</string>
+    <string name="interview_training_icon">Interview Training Icon</string>
+    <string name="interview_training">Interview Training</string>
+    <string name="job_market_analyse_icon">Job Market Analyse Icon</string>
+    <string name="job_market_analyse">Job Market Analyse</string>
+
+    <!-- ========================= -->
+    <!-- CV Correction (New Design) -->
+    <!-- ========================= -->
+
+    <!-- Header -->
+    <string name="cv_correction_title">CV Correction</string>
+    <string name="cv_correction_subtitle">Upload your CV and get AI-powered suggestions to improve it</string>
+
+    <!-- Upload Section -->
+    <string name="upload_your_cv">Upload Your CV</string>
+    <string name="file_selected">File selected</string>
+    <string name="unknown_file">Unknown File</string>
+
+    <!-- Results Section -->
+    <string name="profile_summary_title">Your Profile Summary</string>
+    <string name="review_recommendations">CV Review &amp; Recommendations</string>
+    <string name="cv_analysis_summary">CV Analysis Summary</string>
+    <string name="no_professional_summary">No professional summary provided.</string>
+    <string name="not_provided_label">Not provided</string>
+    <string name="experience_count">Experience: 0 positions</string>
+    <string name="assessment_placeholder">Overall assessment will appear here.</string>
+    <string name="key_strengths">Key Strengths</string>
+    <string name="areas_improvement">Areas for Improvement</string>
+    <string name="no_suggestions">No suggestions available.</string>
+
+    <!-- Error Messages -->
+    <string name="analysis_error_title">Analysis Error</string>
+    <string name="error_extract_text">Could not extract text from PDF. The file might be empty or corrupt.</string>
+    <string name="error_parse_response">Failed to parse AI response.</string>
+    <string name="error_ai_generic">Failed to get analysis from AI service.</string>
+    <string name="error_unexpected">An unexpected error occurred.</string>
+
+    <!-- Misc -->
+    <string name="toggle_theme">Toggle theme</string>
+
+</resources>

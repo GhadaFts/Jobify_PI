@@ -1,0 +1,235 @@
+<div class="flex h-screen" style="background-color: #f3f4f6">
+  <!-- Main Content with Scrollable Profile Form -->
+  <div class="flex-1 p-4 overflow-y-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <div>
+        <h1 style="font-size: 22px; font-weight: bold; color: #111827">Edit Profile</h1>
+        <p style="font-size: 15px; color: #6b7280">
+          Update your company information and professional details
+        </p>
+      </div>
+    </div>
+
+    <!-- Profile Photo -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-lg font-medium mb-4">Profile Photo</h3>
+      <div class="flex items-center gap-6">
+        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300">
+          <img
+            [src]="editedProfile.photo_profil || 'assets/img.png'"
+            alt="Profile"
+            class="w-full h-full object-cover"
+            *ngIf="editedProfile.photo_profil || editedProfile.fullName"
+          />
+          <div
+            class="w-24 h-24 flex items-center justify-center bg-gray-200 text-xl"
+            *ngIf="!editedProfile.photo_profil && !editedProfile.fullName"
+          >
+            {{ getInitials() }}
+          </div>
+        </div>
+        <div>
+          <input
+            type="file"
+            id="photoUpload"
+            accept="image/jpeg,image/png,image/gif"
+            class="hidden"
+            (change)="onFileSelected($event)"
+            #fileInput
+          />
+          <button
+            (click)="fileInput.click()"
+            class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2"
+          >
+            <fa-icon [icon]="faCamera" class="text-gray-600"></fa-icon>
+            Change Photo
+          </button>
+          <p class="text-sm text-gray-500 mt-2">JPG, PNG or GIF. Max size 2MB.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
+      <h3 class="text-lg font-medium mb-4">Personal Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input
+            id="fullName"
+            [(ngModel)]="editedProfile.fullName"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your full name"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            id="email"
+            type="email"
+            [(ngModel)]="editedProfile.email"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Phone</label>
+          <input
+            id="phone_number"
+            type="tel"
+            [(ngModel)]="editedProfile.phone_number"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your phone number"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Nationality</label>
+          <input
+            id="nationality"
+            [(ngModel)]="editedProfile.nationality"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your nationality"
+          />
+        </div>
+        <div class="space-y-2 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Professional Summary</label>
+          <textarea
+            id="description"
+            [(ngModel)]="editedProfile.description"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
+            placeholder="Enter your professional summary"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Information -->
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
+      <h3 class="text-lg font-medium mb-4">Company Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Company Address</label>
+          <input
+            id="companyAddress"
+            [(ngModel)]="editedProfile.companyAddress"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter company address"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Domain</label>
+          <input
+            id="domaine"
+            [(ngModel)]="editedProfile.domaine"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., Technology, Healthcare, Finance"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Number of Employees</label>
+          <select
+            id="employees_number"
+            [(ngModel)]="editedProfile.employees_number"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="0">Select size</option>
+            <option value="10">1-10 employees</option>
+            <option value="50">11-50 employees</option>
+            <option value="200">51-200 employees</option>
+            <option value="500">201-500 employees</option>
+            <option value="1000">501-1000 employees</option>
+            <option value="1001">1000+ employees</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
+      <h3 class="text-lg font-medium mb-4">Company Services</h3>
+      <div class="space-y-4">
+        <div class="flex gap-2">
+          <input
+            placeholder="Add a service..."
+            [(ngModel)]="newService"
+            (keyup.enter)="addService()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            (click)="addService()"
+            class="border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-md flex items-center gap-2"
+          >
+            <svg class="w-5 h-5" aria-hidden="true"><use xlink:href="assets/ic-add.svg"></use></svg>
+            Add
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span
+            *ngFor="let service of editedProfile.service; let i = index"
+            class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1"
+          >
+            {{ service }}
+            <button (click)="removeService(service)" class="hover:text-red-500">
+              <fa-icon [icon]="faXmark"></fa-icon>
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Links -->
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
+      <h3 class="text-lg font-medium mb-4">Social Links</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">GitHub</label>
+          <input
+            id="github_link"
+            [(ngModel)]="editedProfile.github_link"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://github.com/username"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Website</label>
+          <input
+            id="web_link"
+            [(ngModel)]="editedProfile.web_link"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://yourwebsite.com"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Twitter</label>
+          <input
+            id="twitter_link"
+            [(ngModel)]="editedProfile.twitter_link"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://twitter.com/username"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Facebook</label>
+          <input
+            id="facebook_link"
+            [(ngModel)]="editedProfile.facebook_link"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://facebook.com/username"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button at Bottom -->
+    <div class="flex justify-end mt-6">
+      <button
+        (click)="handleSave()"
+        class="bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 rounded-md flex items-center gap-2 font-medium"
+      >
+        <svg class="w-5 h-5" aria-hidden="true"><use xlink:href="assets/ic-save.svg"></use></svg>
+        Save All Changes
+      </button>
+    </div>
+  </div>
+</div>

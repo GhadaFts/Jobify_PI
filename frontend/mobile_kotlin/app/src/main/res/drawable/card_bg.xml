@@ -1,0 +1,21 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- couleur background -->
+    <solid android:color="#FFFFFF"/>
+
+    <!-- bordures rounded -->
+    <corners android:radius="12dp"/>
+
+    <!-- ombre légère -->
+    <stroke
+        android:width="1dp"
+        android:color="#DDDDDD"/>
+
+    <!-- padding interne (optionnel, sinon déjà fl LinearLayout) -->
+    <padding
+        android:left="8dp"
+        android:top="8dp"
+        android:right="8dp"
+        android:bottom="8dp"/>
+</shape>

@@ -1,0 +1,82 @@
+<div class="auth-body">
+  <img class="wave" src="https://raw.githubusercontent.com/sefyudem/Responsive-Login-Form/master/img/wave.png" alt="wave">
+  <div class="container">
+    <div class="img">
+      <img src="/assets/login1.svg" alt="authentication">
+    </div>
+    <div class="login-container">
+      <form (ngSubmit)="onLogin()">
+        <h2>Login</h2>
+        <p>Welcome back!</p>
+        
+        <!-- Email Input -->
+        <div class="input-div one" [class.focus]="emailFocused || email">
+          <div class="i">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <h5>Email</h5>
+            <input 
+              class="input" 
+              type="email" 
+              name="email" 
+              [(ngModel)]="email"
+              (focus)="emailFocused = true"
+              (blur)="emailFocused = false"
+              required>
+          </div>
+        </div>
+        
+        <!-- Password Input -->
+        <div class="input-div two" [class.focus]="passwordFocused || password">
+          <div class="i">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="password-wrapper">
+            <h5>Password</h5>
+            <input 
+              class="input" 
+              [type]="showPassword ? 'text' : 'password'" 
+              name="password" 
+              [(ngModel)]="password"
+              (focus)="passwordFocused = true"
+              (blur)="passwordFocused = false"
+              required>
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Error Messages -->
+        <div *ngIf="errors && errors.length > 0" class="error-messages">
+          <div *ngFor="let error of errors" class="error-item">
+            {{ error }}
+          </div>
+        </div>
+        
+        <!-- Login Button -->
+        <button type="submit" class="btn" [class.loading]="isLoading" [disabled]="isLoading">
+          <span class="loading-spinner" *ngIf="isLoading"></span>
+          {{ isLoading ? 'Signing in...' : 'Login' }}
+        </button>
+        
+        <!-- Forgot Password Link -->
+        <a class="forgot" href="javascript:void(0)" (click)="onForgotPassword()">Forgot your password?</a>
+        
+        <!-- Divider -->
+        <div class="others">
+          <hr>
+          <p>OR</p>
+          <hr>
+        </div>
+        
+        <!-- Account Link -->
+        <div class="account">
+          <p>Don't have an account?</p>
+          <a href="javascript:void(0)" (click)="navigateToSignup()">Sign up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

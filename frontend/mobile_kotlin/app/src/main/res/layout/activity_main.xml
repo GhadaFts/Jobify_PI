@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <!-- Main Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp"
+        android:background="@drawable/bg_gradient">
+
+        <!-- Logo + Title -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:animation="@anim/fade_in_up">
+
+            <ImageView
+                android:id="@+id/appLogo"
+                android:src="@drawable/ic_logout"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:contentDescription="App Logo" />
+
+            <TextView
+                android:id="@+id/appName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jobify"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:id="@+id/slogan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your platform for connecting talent with opportunity"
+                android:textColor="#D9E8F2"
+                android:textSize="14sp"
+                android:layout_marginTop="8dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Cards Container (vertical layout) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="9dp">
+
+            <!-- Job Seeker Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardJobSeeker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="10dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:animation="@anim/slide_up">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:src="@drawable/ic_profile"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:contentDescription="Job Seeker Icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="I'm a Job Seeker"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="#1E3A4F" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Find your dream job, optimize your CV, and apply with confidence"
+                        android:textSize="13sp"
+                        android:textColor="#4A6572"
+                        android:layout_marginTop="10dp" />
+
+                    <!-- Job Seeker Features -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Browse thousands of job offers\n• Get AI-powered CV recommendations\n• Receive personalized career advice\n• Track your applications"
+                        android:textSize="14sp"
+                        android:textColor="#334155"
+                        android:layout_marginTop="16dp"
+                        android:lineSpacingExtra="4dp"
+
+                        android:layout_marginBottom="6dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Recruiter Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardRecruiter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="10dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:animation="@anim/slide_up">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:src="@drawable/ic_recruiter"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:contentDescription="Recruiter Icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="I'm a Recruiter"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="#1E3A4F"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Post jobs, find the perfect candidates, and build your team"
+                        android:textSize="13sp"
+                        android:textColor="#4A6572"
+                        android:layout_marginTop="10dp"/>
+
+                    <!-- Recruiter Features -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Post job opportunities\n• Review candidate applications\n• Manage your job listings\n• Connect with top talent"
+                        android:textSize="14sp"
+                        android:textColor="#334155"
+                        android:layout_marginTop="16dp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="6dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
