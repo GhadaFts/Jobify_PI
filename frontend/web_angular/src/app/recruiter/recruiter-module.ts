@@ -6,7 +6,7 @@ import { ProfileInitial} from './profile-initial/profile-initial';
 import { RecruiterRoutingModule } from './recruiter-routing-module';
 import { RecruiterDashboard } from './dashboard/dashboard';
 import { PublishJob } from './dashboard/publish-job/publish-job';
-import { EditProfile } from './dashboard/edit-profile/edit-profile';
+import { EditProfileRecruiter } from './dashboard/edit-profile/edit-profile';
 import { SharedModule } from '../shared/shared-module';
 import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sidebar';
 import { JobCardRecruiter } from './dashboard/publish-job/job-card-recruiter/job-card-recruiter';
@@ -25,7 +25,7 @@ import { InterviewCard } from './dashboard/interviews/interview-card/interview-c
     ProfileInitial,
     RecruiterDashboard,
     PublishJob,
-    EditProfile,
+    EditProfileRecruiter,
     RecruiterSidebar,
     JobCardRecruiter,
     RecruiterJobDetailsDialog,

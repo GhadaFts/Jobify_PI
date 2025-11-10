@@ -44,6 +44,8 @@ export class Sidebar {
         return 'M12 6v6m0 0v6m0-6h6m-6 0H6'; // Icône pour publier un job (plus)
       case 'interviews':
       return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
+      case 'interview-preparation':
+      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
       default:
         return '';
     }

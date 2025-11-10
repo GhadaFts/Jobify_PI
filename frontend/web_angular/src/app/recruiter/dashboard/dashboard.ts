@@ -12,7 +12,8 @@ export class RecruiterDashboard {
 
   navItems = [
   { id: 'publish-job', label: 'Publish Job' },
-  { id: 'interviews', label: 'Interviews' }
+  { id: 'interviews', label: 'Interviews' },
+
 ];
 
   secondaryNavItems = [

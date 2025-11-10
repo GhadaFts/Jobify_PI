@@ -54,4 +54,24 @@ export class InterviewsService {
     };
     return jobTitles[jobOfferId] || 'Job Offer';
   }
+
+  // Vérifier les conflits d'horaire
+checkTimeConflict(interviewDate: string, interviewTime: string, duration: number): boolean {
+  const selectedDateTime = new Date(interviewDate + 'T' + interviewTime);
+  const selectedEndTime = new Date(selectedDateTime.getTime() + duration * 60000);
+
+  return this.interviews.some(existingInterview => {
+    if (existingInterview.interviewStatus === 'completed') return false;
+
+    const existingDateTime = new Date(existingInterview.interviewDate + 'T' + existingInterview.interviewTime);
+    const existingEndTime = new Date(existingDateTime.getTime() + existingInterview.interviewDuration * 60000);
+
+    // Vérifier si les plages horaires se chevauchent
+    return (
+      (selectedDateTime >= existingDateTime && selectedDateTime < existingEndTime) ||
+      (selectedEndTime > existingDateTime && selectedEndTime <= existingEndTime) ||
+      (selectedDateTime <= existingDateTime && selectedEndTime >= existingEndTime)
+    );
+  });
+}
 }

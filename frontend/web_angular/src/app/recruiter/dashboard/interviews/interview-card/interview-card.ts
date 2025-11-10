@@ -26,26 +26,29 @@ export class InterviewCard {
     }
   }
 
-  getTimeBadgeText(): string {
-    const interviewDateTime = new Date(this.interview.interviewDate + 'T' + this.interview.interviewTime);
-    const now = new Date();
-    const timeDiff = interviewDateTime.getTime() - now.getTime();
+ getTimeBadgeText(): string {
+  const interviewDateTime = new Date(this.interview.interviewDate + 'T' + this.interview.interviewTime);
+  const now = new Date();
+  const timeDiff = interviewDateTime.getTime() - now.getTime();
 
-    if (this.interview.interviewStatus === 'completed') {
-      return 'Completed';
-    } else if (timeDiff <= 0) {
-      return 'Now';
+  if (this.interview.interviewStatus === 'completed') {
+    return 'Completed';
+  } else if (timeDiff <= 0) {
+    return 'In Progress';
+  } else {
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    if (days > 0) {
+      return `${days}d and ${hours}h left`;
+    } else if (hours > 0) {
+      return `${hours}h left`;
     } else {
-      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      
-      if (days > 0) {
-        return `${days}d ${hours}h`;
-      } else {
-        return `${hours}h`;
-      }
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      return `${minutes}m left`;
     }
   }
+}
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);

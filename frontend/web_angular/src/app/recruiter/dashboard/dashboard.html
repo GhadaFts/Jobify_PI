@@ -16,6 +16,8 @@
     <ng-container [ngSwitch]="activeSection">
       <app-publish-job *ngSwitchCase="'publish-job'"></app-publish-job>
       <app-interviews *ngSwitchCase="'interviews'"></app-interviews>
+      <app-edit-profile-recruiter *ngSwitchCase="'edit-profile'"></app-edit-profile-recruiter>
+
 
       <!-- Vous pourrez ajouter d'autres composants plus tard -->
       <div *ngSwitchDefault class="text-center py-12">
