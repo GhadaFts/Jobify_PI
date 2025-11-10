@@ -1,5 +1,12 @@
 import { Component } from '@angular/core';
 import { JobOffer } from '../../../types'; // Adjust the import path
+interface ApplicationData {
+  generatedCV?: string;
+  uploadedFile?: File;
+  coverLetter?: string;
+  applicationDate: Date;
+}
+
 
 @Component({
   selector: 'app-find-job',
@@ -120,7 +127,12 @@ export class FindJob {
       applications: []
     },
   ];
-  appliedJobs: Set<string> = new Set();
+   appliedJobs: Map<string, {
+    generatedCV?: string;
+    uploadedFile?: File;
+    coverLetter?: string;
+    applicationDate: Date;
+  }> = new Map();
   bookmarkedJobs: Set<string> = new Set();
 
   get allJobs(): JobOffer[] {
@@ -134,14 +146,26 @@ export class FindJob {
   get appliedJobsList(): JobOffer[] {
     return this.jobs.filter(job => this.appliedJobs.has(job.id));
   }
-
   get bookmarkedJobsList(): JobOffer[] {
     return this.jobs.filter(job => this.bookmarkedJobs.has(job.id));
   }
 
-  handleApplyJob(jobId: string) {
-    this.appliedJobs.add(jobId);
+  handleApplyJob(applicationData: {
+    jobId: string;
+    generatedCV?: string;
+    uploadedFile?: File;
+    coverLetter?: string;
+  }) {
+    this.appliedJobs.set(applicationData.jobId, {
+      ...applicationData,
+      applicationDate: new Date()
+    });
   }
+
+  handleWithdrawJob(jobId: string) {
+    this.appliedJobs.delete(jobId);
+  }
+
 
   handleBookmarkJob(jobId: string) {
     if (this.bookmarkedJobs.has(jobId)) {

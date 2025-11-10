@@ -6,6 +6,7 @@ import { CvCorrection } from './dashboard/cv-correction/cv-correction';
 import { FindJob } from './dashboard/find-job/find-job';
 import { JobAnalyse } from './dashboard/job-analyse/job-analyse';
 import { EditProfile } from './dashboard/edit-profile/edit-profile';
+import { InterviewPreparation } from './dashboard/interview-preparation/interview-preparation';
 
 const routes: Routes = [
   { path: 'profile-initial', component: ProfileInitial },
@@ -14,6 +15,7 @@ const routes: Routes = [
     { path: 'find-job', component: FindJob },
     { path: 'job-analyse', component: JobAnalyse },
     { path: 'edit-profile', component: EditProfile },
+    {path : 'interview-preparation', component: InterviewPreparation },
 
     { path: '', redirectTo: 'find-job', pathMatch: 'full' } // Default child route
   ]},

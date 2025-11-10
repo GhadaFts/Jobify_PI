@@ -19,6 +19,8 @@ import { JobSeekerSidebar } from './dashboard/job-seeker-sidebar/job-seeker-side
 import { JobDetailsDialog } from './dashboard/find-job/job-card/job-details-dialog/job-details-dialog';
 import { ApplicationDialog } from './dashboard/find-job/job-card/application-dialog/application-dialog';
 import { EditProfile } from './dashboard/edit-profile/edit-profile';
+import { AppliedJobCard } from './dashboard/find-job/applied-job-card/applied-job-card';
+import { InterviewPreparation } from './dashboard/interview-preparation/interview-preparation';
 
 
 
@@ -35,6 +37,8 @@ import { EditProfile } from './dashboard/edit-profile/edit-profile';
     JobDetailsDialog,
     ApplicationDialog,
     EditProfile,
+    AppliedJobCard,
+    InterviewPreparation,
     
   ],
   imports: [

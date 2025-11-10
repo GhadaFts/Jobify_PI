@@ -33,6 +33,12 @@ export interface JobSeeker extends User {
   date_of_birth: string;
   gender: string;
 }
+export interface Recruiter extends User {
+  companyAddress: string;
+  domaine: string;
+  employees_number: number;
+  service: string[];
+}
 
 export interface Application {
   id: number;

@@ -71,15 +71,23 @@ Key skills highlighted based on job requirements.`;
   }
 
   handleSubmit() {
-    if (!this.generatedCV && !this.uploadedFile) {
-      alert('Please generate your CV or upload a file first');
-      return;
-    }
+  if (!this.generatedCV && !this.uploadedFile) {
+    // Utiliser le CV par défaut si aucun CV n'est fourni
+    const defaultCVUrl = '/assets/pdf/ghada.pdf';
     this.dialogRef.close({ 
       jobId: this.data.job.id, 
       generatedCV: this.generatedCV, 
       uploadedFile: this.uploadedFile,
       coverLetter: this.coverLetter 
     });
+    return;
   }
+
+  this.dialogRef.close({ 
+    jobId: this.data.job.id, 
+    generatedCV: this.generatedCV, 
+    uploadedFile: this.uploadedFile,
+    coverLetter: this.coverLetter 
+  });
+}
 }
