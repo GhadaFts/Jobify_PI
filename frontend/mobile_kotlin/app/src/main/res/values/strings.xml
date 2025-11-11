@@ -44,6 +44,13 @@
     <string name="startDate">Start Date</string>
     <string name="enddate">End Date</string>
     <string name="add_ed">Add</string>
+    <string name="add_item">Add Item</string>
+    <string name="enter_here">Enter here</string>
+    <string name="add">Add</string>
+    <string name="add_skill">Add Skill</string>
+    <string name="enter_skill">Enter skill</string>
+    <string name="save">Save</string>
+    <string name="your_platform_for_connecting_talent_with_opportunity">Your platform for connecting talent with opportunity</string>
 
     <!-- Add Experience Dialog -->
     <string name="add_expe">Add Experience</string>

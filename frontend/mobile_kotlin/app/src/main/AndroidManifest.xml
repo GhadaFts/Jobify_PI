@@ -36,7 +36,9 @@
             android:name=".RecruiterProfileActivity"
             android:exported="false" /> <!-- Other App Activities -->
         <activity android:name=".JobOpportunitiesActivity" />
-        <activity android:name=".PostsActivity" />
+        <activity 
+            android:name=".PostsActivity"
+        />
         <activity android:name=".AICareerAdvisorActivity" />
         <activity android:name=".CvCorrectionActivity" />
     </application>
