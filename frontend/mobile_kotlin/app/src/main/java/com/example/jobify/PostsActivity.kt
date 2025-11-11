@@ -2,110 +2,101 @@ package com.example.jobify
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import java.util.*
-class PostsActivity : AppCompatActivity(), AddPostDialogFragment.OnPostAddedListener {
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.example.jobify.ui.posts.PostsScreen
+import com.example.jobify.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
-    private lateinit var rvPosts: RecyclerView
-    private lateinit var btnAddPost: View
-    private lateinit var btnMenu: View
-    private lateinit var drawerLayout: DrawerLayout
-
-    private lateinit var menuHomeLayout: View
-    private lateinit var menuProfileLayout: View
-    private lateinit var menuLogoutLayout: View
-
-    private lateinit var postAdapter: PostAdapter
-    private val posts = mutableListOf<JobPost>()
-
+class PostsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_posts)
-
-        rvPosts = findViewById(R.id.rvPosts)
-        btnAddPost = findViewById(R.id.btnAddPost)
-        btnMenu = findViewById(R.id.btnMenu)
-        drawerLayout = findViewById(R.id.drawerLayout)
-
-        menuHomeLayout = findViewById(R.id.menuHomeLayout)
-        menuProfileLayout = findViewById(R.id.menuProfileLayout)
-        menuLogoutLayout = findViewById(R.id.menuLogoutLayout)
-
-        // Mock data
-        posts.addAll(
-            listOf(
-                JobPost(
-                    id = 1,
-                    title = "Android Developer",
-                    jobPosition = "Full Time",
-                    experience = "2 years",
-                    salary = "2000$",
-                    description = "Develop Android apps",
-                    type = "IT",
-                    createdAt = Date(),
-                    status = "Active",
-                    requirements = listOf("Bachelor in CS"),
-                    skills = listOf("Kotlin", "Java"),
-                    published = true
-                ),
-                JobPost(
-                    id = 2,
-                    title = "Backend Developer",
-                    jobPosition = "Full Time",
-                    experience = "3 years",
-                    salary = "2500$",
-                    description = "Develop APIs",
-                    type = "IT",
-                    createdAt = Date(),
-                    status = "Active",
-                    requirements = listOf("Bachelor in CS"),
-                    skills = listOf("Spring Boot", "SQL"),
-                    published = true
-                )
-            )
-        )
-
-        rvPosts.layoutManager = LinearLayoutManager(this)
-        postAdapter = PostAdapter(posts)
-        rvPosts.adapter = postAdapter
-
-        btnMenu.setOnClickListener {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
+        setContent {
+            AppTheme {
+                PostsApp()
             }
         }
+    }
+}
 
-        btnAddPost.setOnClickListener {
-            val dialog = AddPostDialogFragment()
-            dialog.show(supportFragmentManager, "AddPostDialog")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PostsApp() {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                NavigationDrawerContent {
+                    // Navigation logic
+                    when (it) {
+                        "Find Job" -> scope.launch { drawerState.close() }
+                        "Profile" -> context.startActivity(Intent(context, RecruiterProfileActivity::class.java))
+                        "Correct CV" -> context.startActivity(Intent(context, CvCorrectionActivity::class.java))
+                        "Log Out" -> {
+                            val intent = Intent(context, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
+                        }
+                    }
+                }
+            }
         }
-
-        menuHomeLayout.setOnClickListener {
-            startActivity(Intent(this, PostsActivity::class.java))
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        menuProfileLayout.setOnClickListener {
-            startActivity(Intent(this, RecruiterProfileActivity::class.java))
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        menuLogoutLayout.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            drawerLayout.closeDrawer(GravityCompat.START)
+    ) {
+        Scaffold(
+            containerColor = Color(0xFFF0F2F5), // Light grey background
+            topBar = {
+                TopAppBar(
+                    title = { Text("Job Postings") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            PostsScreen(modifier = Modifier.padding(paddingValues))
         }
     }
+}
 
-    override fun onPostAdded(post: JobPost) {
-        posts.add(post)
-        postAdapter.notifyItemInserted(posts.size - 1)
-        rvPosts.scrollToPosition(posts.size - 1)
+@Composable
+private fun NavigationDrawerContent(onItemClick: (String) -> Unit) {
+    Column {
+        NavigationDrawerItem(
+            label = { Text("Find Job") },
+            selected = true,
+            onClick = { onItemClick("Find Job") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Profile") },
+            selected = false,
+            onClick = { onItemClick("Profile") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Correct CV") },
+            selected = false,
+            onClick = { onItemClick("Correct CV") }
+        )
+        HorizontalDivider()
+        NavigationDrawerItem(
+            label = { Text("Log Out") },
+            selected = false,
+            onClick = { onItemClick("Log Out") }
+        )
     }
 }
