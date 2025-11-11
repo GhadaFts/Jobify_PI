@@ -1,1 +1,114 @@
-<p>interview-preparation works!</p>
+<!-- interview-preparation.html -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-100 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- En-tête -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        🤝 Préparation Entretien
+      </h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Votre coach IA personnel vous guide pas à pas pour réussir vos entretiens
+      </p>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <app-chat></app-chat>
+    </div>
+
+    <!-- Informations supplémentaires -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div class="bg-white rounded-2xl p-6 shadow-lg border border-blue-100">
+        <div class="text-blue-500 text-lg font-semibold mb-2">🎯 Objectif</div>
+        <p class="text-gray-600">Préparation personnalisée selon votre profil et le poste visé</p>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-lg border border-green-100">
+        <div class="text-green-500 text-lg font-semibold mb-2">💡 Conseil</div>
+        <p class="text-gray-600">Réponses analysées et conseils pratiques en temps réel</p>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-lg border border-purple-100">
+        <div class="text-purple-500 text-lg font-semibold mb-2">🚀 Résultat</div>
+        <p class="text-gray-600">Augmentez vos chances de succès grâce à une préparation optimale</p>
+      </div>
+    </div>
+
+    <!-- Section Téléchargement PDF -->
+    <div class="mt-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-2xl overflow-hidden">
+      <div class="p-8 md:p-12 text-center text-white">
+        <div class="max-w-3xl mx-auto">
+          <!-- Icône et titre -->
+          <div class="flex justify-center mb-6">
+            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <h2 class="text-3xl font-bold mb-4">📚 Guide Complet des Questions d'Entretien</h2>
+          <p class="text-blue-100 text-lg mb-6 leading-relaxed">
+            Téléchargez notre guide PDF contenant <span class="font-semibold text-white">50+ questions types</span> 
+            classées par catégorie, avec des conseils pour y répondre efficacement.
+          </p>
+          
+          <!-- Liste des avantages -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-blue-100">Questions techniques et comportementales</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-blue-100">Exemples de réponses structurées</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-blue-100">Conseils par type de poste</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-blue-100">Checklist de préparation</span>
+            </div>
+          </div>
+
+          <!-- Bouton de téléchargement -->
+          <a 
+            href="assets/pdf/entretien.pdf" 
+            download="Guide-Questions-Entretien-Jobify.pdf"
+            class="inline-flex items-center space-x-3 bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Télécharger le Guide PDF (gratuit)</span>
+          </a>
+
+          <!-- Info supplémentaire -->
+          <p class="text-blue-200 text-sm mt-4">
+            📄 Format PDF • 15 pages • Mise à jour régulière
+          </p>
+        </div>
+      </div>
+    </div>
+
+    
+  </div>
+</div>
