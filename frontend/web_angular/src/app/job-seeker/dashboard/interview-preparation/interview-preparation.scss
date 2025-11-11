@@ -1,0 +1,22 @@
+/* interview-preparation.component.css */
+.interview-page {
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbot-section {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+app-chatbot-3d {
+  flex: 0 0 300px; /* Largeur fixe pour le chatbot */
+}
+
+app-chat-interface {
+  flex: 1; /* Prend le reste de l'espace */
+}
