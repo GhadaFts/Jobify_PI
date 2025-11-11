@@ -3,8 +3,11 @@ package com.example.jobify
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -49,8 +52,13 @@ class JobOpportunitiesActivity : AppCompatActivity() {
         }
 
         findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
+            // Close drawer first
             drawerLayout.closeDrawer(GravityCompat.START)
-            finish()
+
+            // Perform logout after drawer closes
+            Handler(Looper.getMainLooper()).postDelayed({
+                performLogout()
+            }, 250)
         }
 
         findViewById<LinearLayout>(R.id.menuHelpLayout).setOnClickListener {
@@ -69,6 +77,28 @@ class JobOpportunitiesActivity : AppCompatActivity() {
 
         loadFakeJobs()
         loadSavedPosts() // ✅ زيدنا هذا السطر
+    }
+    private fun performLogout() {
+        try {
+            // Clear session
+            val sessionManager = SessionManager(this)
+            sessionManager.clearSession()
+
+            // Show logout message
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // Navigate to MainActivity (splash) which will redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+
+            // Finish current activity
+            finishAffinity() // This ensures all activities are cleared
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Logout error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun loadFakeJobs() {
