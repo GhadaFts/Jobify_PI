@@ -6,7 +6,7 @@ import { ProfileInitial} from './profile-initial/profile-initial';
 import { RecruiterRoutingModule } from './recruiter-routing-module';
 import { RecruiterDashboard } from './dashboard/dashboard';
 import { PublishJob } from './dashboard/publish-job/publish-job';
-import { EditProfile } from './dashboard/edit-profile/edit-profile';
+import { EditProfileRecruiter } from './dashboard/edit-profile/edit-profile';
 import { SharedModule } from '../shared/shared-module';
 import { RecruiterSidebar } from './dashboard/recruiter-sidebar/recruiter-sidebar';
 import { JobCardRecruiter } from './dashboard/publish-job/job-card-recruiter/job-card-recruiter';
@@ -15,13 +15,17 @@ import { EditJobDialog } from './dashboard/publish-job/job-card-recruiter/edit-j
 import { ApplicationDetailsDialog } from './dashboard/publish-job/job-card-recruiter/application-details-dialog/application-details-dialog';
 import { InterviewScheduleDialog } from './dashboard/publish-job/job-card-recruiter/interview-schedule-dialog/interview-schedule-dialog';
 import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/take-action-dialog/take-action-dialog';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { Interviews } from './dashboard/interviews/interviews';
+import { InterviewCard } from './dashboard/interviews/interview-card/interview-card';
+
 
 @NgModule({
   declarations: [
     ProfileInitial,
     RecruiterDashboard,
     PublishJob,
-    EditProfile,
+    EditProfileRecruiter,
     RecruiterSidebar,
     JobCardRecruiter,
     RecruiterJobDetailsDialog,
@@ -29,13 +33,16 @@ import { TakeActionDialog } from './dashboard/publish-job/job-card-recruiter/tak
     ApplicationDetailsDialog,
     InterviewScheduleDialog,
     TakeActionDialog,
+    Interviews,
+    InterviewCard,
   ],
   imports: [
     CommonModule,
     FormsModule, // Add this for template-driven forms
     FontAwesomeModule, // Add this for FontAwesome icons
     RecruiterRoutingModule,
-    SharedModule
+    SharedModule,
+    PdfViewerModule,
     
     // Add SharedModule if needed for ToastService or other shared components
   ],

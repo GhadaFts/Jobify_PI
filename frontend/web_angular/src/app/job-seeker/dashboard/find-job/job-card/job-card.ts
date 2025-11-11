@@ -14,8 +14,13 @@ export class JobCard {
   @Input() job!: JobOffer;
   @Input() applied: boolean = false;
   @Input() bookmarked: boolean = false;
-  @Output() apply = new EventEmitter<string>();
-  @Output() bookmark = new EventEmitter<string>();
+@Output() apply = new EventEmitter<{
+    jobId: string;
+    generatedCV?: string;
+    uploadedFile?: File;
+    coverLetter?: string;
+  }>(); 
+    @Output() bookmark = new EventEmitter<string>();
 
   constructor(public dialog: MatDialog) {}
 
@@ -44,17 +49,23 @@ export class JobCard {
   }
 
   openApplyModal(job: JobOffer) {
-    const dialogRef = this.dialog.open(ApplicationDialog, {
-      width: '700px',
-      data: { job, profile: { /* Mock user profile data */ } },
-    });
+  const dialogRef = this.dialog.open(ApplicationDialog, {
+    width: '700px',
+    data: { job, profile: { /* Mock user profile data */ } },
+  });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.apply.emit(job.id); // Emit apply event after submitting application
-      }
-    });
-  }
+  dialogRef.afterClosed().subscribe((result: any) => {
+    if (result) {
+      // Émettre les données de candidature complètes
+      this.apply.emit({
+        jobId: job.id,
+        generatedCV: result.generatedCV,
+        uploadedFile: result.uploadedFile,
+        coverLetter: result.coverLetter
+      });
+    }
+  });
+}
 
   formatCount(count: number): string {
     return count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count.toString();

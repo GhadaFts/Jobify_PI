@@ -1,4 +1,4 @@
-<div class="p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
+<div class="p-6 max-w-7xl max-h-[90vh] overflow-y-auto">
   <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-bold text-gray-900">Détails de la Candidature</h2>
     <button
@@ -12,12 +12,12 @@
   </div>
 
   <div class="bg-white rounded-lg">
-    <!-- Informations du candidat -->
+    <!-- En-tête avec photo et statut -->
     <div class="flex items-start gap-6 mb-8">
       <img
-        [src]="data.application.jobSeeker.photo_profil"
+        [src]="data.application.jobSeeker.photo_profil || '/assets/default-avatar.png'"
         [alt]="data.application.jobSeeker.fullName"
-        class="w-20 h-20 rounded-full object-cover"
+        class="w-20 h-20 rounded-full object-cover border border-gray-200"
       />
       <div class="flex-1">
         <div class="flex items-center gap-3 mb-2">
@@ -35,133 +35,215 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
       <!-- Colonne gauche - Informations personnelles -->
-      <div class="space-y-6">
-        <div>
-          <h4 class="font-semibold text-gray-900 mb-3">Informations Personnelles</h4>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Email:</span>
-              <span class="text-gray-900">{{ data.application.jobSeeker.email }}</span>
+      <div class="xl:col-span-1 space-y-6">
+        <!-- Informations de contact -->
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 class="font-semibold text-gray-900 mb-3">Informations de Contact</h4>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span class="text-gray-900 break-all">{{ data.application.jobSeeker.email }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Date de naissance:</span>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
               <span class="text-gray-900">
                 {{ formatDate(data.application.jobSeeker.date_of_birth) }}
               </span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Genre:</span>
-              <span class="text-gray-900">{{ data.application.jobSeeker.gender }}</span>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <span class="text-gray-900">{{ data.application.jobSeeker.gender || 'Non spécifié' }}</span>
             </div>
           </div>
         </div>
 
-        <div>
-          <h4 class="font-semibold text-gray-900 mb-3">Compétences</h4>
-          <div class="flex flex-wrap gap-2">
-            <span
-              *ngFor="let skill of data.application.jobSeeker.skills"
-              class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-            >
-              {{ skill }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Colonne droite - Candidature -->
-      <div class="space-y-6">
-        <div>
+        <!-- Détails de la candidature -->
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <h4 class="font-semibold text-gray-900 mb-3">Détails de la Candidature</h4>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">
               <span class="text-gray-600">Date de candidature:</span>
               <span class="text-gray-900">{{ formatDate(data.application.applicationDate) }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">CV:</span>
+          </div>
+        </div>
+
+        <!-- Compétences -->
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 class="font-semibold text-gray-900 mb-3">Compétences</h4>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let skill of data.application.jobSeeker.skills"
+              class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full border border-blue-200"
+            >
+              {{ skill }}
+            </span>
+            <span *ngIf="!data.application.jobSeeker.skills?.length" class="text-gray-500 text-sm">
+              Aucune compétence spécifiée
+            </span>
+          </div>
+        </div>
+
+        <!-- Liens sociaux -->
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h4 class="font-semibold text-gray-900 mb-3">Liens Sociaux</h4>
+          <div class="flex flex-col gap-2">
+            <a
+              *ngIf="data.application.jobSeeker.github_link"
+              [href]="data.application.jobSeeker.github_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              GitHub
+            </a>
+            <a
+              *ngIf="data.application.jobSeeker.web_link"
+              [href]="data.application.jobSeeker.web_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0 9c-5 0-9-4-9-9s4-9 9-9"/>
+              </svg>
+              Site Web
+            </a>
+            <span *ngIf="!data.application.jobSeeker.github_link && !data.application.jobSeeker.web_link" class="text-gray-500 text-sm">
+              Aucun lien social spécifié
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne centrale - Visionneuse PDF -->
+      <div class="xl:col-span-2">
+        <div class="bg-gray-50 rounded-lg border border-gray-200">
+          <!-- En-tête du PDF -->
+          <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-white rounded-t-lg">
+            <h4 class="font-semibold text-gray-900">Curriculum Vitae</h4>
+            <div class="flex items-center gap-3">
+              <!-- Contrôles de navigation -->
+              <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-2 py-1">
+                <button 
+                  class="p-1 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  (click)="previousPage()"
+                  [disabled]="currentPage === 1"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                  </svg>
+                </button>
+                <span class="text-sm text-gray-600 mx-2">
+                  Page <span class="font-medium">{{ currentPage }}</span> sur {{ totalPages || 1 }}
+                </span>
+                <button 
+                  class="p-1 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  (click)="nextPage()"
+                  [disabled]="currentPage === totalPages"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Bouton télécharger -->
               <a
-                [href]="data.application.cv_link"
-                class="text-blue-600 hover:text-blue-800 underline"
-                target="_blank"
-                rel="noopener noreferrer"
+                [href]="pdfUrl"
+                download
+                class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
               >
-                Télécharger le CV
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Télécharger
               </a>
+            </div>
+          </div>
+
+          <!-- Visionneuse PDF -->
+          <div class="p-4 bg-white">
+            <div class="overflow-y-auto border border-gray-300 rounded-lg bg-white " style="height: 600px; ">
+              <pdf-viewer
+                [src]="pdfUrl"
+                [render-text]="true"
+                [original-size]="false"
+                [show-all]="false"
+                [page]="currentPage"
+                [zoom]="0.8"
+                style="width: 100%; height: 100%; display: block;"
+                (after-load-complete)="onPdfLoad($event)"
+                (error)="onPdfError($event)"
+              ></pdf-viewer>
             </div>
           </div>
         </div>
 
-        <div>
+        <!-- Lettre de motivation -->
+        <div class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
           <h4 class="font-semibold text-gray-900 mb-3">Lettre de Motivation</h4>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <p class="text-gray-700 text-sm leading-relaxed">
-              {{ data.application.motivation_lettre }}
+          <div class="bg-white p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
+            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {{ data.application.motivation_lettre || 'Aucune lettre de motivation fournie.' }}
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Expérience Professionnelle -->
-    <div class="mt-8 pt-6 border-t border-gray-200">
-      <h4 class="font-semibold text-gray-900 mb-4">Expérience Professionnelle</h4>
-      <div class="space-y-4">
-        <div 
-          *ngFor="let exp of data.application.jobSeeker.experience"
-          class="p-4 bg-gray-50 rounded-lg"
-        >
-          <div class="flex justify-between items-start mb-2">
-            <h5 class="font-medium text-gray-900">{{ exp.position }}</h5>
-            <span class="text-sm text-gray-500">{{ getExperiencePeriod(exp) }}</span>
+    <!-- Expérience et Éducation -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 pt-6 border-t border-gray-200">
+      <!-- Expérience Professionnelle -->
+      <div>
+        <h4 class="font-semibold text-gray-900 mb-4">Expérience Professionnelle</h4>
+        <div class="space-y-4">
+          <div 
+            *ngFor="let exp of data.application.jobSeeker.experience; let i = index"
+            class="p-4 bg-gray-50 rounded-lg border border-gray-200"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <h5 class="font-medium text-gray-900">{{ exp.position || 'Poste non spécifié' }}</h5>
+              <span class="text-sm text-gray-500 whitespace-nowrap ml-2">{{ getExperiencePeriod(exp) }}</span>
+            </div>
+            <p class="text-sm text-gray-700 mb-2">{{ exp.company || 'Entreprise non spécifiée' }}</p>
+            <p class="text-sm text-gray-600">{{ exp.description || 'Aucune description fournie.' }}</p>
           </div>
-          <p class="text-sm text-gray-700 mb-2">{{ exp.company }}</p>
-          <p class="text-sm text-gray-600">{{ exp.description }}</p>
+          <div *ngIf="!data.application.jobSeeker.experience?.length" class="p-4 bg-gray-50 rounded-lg border border-gray-200 text-gray-500 text-sm">
+            Aucune expérience professionnelle spécifiée
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Éducation -->
-    <div class="mt-6 pt-6 border-t border-gray-200">
-      <h4 class="font-semibold text-gray-900 mb-4">Éducation</h4>
-      <div class="space-y-4">
-        <div 
-          *ngFor="let edu of data.application.jobSeeker.education"
-          class="p-4 bg-gray-50 rounded-lg"
-        >
-          <div class="flex justify-between items-start mb-2">
-            <h5 class="font-medium text-gray-900">{{ edu.degree }} en {{ edu.field }}</h5>
-            <span class="text-sm text-gray-500">{{ formatDate(edu.graduationDate) }}</span>
+      <!-- Éducation -->
+      <div>
+        <h4 class="font-semibold text-gray-900 mb-4">Éducation</h4>
+        <div class="space-y-4">
+          <div 
+            *ngFor="let edu of data.application.jobSeeker.education"
+            class="p-4 bg-gray-50 rounded-lg border border-gray-200"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <h5 class="font-medium text-gray-900">{{ edu.degree || 'Diplôme' }} en {{ edu.field || 'Domaine non spécifié' }}</h5>
+              <span class="text-sm text-gray-500 whitespace-nowrap ml-2">{{ formatDate(edu.graduationDate) }}</span>
+            </div>
+            <p class="text-sm text-gray-700">{{ edu.school || 'Établissement non spécifié' }}</p>
           </div>
-          <p class="text-sm text-gray-700">{{ edu.school }}</p>
+          <div *ngIf="!data.application.jobSeeker.education?.length" class="p-4 bg-gray-50 rounded-lg border border-gray-200 text-gray-500 text-sm">
+            Aucune formation spécifiée
+          </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Liens sociaux -->
-    <div class="mt-8 pt-6 border-t border-gray-200">
-      <h4 class="font-semibold text-gray-900 mb-3">Liens Sociaux</h4>
-      <div class="flex gap-4">
-        <a
-          *ngIf="data.application.jobSeeker.github_link"
-          [href]="data.application.jobSeeker.github_link"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          GitHub
-        </a>
-        <a
-          *ngIf="data.application.jobSeeker.web_link"
-          [href]="data.application.jobSeeker.web_link"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          Site Web
-        </a>
       </div>
     </div>
   </div>
@@ -169,11 +251,11 @@
   <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
     <button
       (click)="close()"
-      class="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+      class="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 border border-gray-300"
     >
       Fermer
     </button>
-    <button class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+    <button class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 border border-blue-600">
       Contacter le candidat
     </button>
   </div>

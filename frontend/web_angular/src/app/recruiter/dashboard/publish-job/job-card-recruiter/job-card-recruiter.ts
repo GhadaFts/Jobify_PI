@@ -6,6 +6,10 @@ import { EditJobDialog } from './edit-job-dialog/edit-job-dialog';
 import { ApplicationDetailsDialog } from './application-details-dialog/application-details-dialog';
 import { InterviewScheduleDialog } from './interview-schedule-dialog/interview-schedule-dialog';
 import { TakeActionDialog } from './take-action-dialog/take-action-dialog';
+import { ToastService } from '../../../../services/toast.service'; // Assurez-vous d'avoir ce service
+import { InterviewsService } from '../../../../services/interviews.service';
+
+
 
 @Component({
   selector: 'app-recruiter-job-card',
@@ -28,7 +32,11 @@ export class JobCardRecruiter {
   showFavoritesOnly = false;
   isRanking = false; // Pour l'animation de chargement
 
-  constructor(public dialog: MatDialog) {}
+constructor(
+    public dialog: MatDialog,
+    private interviewsService: InterviewsService,
+    private toastService: ToastService
+  ) {}
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
@@ -94,23 +102,23 @@ export class JobCardRecruiter {
   }
 
   openApplicationDetails(application: Application): void {
-    if (application.status === 'new') {
-      this.scheduleStatusChange(application.id);
-    }
-
-    const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
-      width: '800px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
-      data: { application }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (this.statusChangeTimeout) {
-        clearTimeout(this.statusChangeTimeout);
-      }
-    });
+  if (application.status === 'new') {
+    this.scheduleStatusChange(application.id);
   }
+
+  const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
+    width: '80vw', // Changé de 800px à 95vw
+    maxWidth: '1800px', // Ajouté
+    maxHeight: '90vh',
+    data: { application }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (this.statusChangeTimeout) {
+      clearTimeout(this.statusChangeTimeout);
+    }
+  });
+}
 
   private scheduleStatusChange(applicationId: number): void {
     this.statusChangeTimeout = setTimeout(() => {
@@ -121,23 +129,35 @@ export class JobCardRecruiter {
     }, 20000);
   }
 
-  openInterviewSchedule(application: Application): void {
+ openInterviewSchedule(application: Application): void {
     const dialogRef = this.dialog.open(InterviewScheduleDialog, {
       width: '500px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       data: { application }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
+        // Mettre à jour le statut de l'application
         this.applicationStatusChange.emit({
           applicationId: application.id,
           newStatus: 'interview_scheduled',
           interviewData: result
         });
+
+        // Ajouter l'interview au service
+        this.interviewsService.addInterview({ application, ...result });
+
+        // Afficher le toast de succès
+        this.toastService.success(
+          'Interview has been scheduled successfully.'
+        );
+
+        console.log('Interview scheduled and added to list:', result);
       }
     });
   }
-
   openTakeAction(application: Application): void {
     const dialogRef = this.dialog.open(TakeActionDialog, {
       width: '500px',

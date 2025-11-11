@@ -1,47 +1,114 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Application } from '../../../../../types';
+import { InterviewsService } from '../../../../../services/interviews.service';
+import { ToastService } from '../../../../../services/toast.service';
 
 @Component({
   selector: 'app-interview-schedule-dialog',
-  templateUrl: './interview-schedule-dialog.html',
   standalone: false,
+  templateUrl: './interview-schedule-dialog.html',
+  styleUrls: ['./interview-schedule-dialog.scss']
 })
 export class InterviewScheduleDialog {
-  interviewData = {
-    interviewDate: '',
-    interviewTime: '',
-    location: '',
-    additionalNotes: '',
-    duration: '1 hour',
-    interviewType: 'video_call'
-  };
-
-  interviewTypes = [
-    { value: 'video_call', label: 'Appel vidéo' },
-    { value: 'in_person', label: 'En personne' },
-    { value: 'phone_call', label: 'Appel téléphonique' }
-  ];
-
-  durations = [
-    { value: '30 minutes', label: '30 minutes' },
-    { value: '1 hour', label: '1 heure' },
-    { value: '1.5 hours', label: '1 heure 30' },
-    { value: '2 hours', label: '2 heures' }
-  ];
+  interviewDate: string = '';
+  interviewTime: string = '';
+  interviewType: string = 'local';
+  interviewLocation: string = '';
+  additionalNotes: string = '';
+  meetingLink: string = '';
+  duration: number = 60;
+  
+  timeConflict: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<InterviewScheduleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { application: Application }
+    @Inject(MAT_DIALOG_DATA) public data: { application: Application },
+    private interviewsService: InterviewsService,
+    private toastService: ToastService
   ) {}
 
-  submit(): void {
-    if (this.interviewData.interviewDate && this.interviewData.interviewTime && this.interviewData.location) {
-      this.dialogRef.close(this.interviewData);
+  get isOnlineInterview(): boolean {
+    return this.interviewType === 'online';
+  }
+
+  // Vérifier les conflits en temps réel
+  checkTimeConflict(): void {
+    if (!this.interviewDate || !this.interviewTime) {
+      this.timeConflict = false;
+      return;
+    }
+
+    this.timeConflict = this.interviewsService.checkTimeConflict(
+      this.interviewDate, 
+      this.interviewTime, 
+      this.duration
+    );
+  }
+
+  onDateChange(): void {
+    this.checkTimeConflict();
+  }
+
+  onTimeChange(): void {
+    this.checkTimeConflict();
+  }
+
+  onDurationChange(): void {
+    this.checkTimeConflict();
+  }
+
+  onInterviewTypeChange(): void {
+    if (this.isOnlineInterview) {
+      this.interviewLocation = 'Jitsi Meet';
+      this.generateJitsiLink();
+    } else {
+      this.interviewLocation = '';
+      this.meetingLink = '';
     }
   }
 
-  close(): void {
+  generateJitsiLink(): void {
+    const roomName = `interview-${this.data.application.jobSeeker.fullName.toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-6)}`;
+    this.meetingLink = `https://meet.jit.si/${roomName}`;
+  }
+
+  getTomorrowDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+
+  submit(): void {
+    if (this.timeConflict) {
+      this.toastService.error('Please choose a different time to avoid schedule conflict.');
+      return;
+    }
+
+    if (!this.interviewDate || !this.interviewTime || !this.interviewLocation) {
+      this.toastService.error('Please fill all required fields.');
+      return;
+    }
+
+    if (this.isOnlineInterview && !this.meetingLink) {
+      this.toastService.error('Please generate a meeting link for online interviews.');
+      return;
+    }
+
+    const result = {
+      interviewDate: this.interviewDate,
+      interviewTime: this.interviewTime,
+      interviewType: this.interviewType,
+      interviewLocation: this.interviewLocation,
+      additionalNotes: this.additionalNotes,
+      meetingLink: this.meetingLink,
+      duration: this.duration
+    };
+
+    this.dialogRef.close(result);
+  }
+
+  cancel(): void {
     this.dialogRef.close();
   }
 }

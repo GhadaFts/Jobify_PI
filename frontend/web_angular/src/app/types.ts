@@ -33,6 +33,12 @@ export interface JobSeeker extends User {
   date_of_birth: string;
   gender: string;
 }
+export interface Recruiter extends User {
+  companyAddress: string;
+  domaine: string;
+  employees_number: number;
+  service: string[];
+}
 
 export interface Application {
   id: number;
@@ -78,4 +84,24 @@ export interface JobOffer {
   status: string;
   published: boolean;
   applications?: Application[];
+}
+export interface Interview {
+  id: string;
+  candidateName: string;
+  candidateTitle: string;
+  candidatePhoto: string;
+  jobOfferTitle: string;
+  jobOfferId: string;
+  applicationId: number;
+  interviewDate: string; // ISO string
+  interviewTime: string;
+  interviewDuration: number; // in minutes
+  interviewType: string;
+  interviewLocation: string;
+  interviewStatus: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  interviewer: string;
+  notes?: string;
+  meetingLink?: string;
+  rating?: number;
+  feedback?: string;
 }

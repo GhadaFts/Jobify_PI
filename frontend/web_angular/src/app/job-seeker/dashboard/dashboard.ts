@@ -17,6 +17,8 @@ export class Dashboard {
     { id: 'find-job', label: 'Find Job' },
     { id: 'cv-correction', label: 'CV Correction' },
     { id: 'job-analyse', label: 'Job Analyse' },
+    { id: 'interview-preparation', label: 'Interview Preparation' },
+
   ];
 
   secondaryNavItems: NavigationItem[] = [

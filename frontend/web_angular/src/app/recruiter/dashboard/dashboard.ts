@@ -11,9 +11,10 @@ export class RecruiterDashboard {
   activeSection = 'publish-job';
 
   navItems = [
-    { id: 'publish-job', label: 'Publish Job' },
-    
-  ];
+  { id: 'publish-job', label: 'Publish Job' },
+  { id: 'interviews', label: 'Interviews' },
+
+];
 
   secondaryNavItems = [
     { id: 'edit-profile', label: 'Settings' },

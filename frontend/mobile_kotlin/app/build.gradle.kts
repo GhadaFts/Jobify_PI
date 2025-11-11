@@ -1,8 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose.compiler)
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
+}
+
+// Read the local.properties file
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -11,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.jobify"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -20,6 +31,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Expose the API key from local.properties as a build configuration field
+        val apiKey = localProperties.getProperty("GEMINI_API_KEY", "").replace("\"", "")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {
@@ -45,6 +60,14 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    packagingOptions {
+        exclude("META-INF/LICENSE")
+        exclude("META-INF/NOTICE")
+        exclude("META-INF/DEPENDENCIES")
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -88,11 +111,25 @@ dependencies {
     // For Instant serialization
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
+    // Google GenAI SDK
+    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+
+    // iText for PDF text extraction
+    implementation("com.itextpdf:itextg:5.5.10")
+
+    // OkHttp
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+
+    // Coroutines for async calls
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Lifecycle scope
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+
     // Unit Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
 }
-
 // Cache-busting comment to force a full project sync
