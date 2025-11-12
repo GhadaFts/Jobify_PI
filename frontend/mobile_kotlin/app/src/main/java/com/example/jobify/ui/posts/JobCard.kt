@@ -63,6 +63,10 @@ fun JobCard(
 ) {
     var isPublishing by remember { mutableStateOf(false) }
     var isApplicantsExpanded by remember { mutableStateOf(false) }
+    var selectedApplicant by remember { mutableStateOf<com.example.jobify.model.Applicant?>(null) }
+    var favoriteApplicants by remember { mutableStateOf(setOf<String>()) }
+    var underReviewApplicants by remember { mutableStateOf(setOf<String>()) }
+    var currentJob by remember { mutableStateOf(job) }
 
     Card(
         modifier = Modifier
@@ -142,13 +146,157 @@ fun JobCard(
             }
 
             // Expandable Applicants Section
-            if (isApplicantsExpanded && job.applicants.isNotEmpty()) {
+            if (isApplicantsExpanded && currentJob.applicants.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 ApplicantsSection(
-                    applicants = job.applicants,
-                    onApplicantClick = { /* TODO: Handle applicant click */ },
+                    applicants = currentJob.applicants,
+                    onApplicantClick = { applicant -> selectedApplicant = applicant },
                     onInterviewClick = { /* TODO: Handle interview scheduling */ },
-                    onFavoriteClick = { /* TODO: Toggle favorite */ }
+                    onFavoriteClick = { applicant ->
+                        // Toggle favorite
+                        favoriteApplicants = if (applicant.id in favoriteApplicants) {
+                            favoriteApplicants - applicant.id
+                        } else {
+                            favoriteApplicants + applicant.id
+                        }
+                    },
+                    favoriteApplicants = favoriteApplicants,
+                    underReviewApplicants = underReviewApplicants,
+                    onActionClick = { applicant ->
+                        // TODO: Handle action click
+                    },
+                    onActionAccepted = { applicant ->
+                        // Update applicant to accepted
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == applicant.id) {
+                                app.copy(status = "accepted", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
+                        underReviewApplicants = underReviewApplicants - applicant.id
+                    },
+                    onActionRejected = { applicant ->
+                        // Update applicant to rejected
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == applicant.id) {
+                                app.copy(status = "rejected", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
+                        underReviewApplicants = underReviewApplicants - applicant.id
+                    }
+                )
+            }
+
+            // Show applicant detail dialog
+            selectedApplicant?.let { selectedApplicantItem ->
+                // Get the current version of the applicant from the job to reflect any status changes
+                val currentApplicant = currentJob.applicants.find { it.id == selectedApplicantItem.id } ?: selectedApplicantItem
+
+                // For now, we'll use a simple mapping - in real app, this would come from API/full profile
+                val profile = com.example.jobify.model.ApplicantProfile(
+                    id = currentApplicant.id,
+                    name = currentApplicant.name,
+                    title = currentApplicant.title,
+                    location = "Morocco",
+                    phoneNumber = "+212 612-345678",
+                    email = "${currentApplicant.name.lowercase().replace(" ", ".")}@email.com",
+                    dateOfBirth = "May 15, 1990",
+                    gender = "Male",
+                    profileImageUrl = null,
+                    cvUrl = "dummy.pdf",
+                    motivationLetter = "I am very interested in this frontend developer position. With my extensive experience in React and Node.js, I believe I can contribute significantly to your team.",
+                    skills = listOf("React", "TypeScript", "Next.js", "CSS", "Node.js"),
+                    experience = listOf(
+                        com.example.jobify.model.Experience(
+                            id = "exp1",
+                            jobTitle = "Tech Lead",
+                            company = "XYZ Company",
+                            startDate = "January 1, 2020",
+                            endDate = "January 1, 2024",
+                            description = "Led a team of 5 developers on React/Node.js projects"
+                        ),
+                        com.example.jobify.model.Experience(
+                            id = "exp2",
+                            jobTitle = "Frontend Developer",
+                            company = "ABC Corp",
+                            startDate = "January 1, 2018",
+                            endDate = "January 1, 2020",
+                            description = "Web application development with React and Redux"
+                        )
+                    ),
+                    education = listOf(
+                        com.example.jobify.model.Education(
+                            id = "edu1",
+                            degree = "Master in Computer Science",
+                            institution = "Hassan II University",
+                            graduationDate = "June 1, 2018"
+                        ),
+                        com.example.jobify.model.Education(
+                            id = "edu2",
+                            degree = "Bachelor in Software Engineering",
+                            institution = "ENSA Marrakech",
+                            graduationDate = "June 1, 2016"
+                        )
+                    ),
+                    githubUrl = "github.com/user",
+                    websiteUrl = "portfolio.com",
+                    isNew = currentApplicant.isNew,
+                    appliedDate = currentApplicant.appliedDate
+                )
+
+                ApplicantDetailDialog(
+                    applicantProfile = profile,
+                    onDismiss = { selectedApplicant = null },
+                    onContactClick = { /* TODO: Handle contact */ },
+                    isUnderReviewStatus = selectedApplicantItem.id in underReviewApplicants,
+                    onStatusChanged = { newStatus ->
+                        // Update the applicant status to "Under Review"
+                        // Add the applicant ID to underReviewApplicants set
+                        if (newStatus == "Under Review") {
+                            underReviewApplicants = underReviewApplicants + selectedApplicantItem.id
+
+                            // Update the applicant in the job's applicants list
+                            val updatedApplicants = currentJob.applicants.map { app ->
+                                if (app.id == selectedApplicantItem.id) {
+                                    app.copy(status = "under_review", isNew = false)
+                                } else {
+                                    app
+                                }
+                            }
+                            currentJob = currentJob.copy(applicants = updatedApplicants)
+                        }
+                    },
+                    onActionAccepted = {
+                        // Update applicant to accepted
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == selectedApplicantItem.id) {
+                                app.copy(status = "accepted", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
+                        underReviewApplicants = underReviewApplicants - selectedApplicantItem.id
+                        selectedApplicant = null // Close the dialog
+                    },
+                    onActionRejected = {
+                        // Update applicant to rejected
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == selectedApplicantItem.id) {
+                                app.copy(status = "rejected", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
+                        underReviewApplicants = underReviewApplicants - selectedApplicantItem.id
+                        selectedApplicant = null // Close the dialog
+                    }
                 )
             }
 
