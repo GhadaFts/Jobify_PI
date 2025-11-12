@@ -21,6 +21,9 @@ import { ApplicationDialog } from './dashboard/find-job/job-card/application-dia
 import { EditProfile } from './dashboard/edit-profile/edit-profile';
 import { AppliedJobCard } from './dashboard/find-job/applied-job-card/applied-job-card';
 import { InterviewPreparation } from './dashboard/interview-preparation/interview-preparation';
+import { ChatbotLogo } from './dashboard/interview-preparation/chatbot-logo/chatbot-logo';
+import { Chat } from './dashboard/interview-preparation/chat/chat';
+
 
 
 
@@ -39,6 +42,9 @@ import { InterviewPreparation } from './dashboard/interview-preparation/intervie
     EditProfile,
     AppliedJobCard,
     InterviewPreparation,
+    ChatbotLogo,
+    Chat,
+    
     
   ],
   imports: [
@@ -49,7 +55,7 @@ import { InterviewPreparation } from './dashboard/interview-preparation/intervie
     MatDialogModule,
     LucideAngularModule,  
     FontAwesomeModule,
-    LucideAngularModule.pick({ Camera , Save , Plus , X , Trash2 })
+    LucideAngularModule.pick({ Camera , Save , Plus , X , Trash2 }),
   ]
 })
 export class JobSeekerModule { }

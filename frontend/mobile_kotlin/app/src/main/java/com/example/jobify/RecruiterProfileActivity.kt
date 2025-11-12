@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -36,8 +38,13 @@ class RecruiterProfileActivity : AppCompatActivity() {
             startActivity(Intent(this, RecruiterProfileActivity::class.java))
         }
         menuLogout.setOnClickListener {
+            // Close drawer first
             drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, MainActivity::class.java))
+
+            // Perform logout after drawer closes
+            Handler(Looper.getMainLooper()).postDelayed({
+                performLogout()
+            }, 250)
         }
 
         findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
@@ -45,4 +52,27 @@ class RecruiterProfileActivity : AppCompatActivity() {
         }
 
     }
+    private fun performLogout() {
+        try {
+            // Clear session
+            val sessionManager = SessionManager(this)
+            sessionManager.clearSession()
+
+            // Show logout message
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // Navigate to MainActivity (splash) which will redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+
+            // Finish current activity
+            finishAffinity() // This ensures all activities are cleared
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Logout error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
 }

@@ -1,0 +1,50 @@
+<div 
+      class="relative transition-all duration-1000 ease-in-out"
+      [@logoAnimation]="animationState"
+      [class]="getContainerClasses()"
+    >
+      <!-- Logo principal -->
+      <div class="relative">
+        <img 
+          src="assets/images/chatbot-logo.png" 
+          alt="Coach IA Entretien"
+          class="w-full h-full object-contain transition-all duration-500"
+          [class]="getLogoClasses()"
+        />
+        
+        <!-- Badge notification -->
+        <div 
+          *ngIf="showNotification"
+          class="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center animate-pulse"
+        >
+          <span class="text-white text-xs">💬</span>
+        </div>
+      </div>
+
+      <!-- Message de bienvenue -->
+      <div 
+        *ngIf="showWelcome"
+        class="absolute -top-20 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl p-4 shadow-2xl border border-blue-200 min-w-[280px] text-center z-10"
+      >
+        <div class="flex items-center space-x-2 mb-2">
+          <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-semibold text-gray-700">Coach IA Actif</span>
+        </div>
+        <p class="text-sm text-gray-600">
+          Bonjour ! Je suis votre coach entretien. 
+          Prêt à vous préparer pour décrocher le job de vos rêves ?
+        </p>
+        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-4 h-4 bg-white border-r border-b border-blue-200"></div>
+      </div>
+
+      <!-- État de chargement -->
+      <div 
+        *ngIf="isLoading"
+        class="absolute inset-0 bg-white bg-opacity-80 rounded-2xl flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p class="text-sm text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    </div>
