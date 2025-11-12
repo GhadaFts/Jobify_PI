@@ -42,7 +42,8 @@ fun ApplicantDetailDialog(
     onStatusChanged: (String) -> Unit = { }, // Callback when status changes
     isUnderReviewStatus: Boolean = false, // Track if status has changed to Under Review
     onActionAccepted: () -> Unit = { }, // Callback when action is accepted
-    onActionRejected: () -> Unit = { } // Callback when action is rejected
+    onActionRejected: () -> Unit = { }, // Callback when action is rejected
+    onInterviewScheduled: (InterviewDetails) -> Unit = { } // Callback when interview is scheduled
 ) {
     var statusChanged by remember { mutableStateOf(isUnderReviewStatus) }
     var showActionDialog by remember { mutableStateOf(false) }
@@ -553,7 +554,7 @@ fun ApplicantDetailDialog(
             appliedFor = "1",
             onDismiss = { showInterviewDialog = false },
             onSchedule = { interviewDetails ->
-                onContactClick()
+                onInterviewScheduled(interviewDetails)
                 showInterviewDialog = false
             }
         )
@@ -795,7 +796,9 @@ fun ScheduleInterviewDialog(
     onSchedule: (InterviewDetails) -> Unit
 ) {
     var interviewDate by remember { mutableStateOf("") }
-    var interviewTime by remember { mutableStateOf("") }
+    var interviewHour by remember { mutableStateOf("") }
+    var interviewMinute by remember { mutableStateOf("") }
+    var isAM by remember { mutableStateOf(true) }
     var duration by remember { mutableStateOf("60") }
     var interviewType by remember { mutableStateOf("Local Interview") }
     var location by remember { mutableStateOf("") }
@@ -896,7 +899,7 @@ fun ScheduleInterviewDialog(
                         )
                     }
 
-                    // Interview Time
+                    // Interview Time with AM/PM
                     Column {
                         Text(
                             "Interview Time *",
@@ -904,14 +907,87 @@ fun ScheduleInterviewDialog(
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        OutlinedTextField(
-                            value = interviewTime,
-                            onValueChange = { interviewTime = it },
-                            placeholder = { Text("--:-- --") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(6.dp),
-                            singleLine = true
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = interviewHour,
+                                onValueChange = {
+                                    if (it.length <= 2 && (it.isEmpty() || it.toIntOrNull() != null)) {
+                                        interviewHour = it
+                                    }
+                                },
+                                placeholder = { Text("HH") },
+                                modifier = Modifier
+                                    .weight(1f),
+                                shape = RoundedCornerShape(6.dp),
+                                singleLine = true
+                            )
+
+                            Text(":", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+                            OutlinedTextField(
+                                value = interviewMinute,
+                                onValueChange = {
+                                    if (it.length <= 2 && (it.isEmpty() || it.toIntOrNull() != null)) {
+                                        interviewMinute = it
+                                    }
+                                },
+                                placeholder = { Text("MM") },
+                                modifier = Modifier
+                                    .weight(1f),
+                                shape = RoundedCornerShape(6.dp),
+                                singleLine = true
+                            )
+
+                            // AM/PM Toggle
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(Color(0xFFF5F5F5), RoundedCornerShape(6.dp)),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { isAM = true }
+                                        .padding(4.dp),
+                                    color = if (isAM) Color(0xFF3B82F6) else Color.Transparent,
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        "AM",
+                                        modifier = Modifier.padding(8.dp),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        color = if (isAM) Color.White else Color.Gray,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { isAM = false }
+                                        .padding(4.dp),
+                                    color = if (!isAM) Color(0xFF3B82F6) else Color.Transparent,
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        "PM",
+                                        modifier = Modifier.padding(8.dp),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        color = if (!isAM) Color.White else Color.Gray,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     // Duration
@@ -1059,11 +1135,21 @@ fun ScheduleInterviewDialog(
 
                         Button(
                             onClick = {
-                                if (interviewDate.isNotEmpty() && interviewTime.isNotEmpty() && location.isNotEmpty()) {
+                                val formattedTime = if (interviewHour.isNotEmpty() && interviewMinute.isNotEmpty()) {
+                                    String.format("%02d:%02d %s",
+                                        interviewHour.toIntOrNull() ?: 0,
+                                        interviewMinute.toIntOrNull() ?: 0,
+                                        if (isAM) "AM" else "PM"
+                                    )
+                                } else {
+                                    ""
+                                }
+
+                                if (interviewDate.isNotEmpty() && formattedTime.isNotEmpty() && location.isNotEmpty()) {
                                     onSchedule(
                                         InterviewDetails(
                                             date = interviewDate,
-                                            time = interviewTime,
+                                            time = formattedTime,
                                             duration = duration,
                                             type = interviewType,
                                             location = location,
@@ -1075,7 +1161,7 @@ fun ScheduleInterviewDialog(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp),
-                            enabled = interviewDate.isNotEmpty() && interviewTime.isNotEmpty() && location.isNotEmpty(),
+                            enabled = interviewDate.isNotEmpty() && interviewHour.isNotEmpty() && interviewMinute.isNotEmpty() && location.isNotEmpty(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF3B82F6),
                                 disabledContainerColor = Color(0xFFCBD5E1)

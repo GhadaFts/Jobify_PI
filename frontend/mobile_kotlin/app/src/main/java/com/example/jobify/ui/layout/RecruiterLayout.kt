@@ -10,7 +10,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.example.jobify.InterviewsActivity
-import com.example.jobify.MainActivity
+import com.example.jobify.LoginActivity
+import com.example.jobify.PostsActivity
 import com.example.jobify.RecruiterProfileActivity
 import com.example.jobify.ui.drawer.RecruiterDrawerContent
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ fun RecruiterLayout(
             ModalDrawerSheet {
                 RecruiterDrawerContent(
                     onPublishJobClick = {
+                        context.startActivity(Intent(context, PostsActivity::class.java))
                         scope.launch { drawerState.close() }
                     },
                     onInterviewsClick = {
@@ -45,7 +47,7 @@ fun RecruiterLayout(
                         scope.launch { drawerState.close() }
                     },
                     onLogoutClick = {
-                        val intent = Intent(context, MainActivity::class.java)
+                        val intent = Intent(context, LoginActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         context.startActivity(intent)
                     }

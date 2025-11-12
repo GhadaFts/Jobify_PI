@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jobify.R
 import com.example.jobify.model.Applicant
+import com.example.jobify.ui.posts.InterviewDetails
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -164,7 +165,8 @@ fun ApplicantCard(
     onActionClick: () -> Unit = {},
     isUnderReview: Boolean = false,
     onActionAccepted: () -> Unit = {},
-    onActionRejected: () -> Unit = {}
+    onActionRejected: () -> Unit = {},
+    onInterviewScheduled: (InterviewDetails) -> Unit = {}
 ) {
     var showActionDialog by remember { mutableStateOf(false) }
     var showInterviewDialog by remember { mutableStateOf(false) }
@@ -254,6 +256,20 @@ fun ApplicantCard(
                                 Text(
                                     "Under Review",
                                     color = Color(0xFF92400E),
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                                )
+                            }
+                        } else if (applicant.status == "interview_scheduled") {
+                            // Show "Interview Scheduled" badge in blue
+                            Surface(
+                                color = Color(0xFFDEEBF7),
+                                shape = RoundedCornerShape(3.dp)
+                            ) {
+                                Text(
+                                    "Interview Scheduled",
+                                    color = Color(0xFF1E40AF),
                                     fontSize = 8.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
@@ -440,7 +456,7 @@ fun ApplicantCard(
             appliedFor = "1",
             onDismiss = { showInterviewDialog = false },
             onSchedule = { interviewDetails ->
-                onInterviewClick()
+                onInterviewScheduled(interviewDetails)
                 showInterviewDialog = false
             }
         )
@@ -457,7 +473,8 @@ fun ApplicantsSection(
     underReviewApplicants: Set<String> = emptySet(),
     onActionClick: (Applicant) -> Unit = {},
     onActionAccepted: (Applicant) -> Unit = {},
-    onActionRejected: (Applicant) -> Unit = {}
+    onActionRejected: (Applicant) -> Unit = {},
+    onInterviewScheduled: (Applicant, InterviewDetails) -> Unit = { _, _ -> }
 ) {
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var isAnalyzing by remember { mutableStateOf(false) }
@@ -678,7 +695,8 @@ fun ApplicantsSection(
                         onActionClick = { onActionClick(applicant) },
                         isUnderReview = applicant.id in underReviewApplicants,
                         onActionAccepted = { onActionAccepted(applicant) },
-                        onActionRejected = { onActionRejected(applicant) }
+                        onActionRejected = { onActionRejected(applicant) },
+                        onInterviewScheduled = { interviewDetails -> onInterviewScheduled(applicant, interviewDetails) }
                     )
                 }
             }

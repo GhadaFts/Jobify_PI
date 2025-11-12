@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jobify.R
+import com.example.jobify.data.InterviewManager
 import com.example.jobify.model.Job
 import java.util.concurrent.TimeUnit
 
@@ -188,6 +189,17 @@ fun JobCard(
                         }
                         currentJob = currentJob.copy(applicants = updatedApplicants)
                         underReviewApplicants = underReviewApplicants - applicant.id
+                    },
+                    onInterviewScheduled = { applicant, interviewDetails ->
+                        // Update applicant to interview_scheduled
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == applicant.id) {
+                                app.copy(status = "interview_scheduled", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
                     }
                 )
             }
@@ -296,6 +308,31 @@ fun JobCard(
                         currentJob = currentJob.copy(applicants = updatedApplicants)
                         underReviewApplicants = underReviewApplicants - selectedApplicantItem.id
                         selectedApplicant = null // Close the dialog
+                    },
+                    onInterviewScheduled = { interviewDetails ->
+                        // Update applicant to interview_scheduled
+                        val updatedApplicants = currentJob.applicants.map { app ->
+                            if (app.id == selectedApplicantItem.id) {
+                                app.copy(status = "interview_scheduled", isNew = false)
+                            } else {
+                                app
+                            }
+                        }
+                        currentJob = currentJob.copy(applicants = updatedApplicants)
+
+                        // Add to scheduled interviews
+                        val scheduledInterview = com.example.jobify.model.ScheduledInterview(
+                            id = "${System.currentTimeMillis()}",
+                            candidateName = selectedApplicantItem.name,
+                            candidatePosition = selectedApplicantItem.title,
+                            date = interviewDetails.date,
+                            time = interviewDetails.time,
+                            interviewType = interviewDetails.type,
+                            location = interviewDetails.location,
+                            duration = interviewDetails.duration,
+                            notes = interviewDetails.notes
+                        )
+                        InterviewManager.addInterview(scheduledInterview)
                     }
                 )
             }
