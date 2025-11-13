@@ -114,16 +114,28 @@ class SignupActivity : AppCompatActivity() {
         // Simulate API call
         binding.btnSignup.postDelayed({
             // Here you would make your actual API call
+            // For now, we'll simulate successful registration
 
             isLoading = false
             binding.btnSignup.isEnabled = true
             binding.progressBar.visibility = View.GONE
 
-            // Example: Simulate successful registration
+            // Show success message
             Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
 
-            // Navigate to login or main activity
-            startActivity(Intent(this, LoginActivity::class.java))
+            // Navigate to appropriate profile setup based on role
+            val intent = if (role == "jobseeker") {
+                Intent(this, JobSeekerProfileInitialActivity::class.java)
+            } else {
+                Intent(this, RecruiterProfileInitialActivity::class.java)
+            }
+
+            // Pass user data to profile activity if needed
+            intent.putExtra("fullName", fullName)
+            intent.putExtra("email", email)
+            intent.putExtra("role", role)
+
+            startActivity(intent)
             finish()
 
             // If registration fails, show error:
