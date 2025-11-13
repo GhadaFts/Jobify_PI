@@ -1,0 +1,32 @@
+<div class="chart-container">
+  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+    <h3 class="chart-title">Applications per Job</h3>
+    <div class="chart-content">
+      <div class="bar-chart-horizontal">
+        <div *ngFor="let item of response.data" class="bar-item">
+          <div class="bar-label">
+            <span class="job-title" [title]="item.jobTitle">{{ item.jobTitle | slice: 0: 20 }}...</span>
+            <span class="job-count">{{ item.count }}</span>
+          </div>
+          <div class="bar-container">
+            <div class="bar" [style.width]="(item.count / getMaxCount(response.data) * 100) + '%'"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-stats">
+      <div class="stat">
+        <span class="stat-label">Avg Apps/Job</span>
+        <span class="stat-value">{{ getAverageApps(response.data).toFixed(1) }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Max Apps</span>
+        <span class="stat-value">{{ getMaxCount(response.data) }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Total Apps</span>
+        <span class="stat-value">{{ getTotalApps(response.data) }}</span>
+      </div>
+    </div>
+  </div>
+</div>

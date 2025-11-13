@@ -1,0 +1,30 @@
+<div class="chart-container">
+  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+    <h3 class="chart-title">Geographic Distribution</h3>
+    <div class="heatmap-grid">
+      <div *ngFor="let region of response.data" class="heatmap-cell" [ngClass]="'intensity-' + getIntensity(region.jobs, getMaxJobs(response.data))">
+        <div class="cell-content">
+          <span class="region-name">{{ region.region }}</span>
+          <div class="metrics">
+            <span class="jobs-count">{{ region.jobs }} jobs</span>
+            <span class="apps-count">{{ region.applications }} apps</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="heatmap-legend">
+      <span class="legend-item">
+        <span class="legend-box high"></span>
+        High Activity
+      </span>
+      <span class="legend-item">
+        <span class="legend-box medium"></span>
+        Medium Activity
+      </span>
+      <span class="legend-item">
+        <span class="legend-box low"></span>
+        Low Activity
+      </span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<div class="filters-container">
+  <div class="filters-wrapper">
+    <div class="filters-header">
+      <h3 class="filters-title">
+        <svg class="filters-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+        </svg>
+        Analytics Filters
+      </h3>
+      <button class="filters-button" (click)="resetFilters()">Reset Filters</button>
+    </div>
+
+    <div class="filters-grid">
+      <!-- Date Range -->
+      <div class="filter-group">
+        <label class="filter-label">Start Date</label>
+        <input type="date" class="filter-input" [(ngModel)]="filters.dateRange.startDate" (change)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">End Date</label>
+        <input type="date" class="filter-input" [(ngModel)]="filters.dateRange.endDate" (change)="onFilterChange()" />
+      </div>
+
+      <!-- Granularity -->
+      <div class="filter-group">
+        <label class="filter-label">Granularity</label>
+        <select class="filter-input" [(ngModel)]="filters.granularity" (change)="onFilterChange()">
+          <option value="day">Daily</option>
+          <option value="week">Weekly</option>
+          <option value="month">Monthly</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Advanced Filters Toggle -->
+    <button class="advanced-toggle" (click)="toggleAdvanced()">
+      {{ showAdvanced ? '▼' : '▶' }} Advanced Filters
+    </button>
+
+    <!-- Advanced Filters -->
+    <div *ngIf="showAdvanced" class="advanced-filters">
+      <div class="filters-grid">
+        <!-- Job Type -->
+        <div class="filter-group">
+          <label class="filter-label">Job Type</label>
+          <select class="filter-input" [(ngModel)]="filters.jobType" (change)="onFilterChange()">
+            <option value="">All Types</option>
+            <option *ngFor="let type of jobTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+
+        <!-- Company -->
+        <div class="filter-group">
+          <label class="filter-label">Company</label>
+          <select class="filter-input" [(ngModel)]="filters.company" (change)="onFilterChange()">
+            <option value="">All Companies</option>
+            <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div class="filter-group">
+          <label class="filter-label">Category</label>
+          <select class="filter-input" [(ngModel)]="filters.category" (change)="onFilterChange()">
+            <option value="">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
+        <!-- Region -->
+        <div class="filter-group">
+          <label class="filter-label">Region</label>
+          <select class="filter-input" [(ngModel)]="filters.region" (change)="onFilterChange()">
+            <option value="">All Regions</option>
+            <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

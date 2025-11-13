@@ -1,0 +1,136 @@
+.alerts-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba\(0, 0, 0, 0.08\);
+  border: 1px solid #E5E7EB;
+}
+
+.alerts-wrapper {
+  width: 100%;
+}
+
+.alerts-title {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  background-color: #F9FAFB;
+  border-radius: 8px;
+  border-left: 4px solid #E5E7EB;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: darken(#F9FAFB, 2%);
+  }
+
+  &.alert-critical {
+    background-color: rgba(255, 107, 107, 0.1);
+    border-left-color: #EF4444;
+
+    &:hover {
+      background-color: rgba(255, 107, 107, 0.15);
+    }
+  }
+}
+
+.alert-icon {
+  font-size: 24px;
+  min-width: 32px;
+  text-align: center;
+}
+
+.alert-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.alert-metric {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.alert-change {
+  font-size: 12px;
+  font-weight: 600;
+
+  &.change-positive {
+    color: #10B981;
+  }
+
+  &.change-negative {
+    color: #EF4444;
+  }
+}
+
+.alert-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.badge-normal {
+    background-color: rgba(82, 199, 122, 0.2);
+    color: #10B981;
+  }
+
+  &.badge-alert {
+    background-color: rgba(255, 107, 107, 0.2);
+    color: #EF4444;
+  }
+}
+
+@media (max-width: 768px) {
+  .alerts-container {
+    padding: 16px;
+  }
+
+  .alerts-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .alert-item {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .alert-icon {
+    font-size: 20px;
+  }
+
+  .alert-metric {
+    font-size: 13px;
+  }
+
+  .alert-change {
+    font-size: 11px;
+  }
+
+  .alert-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+
+
