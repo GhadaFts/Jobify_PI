@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { JobOffer, Application } from '../../../../types';
+import { JobOffer, Application, JobOfferAIRequest, AIRankingResponse } from '../../../../types';
 import { RecruiterJobDetailsDialog } from './recruiter-job-details-dialog/recruiter-job-details-dialog';
 import { EditJobDialog } from './edit-job-dialog/edit-job-dialog';
 import { ApplicationDetailsDialog } from './application-details-dialog/application-details-dialog';
@@ -8,8 +8,7 @@ import { InterviewScheduleDialog } from './interview-schedule-dialog/interview-s
 import { TakeActionDialog } from './take-action-dialog/take-action-dialog';
 import { ToastService } from '../../../../services/toast.service'; // Assurez-vous d'avoir ce service
 import { InterviewsService } from '../../../../services/interviews.service';
-
-
+import { AiService } from '../../../../ai-service/ai-service';
 
 @Component({
   selector: 'app-recruiter-job-card',
@@ -35,7 +34,8 @@ export class JobCardRecruiter {
 constructor(
     public dialog: MatDialog,
     private interviewsService: InterviewsService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private aiService: AiService
   ) {}
 
   getStatusColor(status: string): string {
@@ -211,16 +211,70 @@ constructor(
     if (!this.job.applications || this.job.applications.length === 0) {
       return;
     }
-
     this.isRanking = true;
+
+    var prompt = `
+    You are given a structured JSON representing a job offer and its submitted applications.
+    Your task is to evaluate each application’s relevance score (0–100) for the given job offer, considering the match between required skills, experience, and education.
+
+    Return only a JSON object in the following format (no explanations, no extra text):
+    
+    {
+    "id": "string",
+      "applications": [
+        {"id": number, "score": number},
+        {"id": number, "score": number}
+      ]
+    }
+    Here is the input data:
+
+    `
+    const inputData: JobOfferAIRequest = {
+      id: this.job.id,
+      title: this.job.title,
+      company: this.job.company,
+      location: this.job.location,
+      type: this.job.type,
+      experience: this.job.experience,
+      salary: this.job.salary,
+      description: this.job.description,
+      skills: this.job.skills,
+      requirements: this.job.requirements,
+      applications: this.job.applications!.map(app => ({
+        id: app.id,
+        applicationDate: app.applicationDate,
+        status: app.status,
+        motivation_lettre: app.motivation_lettre,
+        jobSeeker: {
+          id: app.jobSeeker.id,
+          email: app.jobSeeker.email,
+          fullName: app.jobSeeker.fullName,
+          description: app.jobSeeker.description,
+          nationality: app.jobSeeker.nationality,
+          skills: app.jobSeeker.skills,
+          experience: app.jobSeeker.experience,
+          education: app.jobSeeker.education,
+          title: app.jobSeeker.title,
+          date_of_birth: app.jobSeeker.date_of_birth,
+          gender: app.jobSeeker.gender
+        },
+        jobOfferId: this.job.id
+      }))
+    };
+    prompt += JSON.stringify(inputData, null, 2);
+    
 
     // Simulation d'un délai de traitement AI (1.5 secondes)
     setTimeout(() => {
+      this.aiService.ask(prompt).then(result => {
+      const response: AIRankingResponse = JSON.parse(result)
       // Attribuer des scores aléatoires à chaque application
       this.job.applications!.forEach(application => {
         if (!application.aiScore) {
-          application.aiScore = Math.floor(Math.random() * 30) + 70; // Score entre 70 et 100
+          application.aiScore = response.applications.find(app => app.id === application.id)?.score || 0;
         }
+      })}).catch(error => {
+        console.error('AI Ranking error:', error);
       });
 
       // Trier par score décroissant
