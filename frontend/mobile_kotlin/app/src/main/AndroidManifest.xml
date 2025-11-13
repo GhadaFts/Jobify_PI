@@ -39,6 +39,9 @@
         <activity 
             android:name=".PostsActivity"
         />
+        <activity
+            android:name=".InterviewsActivity"
+            android:exported="false" />
         <activity android:name=".AICareerAdvisorActivity" />
         <activity android:name=".CvCorrectionActivity" />
     </application>
