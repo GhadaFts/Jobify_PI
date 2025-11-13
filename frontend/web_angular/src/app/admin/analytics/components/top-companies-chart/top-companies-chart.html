@@ -1,0 +1,28 @@
+<div class="chart-container">
+  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+    <h3 class="chart-title">Top Companies by Activity</h3>
+    <div class="companies-grid">
+      <div *ngFor="let company of response.data.slice(0, 8)" class="company-card">
+        <div class="company-header">
+          <h4 class="company-name">{{ company?.companyName || 'Unknown' }}</h4>
+          <span class="company-badge">{{ company?.jobCount || 0 }} jobs</span>
+        </div>
+        <div class="company-metrics">
+          <div class="metric">
+            <span class="metric-value">{{ company?.applicationCount || 0 }}</span>
+            <span class="metric-label">Applications</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">{{ getAvgAppsPerJob(company) }}</span>
+            <span class="metric-label">Avg Apps/Job</span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [style.width]="getProgressWidth(company?.applicationCount, getMaxApps(response.data))"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

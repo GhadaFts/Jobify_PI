@@ -1,0 +1,19 @@
+<div class="alerts-container">
+  <div *ngIf="alertsData$ | async as response" class="alerts-wrapper">
+    <h3 class="alerts-title">Key Metrics Alerts</h3>
+    <div class="alerts-list">
+      <div *ngFor="let alert of response.data" class="alert-item" [ngClass]="{ 'alert-critical': alert.alert }">
+        <div class="alert-icon">{{ getIcon(alert.alert, alert.change) }}</div>
+        <div class="alert-content">
+          <span class="alert-metric">{{ alert.metric }}</span>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(alert.change)">
+            {{ alert.change > 0 ? '+' : '' }}{{ alert.change }}% vs last period
+          </span>
+        </div>
+        <div class="alert-badge" [ngClass]="alert.alert ? 'badge-alert' : 'badge-normal'">
+          {{ alert.alert ? 'Alert' : 'Normal' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

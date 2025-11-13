@@ -1,0 +1,162 @@
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba\(0, 0, 0, 0.08\);
+  border: 1px solid #E5E7EB;
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+.chart-title {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.heatmap-cell {
+  padding: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  &.intensity-high {
+    background: linear-gradient(135deg, #EF4444 0%, darken(#EF4444, 10%) 100%);
+    color: white;
+  }
+
+  &.intensity-medium {
+    background: linear-gradient(135deg, #F97316 0%, darken(#F97316, 10%) 100%);
+    color: white;
+  }
+
+  &.intensity-low {
+    background: linear-gradient(135deg, #3B82F6 0%, darken(#3B82F6, 10%) 100%);
+    color: white;
+  }
+}
+
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.region-name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+.jobs-count,
+.apps-count {
+  font-weight: 600;
+}
+
+.heatmap-legend {
+  display: flex;
+  gap: 32px;
+  padding: 16px;
+  background-color: #F9FAFB;
+  border-radius: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  border: 1px solid #E5E7EB;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.legend-box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+
+  &.high {
+    background: linear-gradient(135deg, #EF4444 0%, darken(#EF4444, 10%) 100%);
+  }
+
+  &.medium {
+    background: linear-gradient(135deg, #F97316 0%, darken(#F97316, 10%) 100%);
+  }
+
+  &.low {
+    background: linear-gradient(135deg, #3B82F6 0%, darken(#3B82F6, 10%) 100%);
+  }
+}
+
+@media (max-width: 1024px) {
+  .heatmap-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .chart-container {
+    padding: 16px;
+  }
+
+  .chart-title {
+    font-size: 16px;
+  }
+
+  .heatmap-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .heatmap-cell {
+    padding: 12px;
+  }
+
+  .region-name {
+    font-size: 14px;
+  }
+
+  .metrics {
+    font-size: 11px;
+  }
+
+  .heatmap-legend {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+  }
+}
+
+
+
