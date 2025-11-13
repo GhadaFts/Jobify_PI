@@ -105,3 +105,61 @@ export interface Interview {
   rating?: number;
   feedback?: string;
 }
+
+export interface JobOfferAIRequest {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  experience: string;
+  salary: string;
+  description: string;
+  skills: string[];
+  requirements: string[];
+  applications: ApplicationAIRequest[];
+}
+
+export interface ApplicationAIRequest {
+  id: number;
+  applicationDate: string;
+  status: 'new' | 'under_review' | 'interview_scheduled' | 'interview_annulled' | 'offer_pending' | 'accepted' | 'rejected';
+  motivation_lettre: string;
+  jobSeeker: JobSeekerAIRequest;
+  jobOfferId: string;
+}
+
+export interface JobSeekerAIRequest {
+  id: number;
+  email: string;
+  fullName: string;
+  description: string;
+  nationality: string;
+  skills: string[];
+  experience: {
+    position: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }[];
+  education: {
+    degree: string;
+    field: string;
+    school: string;
+    graduationDate: string;
+  }[];
+  title: string;
+  date_of_birth: string;
+  gender: string;
+}
+
+export interface AIRankingResponse {
+  id: string;
+  applications: AIRankingApplicationScore[];
+}
+
+export interface AIRankingApplicationScore {
+  id: number;
+  score: number;
+}
