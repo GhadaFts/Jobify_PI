@@ -1,0 +1,23 @@
+<div class="chart-container">
+  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+    <h3 class="chart-title">Jobs Posted Over Time</h3>
+    <div class="chart-content">
+      <div class="simple-chart">
+        <div class="chart-bars">
+          <div *ngFor="let item of response.data" class="bar-item">
+            <div class="bar-wrapper">
+              <div class="bar" [style.height]="(item.count / 45 * 100) + '%'"></div>
+            </div>
+            <span class="bar-label">{{ item.date | slice: 5 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span class="legend-item">
+        <span class="legend-color" style="background-color: #3B82F6;"></span>
+        Total Jobs Posted
+      </span>
+    </div>
+  </div>
+</div>

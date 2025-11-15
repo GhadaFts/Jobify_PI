@@ -9,7 +9,7 @@ const routes: Routes = [
    { path: 'signup', component: SignupComponent },
   { path: 'job-seeker', loadChildren: () => import('./job-seeker/job-seeker-module').then(m => m.JobSeekerModule) },
   { path: 'recruiter', loadChildren: () => import('./recruiter/recruiter-module').then(m => m.RecruiterModule) },
-   { path: 'recruiter', loadChildren: () => import('./recruiter/recruiter-module').then(m => m.RecruiterModule) },
+  { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
   { path: '**', redirectTo: '' }
 ];
 

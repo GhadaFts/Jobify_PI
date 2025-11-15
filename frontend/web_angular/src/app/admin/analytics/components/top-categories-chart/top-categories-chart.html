@@ -1,0 +1,33 @@
+<div class="chart-container">
+  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+    <h3 class="chart-title">Top Job Categories</h3>
+    <div class="categories-table-wrapper">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="align-right">Jobs</th>
+            <th class="align-right">Applications</th>
+            <th class="align-right">Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of response.data; let i = index" [class.alternate]="i % 2 === 0">
+            <td>
+              <span class="category-badge">{{ cat.category }}</span>
+            </td>
+            <td class="align-right">
+              <span class="badge-jobs">{{ cat.jobs }}</span>
+            </td>
+            <td class="align-right">
+              <span class="badge-apps">{{ cat.applications }}</span>
+            </td>
+            <td class="align-right">
+              <span class="badge-ratio">{{ (cat.applications / cat.jobs).toFixed(1) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,151 @@
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba\(0, 0, 0, 0.08\);
+  border: 1px solid #E5E7EB;
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+.chart-title {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.chart-content {
+  margin-bottom: 16px;
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, darken(#8B5CF6, 30%) 0%, darken(#8B5CF6, 35%) 100%);
+  border-radius: 8px;
+  border-left: 4px solid #8B5CF6;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead {
+    background-color: #F9FAFB;
+    border-bottom: 2px solid #E5E7EB;
+  }
+
+  th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #6B7280;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #E5E7EB;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken(white, 2%);
+    }
+  }
+
+  td {
+    padding: 16px;
+    color: #1F2937;
+  }
+}
+
+.highlight-new {
+  background-color: rgba(177, 127, 240, 0.1);
+  font-weight: 600;
+  color: #8B5CF6;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.highlight-dau {
+  background-color: rgba(91, 157, 217, 0.1);
+  font-weight: 600;
+  color: #3B82F6;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.growth-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: rgba(82, 199, 122, 0.2);
+  color: #10B981;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 16px;
+  }
+
+  .chart-title {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .metrics-row {
+    gap: 12px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .data-table {
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 12px;
+    }
+  }
+}
+
+
+
