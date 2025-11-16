@@ -21,22 +21,22 @@ export class JobCardRecruiter {
   @Input() published: boolean = false;
   @Output() publish = new EventEmitter<string>();
   @Output() edit = new EventEmitter<JobOffer>();
-  @Output() applicationStatusChange = new EventEmitter<{applicationId: number, newStatus: string, interviewData?: any}>();
+  @Output() applicationStatusChange = new EventEmitter<{ applicationId: number, newStatus: string, interviewData?: any }>();
 
   showApplications = false;
   private statusChangeTimeout: any;
-  
+
   // Nouvelles propriétés pour AI Ranking et Favoris
   aiRankingEnabled = false;
   showFavoritesOnly = false;
   isRanking = false; // Pour l'animation de chargement
 
-constructor(
+  constructor(
     public dialog: MatDialog,
     private interviewsService: InterviewsService,
     private toastService: ToastService,
     private aiService: AiService
-  ) {}
+  ) { }
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
@@ -102,23 +102,23 @@ constructor(
   }
 
   openApplicationDetails(application: Application): void {
-  if (application.status === 'new') {
-    this.scheduleStatusChange(application.id);
-  }
-
-  const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
-    width: '80vw', // Changé de 800px à 95vw
-    maxWidth: '1800px', // Ajouté
-    maxHeight: '90vh',
-    data: { application }
-  });
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (this.statusChangeTimeout) {
-      clearTimeout(this.statusChangeTimeout);
+    if (application.status === 'new') {
+      this.scheduleStatusChange(application.id);
     }
-  });
-}
+
+    const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
+      width: '80vw', // Changé de 800px à 95vw
+      maxWidth: '1800px', // Ajouté
+      maxHeight: '90vh',
+      data: { application }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (this.statusChangeTimeout) {
+        clearTimeout(this.statusChangeTimeout);
+      }
+    });
+  }
 
   private scheduleStatusChange(applicationId: number): void {
     this.statusChangeTimeout = setTimeout(() => {
@@ -129,7 +129,7 @@ constructor(
     }, 20000);
   }
 
- openInterviewSchedule(application: Application): void {
+  openInterviewSchedule(application: Application): void {
     const dialogRef = this.dialog.open(InterviewScheduleDialog, {
       width: '500px',
       maxWidth: '95vw',
@@ -207,6 +207,22 @@ constructor(
   /**
    * Active le classement AI et génère des scores aléatoires
    */
+  private extractJSON(text: string): string {
+    // Remove markdown code blocks
+    text = text.replace(/```json/gi, "");
+    text = text.replace(/```/g, "");
+
+    // Find the first '{' and last '}'
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
+    if (first === -1 || last === -1) {
+      throw new Error("No JSON object found in AI response:\n" + text);
+    }
+
+    return text.substring(first, last + 1);
+  }
+
+
   enableAIRanking(): void {
     if (!this.job.applications || this.job.applications.length === 0) {
       return;
@@ -262,18 +278,21 @@ constructor(
       }))
     };
     prompt += JSON.stringify(inputData, null, 2);
-    
+
 
     // Simulation d'un délai de traitement AI (1.5 secondes)
     setTimeout(() => {
       this.aiService.ask(prompt).then(result => {
-      const response: AIRankingResponse = JSON.parse(result)
-      // Attribuer des scores aléatoires à chaque application
-      this.job.applications!.forEach(application => {
-        if (!application.aiScore) {
-          application.aiScore = response.applications.find(app => app.id === application.id)?.score || 0;
-        }
-      })}).catch(error => {
+        const jsonString = this.extractJSON(result);
+        const response: AIRankingResponse = JSON.parse(jsonString)
+        console.log('AI Ranking response:', response);
+        // Attribuer des scores aléatoires à chaque application
+        this.job.applications!.forEach(application => {
+          if (!application.aiScore) {
+            application.aiScore = response.applications.find(app => app.id === application.id)?.score || 0;
+          }
+        })
+      }).catch(error => {
         console.error('AI Ranking error:', error);
       });
 
@@ -292,7 +311,7 @@ constructor(
     this.aiRankingEnabled = false;
     // Réinitialiser l'ordre par date de candidature
     if (this.job.applications) {
-      this.job.applications.sort((a, b) => 
+      this.job.applications.sort((a, b) =>
         new Date(b.applicationDate).getTime() - new Date(a.applicationDate).getTime()
       );
     }
