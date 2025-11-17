@@ -48,6 +48,8 @@
             android:exported="false" />
         <activity android:name=".AICareerAdvisorActivity" />
         <activity android:name=".CvCorrectionActivity" />
+        <activity android:name=".InterviewPreparationActivity" />
+
     </application>
 
 </manifest>
