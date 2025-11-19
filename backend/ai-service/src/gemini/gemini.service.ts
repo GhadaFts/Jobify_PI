@@ -12,6 +12,12 @@ interface GeminiResponse {
   }>;
 }
 
+interface AxiosError {
+  response?: {
+    data: unknown;
+  };
+}
+
 @Injectable()
 export class GeminiService {
   private readonly apiKey: string;
@@ -57,7 +63,7 @@ export class GeminiService {
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
-      const responseData = (error as any)?.response?.data;
+      const responseData = (error as AxiosError)?.response?.data;
 
       console.error('Gemini API Error:', responseData || errorMessage);
       throw new HttpException(

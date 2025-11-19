@@ -1,27 +1,35 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { JobOffer, Application, JobOfferAIRequest, AIRankingResponse } from '../../../../types';
+import { JobOffer, Application } from '../../../../types';
 import { RecruiterJobDetailsDialog } from './recruiter-job-details-dialog/recruiter-job-details-dialog';
 import { EditJobDialog } from './edit-job-dialog/edit-job-dialog';
 import { ApplicationDetailsDialog } from './application-details-dialog/application-details-dialog';
 import { InterviewScheduleDialog } from './interview-schedule-dialog/interview-schedule-dialog';
 import { TakeActionDialog } from './take-action-dialog/take-action-dialog';
-import { ToastService } from '../../../../services/toast.service'; // Assurez-vous d'avoir ce service
+import { ToastService } from '../../../../services/toast.service';
 import { InterviewsService } from '../../../../services/interviews.service';
-import { AiService } from '../../../../ai-service/ai-service';
+import {
+  AiService,
+  JobOfferAIRequest,
+  AIRankingResponse,
+} from '../../../../ai-service/ai-service-backend';
 
 @Component({
   selector: 'app-recruiter-job-card',
   standalone: false,
   templateUrl: './job-card-recruiter.html',
-  styleUrls: ['./job-card-recruiter.scss']
+  styleUrls: ['./job-card-recruiter.scss'],
 })
 export class JobCardRecruiter {
   @Input() job!: JobOffer;
   @Input() published: boolean = false;
   @Output() publish = new EventEmitter<string>();
   @Output() edit = new EventEmitter<JobOffer>();
-  @Output() applicationStatusChange = new EventEmitter<{ applicationId: number, newStatus: string, interviewData?: any }>();
+  @Output() applicationStatusChange = new EventEmitter<{
+    applicationId: number;
+    newStatus: string;
+    interviewData?: any;
+  }>();
 
   showApplications = false;
   private statusChangeTimeout: any;
@@ -36,16 +44,16 @@ export class JobCardRecruiter {
     private interviewsService: InterviewsService,
     private toastService: ToastService,
     private aiService: AiService
-  ) { }
+  ) {}
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      'open': '#10B981',
-      'new': '#3B82F6',
+      open: '#10B981',
+      new: '#3B82F6',
       'hot job': '#DC2626',
       'limited openings': '#F59E0B',
       'actively hiring': '#8B5CF6',
-      'urgent hiring': '#EF4444'
+      'urgent hiring': '#EF4444',
     };
     return colors[status] || '#6B7280';
   }
@@ -81,13 +89,13 @@ export class JobCardRecruiter {
 
   getApplicationStatusText(status: string): string {
     const statusTexts: { [key: string]: string } = {
-      'new': 'New',
-      'under_review': 'Under Review',
-      'interview_scheduled': 'Interview Scheduled',
-      'interview_annulled': 'Interview Annulled',
-      'offer_pending': 'Offer Pending',
-      'accepted': 'Accepted',
-      'rejected': 'Rejected'
+      new: 'New',
+      under_review: 'Under Review',
+      interview_scheduled: 'Interview Scheduled',
+      interview_annulled: 'Interview Annulled',
+      offer_pending: 'Offer Pending',
+      accepted: 'Accepted',
+      rejected: 'Rejected',
     };
     return statusTexts[status] || status;
   }
@@ -97,7 +105,7 @@ export class JobCardRecruiter {
     return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
@@ -107,13 +115,13 @@ export class JobCardRecruiter {
     }
 
     const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
-      width: '80vw', // Changé de 800px à 95vw
-      maxWidth: '1800px', // Ajouté
+      width: '80vw',
+      maxWidth: '1800px',
       maxHeight: '90vh',
-      data: { application }
+      data: { application },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (this.statusChangeTimeout) {
         clearTimeout(this.statusChangeTimeout);
       }
@@ -124,7 +132,7 @@ export class JobCardRecruiter {
     this.statusChangeTimeout = setTimeout(() => {
       this.applicationStatusChange.emit({
         applicationId: applicationId,
-        newStatus: 'under_review'
+        newStatus: 'under_review',
       });
     }, 20000);
   }
@@ -134,7 +142,7 @@ export class JobCardRecruiter {
       width: '500px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-      data: { application }
+      data: { application },
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -143,32 +151,31 @@ export class JobCardRecruiter {
         this.applicationStatusChange.emit({
           applicationId: application.id,
           newStatus: 'interview_scheduled',
-          interviewData: result
+          interviewData: result,
         });
 
         // Ajouter l'interview au service
         this.interviewsService.addInterview({ application, ...result });
 
         // Afficher le toast de succès
-        this.toastService.success(
-          'Interview has been scheduled successfully.'
-        );
+        this.toastService.success('Interview has been scheduled successfully.');
 
         console.log('Interview scheduled and added to list:', result);
       }
     });
   }
+
   openTakeAction(application: Application): void {
     const dialogRef = this.dialog.open(TakeActionDialog, {
       width: '500px',
-      data: { application }
+      data: { application },
     });
 
     dialogRef.afterClosed().subscribe((result: 'accepted' | 'rejected') => {
       if (result) {
         this.applicationStatusChange.emit({
           applicationId: application.id,
-          newStatus: result
+          newStatus: result,
         });
       }
     });
@@ -179,10 +186,10 @@ export class JobCardRecruiter {
       width: '700px',
       maxWidth: '90vw',
       maxHeight: '90vh',
-      data: { job }
+      data: { job },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       console.log('Modal details closed', result);
     });
   }
@@ -192,7 +199,7 @@ export class JobCardRecruiter {
       width: '800px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-      data: { job }
+      data: { job },
     });
 
     dialogRef.afterClosed().subscribe((result: JobOffer) => {
@@ -205,46 +212,17 @@ export class JobCardRecruiter {
   // NOUVELLES MÉTHODES POUR AI RANKING ET FAVORIS
 
   /**
-   * Active le classement AI et génère des scores aléatoires
+   * Active le classement AI en utilisant le microservice backend
    */
-  private extractJSON(text: string): string {
-    // Remove markdown code blocks
-    text = text.replace(/```json/gi, "");
-    text = text.replace(/```/g, "");
-
-    // Find the first '{' and last '}'
-    const first = text.indexOf("{");
-    const last = text.lastIndexOf("}");
-    if (first === -1 || last === -1) {
-      throw new Error("No JSON object found in AI response:\n" + text);
-    }
-
-    return text.substring(first, last + 1);
-  }
-
-
   enableAIRanking(): void {
     if (!this.job.applications || this.job.applications.length === 0) {
+      this.toastService.error('Aucune candidature à classer pour cette offre.');
       return;
     }
+
     this.isRanking = true;
 
-    var prompt = `
-    You are given a structured JSON representing a job offer and its submitted applications.
-    Your task is to evaluate each application’s relevance score (0–100) for the given job offer, considering the match between required skills, experience, and education.
-
-    Return only a JSON object in the following format (no explanations, no extra text):
-    
-    {
-    "id": "string",
-      "applications": [
-        {"id": number, "score": number},
-        {"id": number, "score": number}
-      ]
-    }
-    Here is the input data:
-
-    `
+    // Préparer les données pour l'API
     const inputData: JobOfferAIRequest = {
       id: this.job.id,
       title: this.job.title,
@@ -256,52 +234,102 @@ export class JobCardRecruiter {
       description: this.job.description,
       skills: this.job.skills,
       requirements: this.job.requirements,
-      applications: this.job.applications!.map(app => ({
+      applications: this.job.applications!.map((app) => ({
         id: app.id,
         applicationDate: app.applicationDate,
         status: app.status,
-        motivation_lettre: app.motivation_lettre,
+        motivation_lettre: app.motivation_lettre || '',
         jobSeeker: {
           id: app.jobSeeker.id,
           email: app.jobSeeker.email,
           fullName: app.jobSeeker.fullName,
-          description: app.jobSeeker.description,
-          nationality: app.jobSeeker.nationality,
-          skills: app.jobSeeker.skills,
-          experience: app.jobSeeker.experience,
-          education: app.jobSeeker.education,
-          title: app.jobSeeker.title,
-          date_of_birth: app.jobSeeker.date_of_birth,
-          gender: app.jobSeeker.gender
+          description: app.jobSeeker.description || '',
+          nationality: app.jobSeeker.nationality || '',
+          skills: app.jobSeeker.skills || [],
+          experience: app.jobSeeker.experience || '',
+          education: app.jobSeeker.education || '',
+          title: app.jobSeeker.title || '',
+          date_of_birth: app.jobSeeker.date_of_birth || '',
+          gender: app.jobSeeker.gender || '',
         },
-        jobOfferId: this.job.id
-      }))
+        jobOfferId: this.job.id,
+      })),
     };
-    prompt += JSON.stringify(inputData, null, 2);
 
-
-    // Simulation d'un délai de traitement AI (1.5 secondes)
-    setTimeout(() => {
-      this.aiService.ask(prompt).then(result => {
-        const jsonString = this.extractJSON(result);
-        const response: AIRankingResponse = JSON.parse(jsonString)
-        console.log('AI Ranking response:', response);
-        // Attribuer des scores aléatoires à chaque application
-        this.job.applications!.forEach(application => {
-          if (!application.aiScore) {
-            application.aiScore = response.applications.find(app => app.id === application.id)?.score || 0;
+    // Optionnel: Valider les données avant envoi
+    this.aiService.validateRankingRequest(inputData).subscribe({
+      next: (validationResult) => {
+        if (!validationResult.valid) {
+          console.warn('Validation warnings:', validationResult.warnings);
+          if (validationResult.errors.length > 0) {
+            this.toastService.error(`Erreurs de validation: ${validationResult.errors.join(', ')}`);
+            this.isRanking = false;
+            return;
           }
-        })
-      }).catch(error => {
+        }
+
+        // Appeler le microservice backend pour le ranking
+        this.performAIRanking(inputData);
+      },
+      error: (validationError) => {
+        console.error('Validation error:', validationError);
+        // Continuer avec le ranking même si la validation échoue
+        this.performAIRanking(inputData);
+      },
+    });
+  }
+
+  /**
+   * Effectue le classement AI via le microservice
+   */
+  private performAIRanking(inputData: JobOfferAIRequest): void {
+    this.aiService.rankApplications(inputData).subscribe({
+      next: (response: AIRankingResponse) => {
+        console.log('AI Ranking response:', response);
+
+        // Attribuer les scores aux applications
+        this.job.applications!.forEach((application) => {
+          const scoredApp = response.applications.find((app) => app.id === application.id);
+          application.aiScore = scoredApp?.score || 0;
+        });
+
+        // Trier par score décroissant
+        this.job.applications!.sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
+
+        this.aiRankingEnabled = true;
+        this.isRanking = false;
+
+        // Calculer les statistiques pour le feedback
+        const scores = response.applications.map((app) => app.score);
+        const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+        const maxScore = Math.max(...scores);
+
+        this.toastService.success(
+          `Classement AI terminé ! ${
+            response.applications.length
+          } candidatures évaluées. Score moyen: ${averageScore.toFixed(1)}/100`
+        );
+      },
+      error: (error) => {
         console.error('AI Ranking error:', error);
-      });
+        this.isRanking = false;
 
-      // Trier par score décroissant
-      this.job.applications!.sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
+        let errorMessage = 'Erreur lors du classement AI. Veuillez réessayer.';
 
-      this.aiRankingEnabled = true;
-      this.isRanking = false;
-    }, 1500);
+        if (error.status === 400) {
+          errorMessage = 'Données invalides pour le classement AI.';
+        } else if (error.status === 500) {
+          errorMessage = 'Service AI temporairement indisponible.';
+        } else if (error.status === 0) {
+          errorMessage = 'Impossible de contacter le service AI. Vérifiez la connexion.';
+        }
+
+        this.toastService.error(errorMessage);
+
+        // Fallback: utiliser le classement par date
+        this.disableAIRanking();
+      },
+    });
   }
 
   /**
@@ -311,10 +339,30 @@ export class JobCardRecruiter {
     this.aiRankingEnabled = false;
     // Réinitialiser l'ordre par date de candidature
     if (this.job.applications) {
-      this.job.applications.sort((a, b) =>
-        new Date(b.applicationDate).getTime() - new Date(a.applicationDate).getTime()
+      this.job.applications.sort(
+        (a, b) => new Date(b.applicationDate).getTime() - new Date(a.applicationDate).getTime()
       );
     }
+  }
+
+  /**
+   * Vérifie la santé du service AI avant de lancer le ranking
+   */
+  checkAIServiceHealth(): void {
+    this.aiService.checkRankingHealth().subscribe({
+      next: (health) => {
+        console.log('AI Service Health:', health);
+        if (health.status === 'OK') {
+          this.toastService.success('Service AI disponible et opérationnel');
+        }
+      },
+      error: (error) => {
+        console.error('AI Service Health check failed:', error);
+        this.toastService.error(
+          'Service AI temporairement indisponible - Le classement peut échouer'
+        );
+      },
+    });
   }
 
   /**
@@ -322,6 +370,11 @@ export class JobCardRecruiter {
    */
   toggleFavorites(): void {
     this.showFavoritesOnly = !this.showFavoritesOnly;
+    if (this.showFavoritesOnly) {
+      this.toastService.success(`Affichage des favoris uniquement (${this.favoritesCount})`);
+    } else {
+      this.toastService.success('Affichage de toutes les candidatures');
+    }
   }
 
   /**
@@ -330,6 +383,8 @@ export class JobCardRecruiter {
   toggleFavorite(application: Application, event: Event): void {
     event.stopPropagation(); // Empêcher l'ouverture des détails
     application.isFavorite = !application.isFavorite;
+
+    const action = application.isFavorite ? 'ajoutée aux' : 'retirée des';
   }
 
   /**
@@ -341,7 +396,7 @@ export class JobCardRecruiter {
     }
 
     if (this.showFavoritesOnly) {
-      return this.job.applications.filter(app => app.isFavorite);
+      return this.job.applications.filter((app) => app.isFavorite);
     }
 
     return this.job.applications;
@@ -357,15 +412,44 @@ export class JobCardRecruiter {
       return 'bg-blue-100 text-blue-800 border-blue-300';
     } else if (score >= 70) {
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    } else if (score >= 60) {
+      return 'bg-orange-100 text-orange-800 border-orange-300';
     } else {
       return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   }
 
   /**
+   * Obtient le texte descriptif pour le score
+   */
+  getScoreText(score: number): string {
+    if (score >= 90) return 'Excellent';
+    if (score >= 80) return 'Très bon';
+    if (score >= 70) return 'Bon';
+    if (score >= 60) return 'Moyen';
+    return 'À améliorer';
+  }
+
+  /**
    * Compte le nombre de favoris
    */
   get favoritesCount(): number {
-    return this.job.applications?.filter(app => app.isFavorite).length || 0;
+    return this.job.applications?.filter((app) => app.isFavorite).length || 0;
+  }
+
+  /**
+   * Obtient le score moyen des candidatures
+   */
+  get averageScore(): number {
+    if (!this.job.applications || this.job.applications.length === 0) return 0;
+    const total = this.job.applications.reduce((sum, app) => sum + (app.aiScore || 0), 0);
+    return total / this.job.applications.length;
+  }
+
+  /**
+   * Obtient le nombre de candidatures avec score élevé (>80)
+   */
+  get highQualityApplications(): number {
+    return this.job.applications?.filter((app) => (app.aiScore || 0) >= 80).length || 0;
   }
 }

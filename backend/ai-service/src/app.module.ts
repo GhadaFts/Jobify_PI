@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CvCorrectionModule } from './cv-correction/cv-correction.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { InterviewBotModule } from './interview-bot/interview-bot.module'; // AJOUT
-
+import { ApplicationRankingModule } from './application-ranking/application-ranking.module'; // AJOUT
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -11,7 +11,8 @@ import { InterviewBotModule } from './interview-bot/interview-bot.module'; // AJ
     }),
     GeminiModule,
     CvCorrectionModule,
-    InterviewBotModule, // AJOUT
+    InterviewBotModule,
+    ApplicationRankingModule, // AJOUT
   ],
 })
 export class AppModule {}
