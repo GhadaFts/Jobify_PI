@@ -3,8 +3,11 @@ package com.example.jobify
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
@@ -14,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -43,6 +47,11 @@ class CvCorrectionActivity : AppCompatActivity() {
     private lateinit var analyzeButton: Button
     private lateinit var loadingIndicator: ProgressBar
     private lateinit var mainScroll: NestedScrollView
+    private var isDarkMode = false
+    private lateinit var rootLayout: ScrollView
+    private lateinit var tvAdviceResult: TextView
+
+
 
     // Results UI
     private lateinit var resultsWrapper: LinearLayout
@@ -80,6 +89,47 @@ class CvCorrectionActivity : AppCompatActivity() {
 
         bindViews()
         setupListeners()
+
+        // ---------------- MENU ACTIONS ----------------
+        findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, JobOpportunitiesActivity::class.java))
+        }
+
+        findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        findViewById<LinearLayout>(R.id.menuCorrectCVLayout)?.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, CvCorrectionActivity::class.java))
+        }
+        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, InterviewPreparationActivity::class.java))
+
+        }
+
+        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
+        }
+
+        findViewById<LinearLayout>(R.id.menuHelpLayout)?.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            Toast.makeText(this, "Help section coming soon!", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
+            // Close drawer first
+            drawerLayout.closeDrawer(GravityCompat.START)
+
+            // Perform logout after drawer closes
+            Handler(Looper.getMainLooper()).postDelayed({
+                performLogout()
+            }, 250)
+        }
     }
 
     private fun bindViews() {
@@ -126,6 +176,43 @@ class CvCorrectionActivity : AppCompatActivity() {
         }
     }
 
+    private fun performLogout() {
+        try {
+            // Clear session
+            val sessionManager = SessionManager(this)
+            sessionManager.clearSession()
+
+            // Show logout message
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // Navigate to MainActivity (splash) which will redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+
+            // Finish current activity
+            finishAffinity() // This ensures all activities are cleared
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Logout error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    private fun toggleDarkMode(btnTheme: ImageView, darkModeIcon: ImageView?) {
+        if (isDarkMode) {
+            btnTheme.setImageResource(R.drawable.ic_sun)
+            darkModeIcon?.setImageResource(R.drawable.ic_dark_mode)
+            rootLayout.setBackgroundColor(Color.parseColor("#F5F7FA"))
+            tvAdviceResult.setTextColor(Color.parseColor("#333333"))
+            isDarkMode = false
+        } else {
+            btnTheme.setImageResource(R.drawable.ic_moon)
+            darkModeIcon?.setImageResource(R.drawable.ic_sun)
+            rootLayout.setBackgroundColor(Color.parseColor("#1F1F1F"))
+            tvAdviceResult.setTextColor(Color.parseColor("#FFFFFF"))
+            isDarkMode = true
+        }
+    }
     private fun analyzeCv(uri: Uri) {
         showLoading(true)
         CoroutineScope(Dispatchers.Main).launch {
@@ -326,4 +413,5 @@ class CvCorrectionActivity : AppCompatActivity() {
         }
         return result ?: getString(R.string.unknown_file)
     }
+
 }

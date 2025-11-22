@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
-import { JobOffer } from '../../../types'; // Adjust the import path
+// find-job.ts - VERSION COMPLÈTE AVEC BOUTONS
+import { Component, OnInit } from '@angular/core';
+import { JobOffer } from '../../../types';
+import { GeocodingService } from '../../../services/geocoding.service';
+
 interface ApplicationData {
   generatedCV?: string;
   uploadedFile?: File;
@@ -7,6 +10,11 @@ interface ApplicationData {
   applicationDate: Date;
 }
 
+interface Coordinates {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+}
 
 @Component({
   selector: 'app-find-job',
@@ -14,138 +22,331 @@ interface ApplicationData {
   templateUrl: './find-job.html',
   styleUrls: ['./find-job.scss']
 })
-export class FindJob {
+export class FindJob implements OnInit {
   activeTab: string = 'all';
   searchQuery: string = '';
+  
+  // SECTION TOGGLES
+  showLocationSection: boolean = false;
+  showFilterSection: boolean = false;
+  
+  // SEPARATE FILTERS
+  useCurrentLocation: boolean = false;
+  isLoadingLocation: boolean = false;
+  radius: number = 50;
+  
+  // Additional filters
+  jobTypeFilter: string = '';
+  jobStatusFilter: string = '';
+  
+  // IMPROVED location detection
+  detectedCity: string = '';
+  detectedArea: string = '';
+  detectedCoordinates: string = '';
+  locationAccuracy: string = '';
+  locationInfo: string = 'Enter a city name or use your current location';
+  
+  private coordinatesCache: Map<string, Coordinates> = new Map();
+  private currentLocation: Coordinates | null = null;
+
+  // JOBS DATA
   jobs: JobOffer[] = [
+    // Your existing jobs...
     {
       id: '1',
-      title: 'Software Engineer',
-      company: 'Tech Corp',
+      title: 'Full Stack Developer',
+      company: 'TekUp',
       companyLogo: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=200&fit=crop',
-      location: 'New York',
+      location: 'Tunis Center',
       type: 'Full-time',
       experience: '3+ years',
-      salary: '$120,000',
-      description: 'Develop web applications...',
-      skills: ['JavaScript', 'React', 'Node.js'],
-      requirements: ['Bachelor\'s degree in Computer Science', '3+ years of experience in software development'],
+      salary: '3,500 TND',
+      description: 'Develop modern web applications with Angular and Node.js',
+      skills: ['JavaScript', 'Angular', 'Node.js', 'MongoDB'],
+      requirements: ['Computer Science degree', 'Full stack development experience'],
       posted: '2 days ago',
-      applicants: 50,
+      applicants: 15,
       status: 'open',
       published: true,
-      applications: []
+      applications: [],
+      coordinates: { lat: 36.8065, lng: 10.1815 }
     },
+    // ... (include all your existing jobs)
+    
+    // NEW JOBS IN TEBOURBA/MANNOUBA AREA
     {
-      id: '2',
-      title: 'Data Analyst',
-      company: 'Data Insights',
+      id: '9',
+      title: 'Agricultural Engineer',
+      company: 'Tebourba Farming Coop',
       companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'San Francisco',
+      location: 'Tebourba',
       type: 'Full-time',
       experience: '2+ years',
-      salary: '$95,000',
-      description: 'Analyze data to provide actionable insights...',
-      skills: ['Python', 'SQL', 'Excel'],
-      requirements: ['Bachelor\'s degree in Statistics or related field', '2+ years of data analysis experience'],
-      posted: '5 days ago',
-      applicants: 30,
+      salary: '2,800 TND',
+      description: 'Manage agricultural operations and crop production',
+      skills: ['Agriculture', 'Crop Management', 'Irrigation', 'French'],
+      requirements: ['Agriculture engineering degree', 'Field experience'],
+      posted: '2 days ago',
+      applicants: 4,
+      status: 'open',
+      published: true,
+      applications: [],
+      coordinates: { lat: 36.8333, lng: 9.8500 }
+    },
+    {
+      id: '10',
+      title: 'School Teacher',
+      company: 'Tebourba Secondary School',
+      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
+      location: 'Tebourba Center',
+      type: 'Full-time',
+      experience: '3+ years',
+      salary: '2,500 TND',
+      description: 'Teaching mathematics and sciences to secondary students',
+      skills: ['Teaching', 'Mathematics', 'Sciences', 'Pedagogy'],
+      requirements: ['Teaching degree', '3+ years experience'],
+      posted: '1 week ago',
+      applicants: 8,
       status: 'urgent hiring',
       published: true,
-      applications: []
+      applications: [],
+      coordinates: { lat: 36.8380, lng: 9.8450 }
     },
-    {
-      id: '3',
-      title: 'UI/UX Designer',
-      company: 'Creative Studio',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Los Angeles',
-      type: 'Part-time',
-      experience: '1+ years',
-      salary: '$80,000',
-      description: 'Design user-friendly interfaces and experiences...',
-      skills: ['Figma', 'Adobe XD', 'Prototyping'],
-      requirements: ['Portfolio demonstrating UI/UX skills', 'Experience with design tools'],
-      posted: '1 week ago',
-      applicants: 20,
-      status: 'hot job',
-      published: true,
-      applications: []
-    },
-    {
-      id: '4',
-      title: 'Product Manager',
-      company: 'Innovate Inc',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Chicago',
-      type: 'Full-time',
-      experience: '5+ years',
-      salary: '$140,000',
-      description: 'Lead product development...',
-      skills: ['Product Strategy', 'Agile', 'User Research'],
-      requirements: ['5+ years of product management experience', 'Strong analytical skills'],
-      posted: '1 day ago',
-      applicants: 15,
-      status: 'new',
-      published: true,
-      applications: []
-    },
-    {
-      id: '5',
-      title: 'DevOps Engineer',
-      company: 'Cloud Solutions',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Austin',
-      type: 'Full-time',
-      experience: '4+ years',
-      salary: '$130,000',
-      description: 'Manage cloud infrastructure...',
-      skills: ['AWS', 'Docker', 'Kubernetes'],
-      requirements: ['Experience with cloud platforms', 'Knowledge of containerization technologies'],
-      posted: '3 days ago',
-      applicants: 25,
-      status: 'limited openings',
-      published: true,
-      applications: []
-    },
-    {
-      id: '6',
-      title: 'Frontend Developer',
-      company: 'Web Masters',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Miami',
-      type: 'Full-time',
-      experience: '2+ years',
-      salary: '$110,000',
-      description: 'Build responsive web applications...',
-      skills: ['TypeScript', 'React', 'CSS'],
-      requirements: ['Proficiency in modern frontend frameworks', 'Understanding of responsive design'],
-      posted: '4 days ago',
-      applicants: 40,
-      status: 'actively hiring',
-      published: true,
-      applications: []
-    },
+    // ... (include all your Tebourba/Mannouba jobs)
   ];
-   appliedJobs: Map<string, {
-    generatedCV?: string;
-    uploadedFile?: File;
-    coverLetter?: string;
-    applicationDate: Date;
-  }> = new Map();
+
+  appliedJobs: Map<string, ApplicationData> = new Map();
   bookmarkedJobs: Set<string> = new Set();
 
-  get allJobs(): JobOffer[] {
-    return this.jobs.filter(job =>
-      job.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(this.searchQuery.toLowerCase()))
-    );
+  constructor(private geocodingService: GeocodingService) {}
+
+  ngOnInit() {}
+
+  // TOGGLE SECTIONS
+  toggleLocationSection() {
+    this.showLocationSection = !this.showLocationSection;
+    // Close filter section if opening location section
+    if (this.showLocationSection) {
+      this.showFilterSection = false;
+    }
   }
 
+  toggleFilterSection() {
+    this.showFilterSection = !this.showFilterSection;
+    // Close location section if opening filter section
+    if (this.showFilterSection) {
+      this.showLocationSection = false;
+    }
+  }
+
+  // DISTANCE CALCULATION
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLng = this.deg2rad(lng2 - lng1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c;
+  }
+
+  private deg2rad(deg: number): number {
+    return deg * (Math.PI/180);
+  }
+
+  // MAIN GETTER WITH SEPARATE FILTERS
+  get allJobs(): JobOffer[] {
+    let filteredJobs = this.jobs;
+
+    // MAIN SEARCH
+    if (this.searchQuery.trim() !== '') {
+      const query = this.searchQuery.toLowerCase();
+      filteredJobs = filteredJobs.filter(job =>
+        job.title.toLowerCase().includes(query) ||
+        job.company.toLowerCase().includes(query) ||
+        job.skills.some(skill => skill.toLowerCase().includes(query)) ||
+        job.location.toLowerCase().includes(query)
+      );
+    }
+
+    // JOB TYPE FILTER
+    if (this.jobTypeFilter) {
+      filteredJobs = filteredJobs.filter(job => job.type === this.jobTypeFilter);
+    }
+
+    // JOB STATUS FILTER
+    if (this.jobStatusFilter) {
+      filteredJobs = filteredJobs.filter(job => job.status === this.jobStatusFilter);
+    }
+
+    // REAL-TIME GEOLOCATION FILTER
+    if (this.useCurrentLocation && this.currentLocation) {
+      filteredJobs = this.filterJobsByGeolocation(filteredJobs);
+    }
+
+    return filteredJobs;
+  }
+
+  // REAL-TIME GEOLOCATION FILTER
+  private filterJobsByGeolocation(jobs: JobOffer[]): JobOffer[] {
+    console.log('📍 Filtering by real-time geolocation:', this.currentLocation);
+    
+    return jobs.filter(job => {
+      if (!job.coordinates) return false;
+      
+      const distance = this.calculateDistance(
+        this.currentLocation!.lat, this.currentLocation!.lng,
+        job.coordinates.lat, job.coordinates.lng
+      );
+      
+      console.log(`📏 ${job.location}: ${distance.toFixed(1)}km (radius: ${this.radius}km)`);
+      return distance <= this.radius;
+    });
+  }
+
+  // REAL-TIME GEOLOCATION TOGGLE
+  async toggleCurrentLocation() {
+    if (this.useCurrentLocation) {
+      // Deactivate
+      this.useCurrentLocation = false;
+      this.currentLocation = null;
+      this.detectedCity = '';
+      this.detectedArea = '';
+      this.locationInfo = 'Real-time location deactivated';
+    } else {
+      // Activate
+      this.isLoadingLocation = true;
+      this.locationInfo = 'Detecting your precise location...';
+      
+      try {
+        const position = await this.geocodingService.getCurrentPosition();
+        this.currentLocation = position;
+        this.useCurrentLocation = true;
+        
+        this.detectedCoordinates = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+        this.locationAccuracy = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(0) + 'm' : 'Unknown'}`;
+        
+        console.log('📍 Raw coordinates:', this.detectedCoordinates);
+        
+        // IMPROVED REVERSE GEOCODING WITH BETTER LOGIC
+        this.geocodingService.getCityFromCoords(position.lat, position.lng).subscribe({
+          next: (data: any) => {
+            console.log('🔄 Full geocoding response:', data);
+            
+            if (data && data.results && data.results.length > 0) {
+              const bestResult = data.results[0];
+              const components = bestResult.components;
+              
+              console.log('📍 All location components:', components);
+              
+              // IMPROVED LOCATION DETECTION STRATEGY
+              let detectedLocation = this.extractBestLocationName(components);
+              
+              if (detectedLocation) {
+                this.detectedCity = detectedLocation;
+                this.detectedArea = this.extractAreaDetails(components);
+                this.locationInfo = `📍 Your location: ${detectedLocation}`;
+                
+                console.log('✅ Detected location:', detectedLocation);
+                console.log('📍 Area details:', this.detectedArea);
+              } else {
+                this.detectedCity = 'Your current area';
+                this.locationInfo = '📍 Real-time location active';
+                console.warn('⚠️ No specific location name found');
+              }
+              
+            } else {
+              this.detectedCity = 'Your current position';
+              this.locationInfo = '📍 Real-time location active';
+              console.error('❌ No results from geocoding API');
+            }
+            this.isLoadingLocation = false;
+          },
+          error: (error) => {
+            console.error('❌ Reverse geocoding error:', error);
+            this.detectedCity = 'Your current position';
+            this.locationInfo = '📍 Real-time location active (API error)';
+            this.isLoadingLocation = false;
+          }
+        });
+      } catch (error) {
+        console.error('❌ Geolocation error:', error);
+        
+        let errorMessage = 'Unknown error';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else {
+          errorMessage = String(error);
+        }
+        
+        this.locationInfo = `❌ Error: ${errorMessage}`;
+        this.useCurrentLocation = false;
+        this.isLoadingLocation = false;
+        
+        if (errorMessage.includes('permission')) {
+          alert('📍 Please allow location access in your browser settings to use this feature.');
+        } else if (errorMessage.includes('unavailable')) {
+          alert('📍 Location unavailable. Please check your GPS signal and try again.');
+        } else if (errorMessage.includes('timeout')) {
+          alert('📍 Location detection timeout. Please try again.');
+        }
+      }
+    }
+  }
+
+  // IMPROVED LOCATION EXTRACTION
+  private extractBestLocationName(components: any): string {
+    const locationPriority = [
+      components.city,
+      components.town,
+      components.village,
+      components.municipality,
+      components.county,
+      components.suburb,
+      components.neighbourhood,
+      components.state_district,
+      components.state
+    ];
+
+    return locationPriority.find(name => name && name.trim() !== '') || '';
+  }
+
+  private extractAreaDetails(components: any): string {
+    const details = [];
+    
+    if (components.road) details.push(components.road);
+    if (components.suburb && !components.city) details.push(components.suburb);
+    if (components.postcode) details.push(components.postcode);
+    
+    return details.length > 0 ? details.join(', ') : 'Area details not available';
+  }
+
+  // RESET ALL FILTERS
+  resetFilters() {
+    this.searchQuery = '';
+    this.useCurrentLocation = false;
+    this.currentLocation = null;
+    this.radius = 50;
+    this.jobTypeFilter = '';
+    this.jobStatusFilter = '';
+    this.detectedCity = '';
+    this.detectedArea = '';
+    this.detectedCoordinates = '';
+    this.locationAccuracy = '';
+    this.locationInfo = 'Enter a city name or use your current location';
+    this.showLocationSection = false;
+    this.showFilterSection = false;
+  }
+
+  // EXISTING METHODS
   get appliedJobsList(): JobOffer[] {
     return this.jobs.filter(job => this.appliedJobs.has(job.id));
   }
+
   get bookmarkedJobsList(): JobOffer[] {
     return this.jobs.filter(job => this.bookmarkedJobs.has(job.id));
   }
@@ -166,7 +367,6 @@ export class FindJob {
     this.appliedJobs.delete(jobId);
   }
 
-
   handleBookmarkJob(jobId: string) {
     if (this.bookmarkedJobs.has(jobId)) {
       this.bookmarkedJobs.delete(jobId);
@@ -175,20 +375,18 @@ export class FindJob {
     }
   }
 
-  // Méthode pour obtenir la couleur selon le statut
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      'open': '#10B981', // Vert
-      'new': '#3B82F6', // Bleu
-      'hot job': '#DC2626', // Rouge
-      'limited openings': '#F59E0B', // Orange
-      'actively hiring': '#8B5CF6', // Violet
-      'urgent hiring': '#EF4444' // Rouge vif
+      'open': '#10B981',
+      'new': '#3B82F6',
+      'hot job': '#DC2626',
+      'limited openings': '#F59E0B',
+      'actively hiring': '#8B5CF6',
+      'urgent hiring': '#EF4444'
     };
-    return colors[status] || '#6B7280'; // Gris par défaut
+    return colors[status] || '#6B7280';
   }
 
-  // Méthode pour formater le nombre d'applicants
   formatCount(count: number): string {
     return count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count.toString();
   }

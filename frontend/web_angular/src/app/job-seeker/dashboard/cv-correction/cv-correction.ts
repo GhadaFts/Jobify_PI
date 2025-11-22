@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { JobSeeker } from '../../../types';
-import { AiService } from '../../../ai-service/ai-service';
+import { AiService } from '../../../ai-service/ai-service-backend'; // Votre nouveau service
 import * as pdfjsLib from 'pdfjs-dist';
-import { marked } from 'marked';
 
 interface ImprovedSummary {
   overallAssessment: string;
@@ -18,7 +16,7 @@ interface CvSuggestion {
   message: string;
 }
 
-interface GeminiResponse {
+interface CvAnalysisResponse {
   cvScore: number;
   cvSuggestions: CvSuggestion[];
   improvedSummary: ImprovedSummary;
@@ -42,79 +40,10 @@ export class CvCorrection {
     strengths: [],
     improvements: []
   };
-  
-  private readonly defaultPrompt = `
-You are a professional CV analyzer. 
-You will receive the raw text extracted from a user's CV.
 
-Your goal is to analyze it and return a JSON object (NO explanations, NO markdown, NO text outside JSON).
-The JSON must strictly follow this structure:
+  // Supprimez le defaultPrompt car il est maintenant dans le backend
 
-{
-  "cvScore": number, // overall score out of 100
-  "cvSuggestions": [
-    {
-      "id": string, // unique id like "weak_1" or "missing_3"
-      "type": "success" | "warning" | "info" | "missing",
-      "title": string,
-      "message": string
-    }
-  ],
-  "improvedSummary": {
-    "overallAssessment": string,
-    "strengths": string[],
-    "improvements": string[]
-  },
-  "profile": {
-    "id": number,
-    "email": string,
-    "password": string,
-    "fullName": string,
-    "role": string,
-    "photo_profil": string,
-    "twitter_link": string,
-    "web_link": string,
-    "github_link": string,
-    "facebook_link": string,
-    "description": string,
-    "phone_number": string,
-    "nationality": string,
-    "skills": string[],
-    "experience": [
-      {
-        "position": string,
-        "company": string,
-        "startDate": string,
-        "endDate": string,
-        "description": string
-      }
-    ],
-    "education": [
-      {
-        "degree": string,
-        "field": string,
-        "school": string,
-        "graduationDate": string
-      }
-    ],
-    "title": string,
-    "date_of_birth": string,
-    "gender": string
-  }
-}
-
-Guidelines for the analysis:
-- Identify STRONG sections (good content) → type = "success"
-- Identify WEAK or unclear sections → type = "warning"
-- Identify INFO or general improvement tips → type = "info"
-- Identify MISSING sections (e.g., missing contact info, summary, education) → type = "missing"
-- Score between 0–100 based on completeness, clarity, and structure.
-
-Return only JSON.
-Now analyze this CV:
-`;
-
-  constructor(private ai: AiService) {
+  constructor(private aiService: AiService) { // Renommez 'ai' en 'aiService'
     (pdfjsLib as any).GlobalWorkerOptions.workerSrc =
       `https://unpkg.com/pdfjs-dist@${(pdfjsLib as any).version}/build/pdf.worker.min.mjs`;
   }
@@ -142,6 +71,7 @@ Now analyze this CV:
     gender: ''
   };
   pdfText = '';
+  jobDescription: string = ''; // Ajoutez cette propriété si elle n'existe pas
 
   onDragOver(event: DragEvent) {
     event.preventDefault();
@@ -222,6 +152,7 @@ Now analyze this CV:
     this.cvScore = null;
     this.cvSuggestions = [];
     this.pdfText = '';
+    this.jobDescription = ''; // Reset job description aussi
     this.profile = {
       id: 0,
       email: '',
@@ -272,91 +203,25 @@ Now analyze this CV:
     }
 
     this.isLoading = true;
-    const fullPrompt = `${this.defaultPrompt}\n\n${this.pdfText}`;
 
     try {
-      const result = await this.ai.ask(fullPrompt);
-      if (typeof result === 'string') {
-        try {
-          // First try parsing as direct JSON
-          const response: GeminiResponse = JSON.parse(result);
-          this.cvScore = response.cvScore;
-          this.cvSuggestions = response.cvSuggestions;
-          this.improvedSummary = response.improvedSummary;
-          this.profile = response.profile;
-          this.isAnalyzed = true;
-        } catch (parseError) {
-          console.warn('JSON parse failed, trying to extract JSON from response');
-          
-          // Try to extract JSON from the response
-          const jsonMatch = result.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            try {
-              const response: GeminiResponse = JSON.parse(jsonMatch[0]);
-              this.cvScore = response.cvScore;
-              this.cvSuggestions = response.cvSuggestions;
-              this.improvedSummary = response.improvedSummary;
-              this.profile = response.profile;
-              this.isAnalyzed = true;
-            } catch (error) {
-              console.error('Error parsing extracted JSON:', error);
-              this.handleNonJsonResponse(result);
-            }
-          } else {
-            // Handle as non-JSON response
-            this.handleNonJsonResponse(result);
-          }
-        }
-      }
+      // Utilisez le nouveau service backend au lieu d'appeler Gemini directement
+      const result = await this.aiService.analyzeCv(this.pdfText, this.jobDescription).toPromise();
+      
+      // Traitez le résultat directement (le backend garantit la structure JSON)
+      this.cvScore = result.cvScore;
+      this.cvSuggestions = result.cvSuggestions;
+      this.improvedSummary = result.improvedSummary;
+      this.profile = result.profile;
+      this.isAnalyzed = true;
+
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      alert('Error communicating with AI service. Please try again.');
+      console.error('Error analyzing CV:', error);
+      alert('Error analyzing CV. Please try again.');
     } finally {
       this.isLoading = false;
     }
   }
 
-  private handleNonJsonResponse(result: string) {
-    // Try to extract score if present
-    const scoreMatch = result.match(/(?:score|rating):\s*(\d+)/i);
-    if (scoreMatch) {
-      this.cvScore = parseInt(scoreMatch[1], 10);
-    }
-
-    // Try to extract suggestions
-    const sections = result.split(/[\n\r]+/);
-    const suggestions: CvSuggestion[] = [];
-    let currentType: 'success' | 'warning' | 'info' | 'missing' = 'info';
-    
-    sections.forEach((section, index) => {
-      if (section.toLowerCase().includes('strength') || section.includes('✓')) {
-        currentType = 'success';
-      } else if (section.toLowerCase().includes('improve') || section.toLowerCase().includes('weak') || section.includes('⚠')) {
-        currentType = 'warning';
-      } else if (section.toLowerCase().includes('missing') || section.includes('❌')) {
-        currentType = 'missing';
-      }
-
-      if (section.trim() && !section.toLowerCase().includes('section') && section.length > 10) {
-        suggestions.push({
-          id: `suggestion_${index}`,
-          type: currentType,
-          title: currentType.charAt(0).toUpperCase() + currentType.slice(1),
-          message: section.trim()
-        });
-      }
-    });
-
-    if (suggestions.length > 0) {
-      this.cvSuggestions = suggestions;
-    }
-
-    this.improvedSummary = {
-      overallAssessment: result.split('\n')[0] || 'Analysis completed',
-      strengths: suggestions.filter(s => s.type === 'success').map(s => s.message),
-      improvements: suggestions.filter(s => s.type === 'warning' || s.type === 'missing').map(s => s.message)
-    };
-
-    this.isAnalyzed = true;
-  }
+  // Supprimez handleNonJsonResponse car le backend gère déjà ça
 }

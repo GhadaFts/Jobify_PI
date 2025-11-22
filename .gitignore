@@ -1,0 +1,43 @@
+# Eclipse/STS metadata
+.metadata/
+.settings/
+.classpath
+.project
+.factorypath
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# Build outputs
+build/
+dist/
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
+
+# Application specific
+application.properties.local

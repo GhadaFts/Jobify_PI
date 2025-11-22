@@ -77,6 +77,10 @@ class AICareerAdvisorActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, CvCorrectionActivity::class.java))
         }
+        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout)?.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, InterviewPreparationActivity::class.java))
+        }
 
         findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)

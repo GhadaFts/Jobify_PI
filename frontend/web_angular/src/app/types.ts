@@ -67,11 +67,12 @@ export interface InterviewNotification {
   interviewType: string;
 }
 
+// Dans types.ts, modifiez l'interface JobOffer :
 export interface JobOffer {
   id: string;
   title: string;
   company: string;
-  companyLogo?: string;
+  companyLogo?: string; // ← RENDEZ-LE OPTIONNEL AVEC "?"
   location: string;
   type: string;
   experience: string;
@@ -83,7 +84,11 @@ export interface JobOffer {
   applicants: number;
   status: string;
   published: boolean;
-  applications?: Application[];
+  applications: any[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 export interface Interview {
   id: string;
