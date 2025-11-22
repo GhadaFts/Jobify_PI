@@ -32,10 +32,10 @@ public class Application {
 
     // Foreign Keys (references to other microservices)
     @Indexed
-    private Integer jobSeekerId;
+    private Double jobSeekerId;
 
     @Indexed
-    private Integer jobOfferId;
+    private Double jobOfferId;
 
     // AI Ranking (score from AI Service - Gemini)
     private Double aiScore;

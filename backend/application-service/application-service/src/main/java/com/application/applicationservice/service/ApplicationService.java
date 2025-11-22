@@ -77,13 +77,13 @@ public class ApplicationService {
         return mapToDTO(application);
     }
 
-    public List<ApplicationResponseDTO> getByJobOfferId(Integer jobOfferId) {
+    public List<ApplicationResponseDTO> getByJobOfferId(Double jobOfferId) {
         return repository.findByJobOfferId(jobOfferId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<ApplicationResponseDTO> getByJobSeekerId(Integer jobSeekerId) {
+    public List<ApplicationResponseDTO> getByJobSeekerId(Double jobSeekerId) {
         return repository.findByJobSeekerId(jobSeekerId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class ApplicationService {
         repository.delete(application);
     }
     
-    public Boolean checkDuplicateApplication(Integer jobOfferId, Integer jobSeekerId) {
+    public Boolean checkDuplicateApplication(Double jobOfferId, Double jobSeekerId) {
         return repository.existsByJobOfferIdAndJobSeekerId(jobOfferId, jobSeekerId);
     }
 

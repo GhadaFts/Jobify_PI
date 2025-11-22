@@ -33,12 +33,12 @@ public class ApplicationController {
     }
 
     @GetMapping("/joboffer/{jobOfferId}")
-    public ResponseEntity<List<ApplicationResponseDTO>> getByJobOfferId(@PathVariable Integer jobOfferId) {
+    public ResponseEntity<List<ApplicationResponseDTO>> getByJobOfferId(@PathVariable Double jobOfferId) {
         return ResponseEntity.ok(service.getByJobOfferId(jobOfferId));
     }
 
     @GetMapping("/jobseeker/{jobSeekerId}")
-    public ResponseEntity<List<ApplicationResponseDTO>> getByJobSeekerId(@PathVariable Integer jobSeekerId) {
+    public ResponseEntity<List<ApplicationResponseDTO>> getByJobSeekerId(@PathVariable Double jobSeekerId) {
         return ResponseEntity.ok(service.getByJobSeekerId(jobSeekerId));
     }
 
@@ -74,8 +74,8 @@ public class ApplicationController {
     
     @GetMapping("/check-duplicate")
     public ResponseEntity<Boolean> checkDuplicate(
-            @RequestParam Integer jobOfferId,
-            @RequestParam Integer jobSeekerId) {
+            @RequestParam Double jobOfferId,
+            @RequestParam Double jobSeekerId) {
         return ResponseEntity.ok(service.checkDuplicateApplication(jobOfferId, jobSeekerId));
     }
 }
