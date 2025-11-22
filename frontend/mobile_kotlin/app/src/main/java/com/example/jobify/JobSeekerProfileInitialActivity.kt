@@ -232,7 +232,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
             2 -> {
                 binding.btnProfile.setTextColor(getColor(R.color.colorPrimary))
                 binding.viewProfileIndicator.visibility = View.VISIBLE
-                displayExperiences() 
+                displayExperiences()
                 displayEducations()
             }
             3 -> {
