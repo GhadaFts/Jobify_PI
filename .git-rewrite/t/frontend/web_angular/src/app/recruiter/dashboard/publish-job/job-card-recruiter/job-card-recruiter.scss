@@ -1,0 +1,104 @@
+// Animation pour le bouton AI Ranking
+@keyframes pulse-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.ai-ranking-button {
+  background-size: 200% 200%;
+  animation: pulse-gradient 3s ease infinite;
+}
+
+// Animation pour l'étoile favorite
+@keyframes star-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.favorite-star {
+  &.active {
+    animation: star-pop 0.4s ease;
+  }
+}
+
+// Animation pour le score badge
+@keyframes score-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.score-badge {
+  animation: score-fade-in 0.5s ease;
+}
+
+// Animation pour le numéro de rang
+@keyframes rank-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.rank-number {
+  animation: rank-bounce 1s ease infinite;
+}
+
+// Transition smooth pour les cartes d'application
+.application-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+// Effet de shimmer pour le loading AI
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(
+    to right,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+// Effet de glow pour les éléments actifs
+.glow-effect {
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+  }
+}

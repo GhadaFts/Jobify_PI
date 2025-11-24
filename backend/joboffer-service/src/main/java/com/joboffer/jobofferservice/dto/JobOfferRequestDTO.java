@@ -18,5 +18,5 @@ public class JobOfferRequestDTO {
     private List<String> skills;
     private boolean published;
     private String status;
-    private Integer recruiterId; // foreign key reference
+    private Double recruiterId; // foreign key reference
 }

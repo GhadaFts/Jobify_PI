@@ -1,0 +1,287 @@
+<!-- NAVBAR INSIDE LANDING PAGE -->
+<nav
+    class="flex justify-between items-center px-6 md:px-10 py-4 bg-white/90 backdrop-blur-lg shadow-md sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+        <img src="assets/logo.png" class="w-8" alt="Jobify Logo" />
+        <h1 class="text-xl font-semibold text-jobiBlue">Jobify</h1>
+    </div>
+
+    <ul class="hidden md:flex gap-10">
+        <li><a routerLink="/" class="text-black hover:text-jobiBlue transition">Home</a></li>
+        <li><a href="#features" class="text-black hover:text-jobiBlue transition">Features</a></li>
+        <li><a href="#how-it-works" class="text-black hover:text-jobiBlue transition">How It Works</a></li>
+        <li><a routerLink="/login" class="text-black hover:text-jobiBlue transition">Login</a></li>
+        <li><a routerLink="/signup" class="text-black hover:text-jobiBlue transition">Register</a></li>
+    </ul>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="grid grid-cols-1 md:grid-cols-2 items-center px-6 md:px-16 py-16 md:py-20 gap-10">
+    <!-- LEFT SIDE TEXT -->
+    <div class="space-y-6 text-center md:text-left">
+        <p class="text-jobiBlue font-semibold text-sm md:text-base">
+            Welcome to Jobify
+        </p>
+
+        <h1 class="text-4xl md:text-6xl text-black leading-tight font-semibold md:font-normal">
+            Reimagining recruitment<br />
+            through the power of AI.
+        </h1>
+
+        <p class="text-gray-600 max-w-md mx-auto md:mx-0 leading-relaxed">
+            Jobify empowers job seekers, professionals, and companies with smart tools for CV building,
+            interview preparation, and intelligent job matching — all in one powerful platform.
+        </p>
+
+        <!-- BUTTONS -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
+            <a routerLink="/login" class="btn-primary">
+                Log In
+            </a>
+            <a routerLink="/signup" class="btn-secondary">
+                Register
+            </a>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE IMAGE -->
+    <div class="flex justify-center md:justify-end">
+        <img src="assets/hero-image.png" alt="Hero Image"
+            class="w-[300px] sm:w-[380px] md:w-[500px] rounded-2xl shadow-lg border border-jobiGray" />
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section id="features" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                For Everyone in the Job Market
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Whether you're looking for your dream job or searching for the perfect candidate,
+                Jobify has the tools to make your journey successful.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+
+            <!-- Job Seeker Card -->
+            <div
+                class="relative bg-white rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-visible">
+
+                <!-- Overflow Avatar -->
+                <img src="../../../assets/Helping a partner-rafiki.svg" alt="Avatar"
+                    class="absolute -bottom-4 -right-10 w-48 h-auto pointer-events-none select-none">
+
+                <div class="max-w-md">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">
+                        For <span class="text-jobiBlue">Job Seekers</span>
+                    </h3>
+
+                    <p class="text-gray-600 text-sm leading-relaxed mb-6">
+                        Holding social tokens allows the individual to gain access to benefits including
+                        annual and seasonal content, private communities, direct access to celebrity,
+                        early access to tickets, and more.
+                    </p>
+
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiBlue mr-3"></i>
+                            <span>AI-Powered CV Builder</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiBlue mr-3"></i>
+                            <span>Smart Job Matching</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiBlue mr-3"></i>
+                            <span>Interview Preparation</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiBlue mr-3"></i>
+                            <span>Career Growth Tracking</span>
+                        </li>
+                    </ul>
+
+                    <a routerLink="/signup" class="btn-primary inline-flex items-center">
+                        Start Your Journey
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recruiter Card -->
+            <div
+                class="relative bg-white rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-visible">
+
+                <!-- Overflow Avatar -->
+                <img src="../../../assets/Onboarding-rafiki.svg" alt="Avatar"
+                    class="absolute -bottom-4 -right-10 w-48 h-auto pointer-events-none select-none">
+
+                <div class="max-w-md">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">
+                        For <span class="text-jobiBlue">Recruiters</span>
+                    </h3>
+
+                    <p class="text-gray-600 text-sm leading-relaxed mb-6">
+                        Holding social tokens allows the individual to gain access to benefits including
+                        annual and seasonal content, private communities, direct access to celebrity,
+                        early access to tickets, and more.
+                    </p>
+
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiOrange mr-3"></i>
+                            <span>Smart Candidate Matching</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiOrange mr-3"></i>
+                            <span>Automated Screening</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiOrange mr-3"></i>
+                            <span>Job Posting Management</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-jobiOrange mr-3"></i>
+                            <span>Analytics & Insights</span>
+                        </li>
+                    </ul>
+
+                    <a routerLink="/signup" class="btn-secondary inline-flex items-center">
+                        Find Talent
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</section>
+
+<!-- HOW IT WORKS SECTION -->
+<section id="how-it-works" class="py-16 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                How it <span class="text-jobiBlue">Work?</span>
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Simple steps to get started with Jobify and transform your career or recruitment process.
+            </p>
+        </div>
+
+        <div class="how-it-works-container">
+            <!-- Step 1 -->
+            <div class="text-center group step-item">
+                <div class="relative mb-6">
+                    <div class="step-circle step-pink">
+                        <i class="fas fa-user-plus text-3xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Sign In/Register</h3>
+                <p class="text-gray-600">
+                    Create your account as a job seeker or recruiter and set up your profile in minutes.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="text-center group step-item">
+                <div class="relative mb-6">
+                    <div class="step-circle step-blue">
+                        <i class="fas fa-search text-3xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Job Search & Match</h3>
+                <p class="text-gray-600">
+                    Start exploring opportunities or candidates with our intelligent matching algorithm.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="text-center group step-item">
+                <div class="relative mb-6">
+                    <div class="step-circle step-green">
+                        <i class="fas fa-file-upload text-3xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">CV/Resume Upload</h3>
+                <p class="text-gray-600">
+                    Upload your CV or create one with our AI builder. Recruiters can set up company profiles.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center mt-16">
+            <div class="cta-gradient rounded-2xl p-8 md:p-12 text-white max-w-4xl mx-auto">
+                <h3 class="text-2xl md:text-3xl font-bold mb-4">
+                    Ready to Transform Your Career?
+                </h3>
+                <p class="cta-text mb-6 max-w-2xl mx-auto">
+                    Join thousands of job seekers and recruiters who have found success with Jobify.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a routerLink="/signup" class="btn-cta-white">
+                        Get Started Free
+                    </a>
+                    <a routerLink="/login" class="btn-cta-outline">
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <img src="assets/logo.png" class="w-8" alt="Jobify Logo" />
+                    <h1 class="text-xl font-semibold text-white">Jobify</h1>
+                </div>
+                <p class="text-gray-400">
+                    Revolutionizing recruitment through AI-powered solutions for job seekers and employers.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">For Job Seekers</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">Find Jobs</a></li>
+                    <li><a href="#" class="hover:text-white transition">CV Builder</a></li>
+                    <li><a href="#" class="hover:text-white transition">Career Advice</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">For Recruiters</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">Post Jobs</a></li>
+                    <li><a href="#" class="hover:text-white transition">Find Candidates</a></li>
+                    <li><a href="#" class="hover:text-white transition">Recruitment Tools</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold mb-4">Company</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                    <li><a href="#" class="hover:text-white transition">Contact</a></li>
+                    <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Jobify. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

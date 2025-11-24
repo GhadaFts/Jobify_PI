@@ -34,5 +34,5 @@ public class JobOffer {
     private List<String> skills;
 
     // Reference to recruiter in another service
-    private Integer recruiterId;
+    private Double recruiterId;
 }

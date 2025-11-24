@@ -1,5 +1,5 @@
 <div class="flex h-screen" style="background-color: #f3f4f6">
-  <div class="flex-1 p-4 overflow-y-auto">
+  <div class="flex-1 p-4 overflow-y-auto  no-scrollbar">
     <!-- Header -->
     <div class="mb-6">
       <div>
@@ -30,7 +30,7 @@
           </svg>
           <input
             type="text"
-            placeholder="Search jobs, companies, skills..."
+            placeholder="Search jobs, companies, skills, locations ..."
             [(ngModel)]="searchQuery"
             class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             style="font-size: 15px"
@@ -70,7 +70,10 @@
 
     <!-- FIND JOBS NEAR YOU SECTION (Hidden by default) -->
     <div *ngIf="showLocationSection" class="mb-6 p-4 bg-white rounded-lg shadow-sm border border-blue-200">
-      <h3 class="text-sm font-semibold text-blue-800 mb-3">📍 Find Jobs Near You</h3>
+      <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-map-marker-alt text-blue-600"></i>
+        Find Jobs Near You
+      </h3>
       
       <div class="flex flex-wrap gap-4 items-end">
         <!-- Geolocation Toggle -->
@@ -83,9 +86,9 @@
             [disabled]="isLoadingLocation"
             class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium"
           >
-            <span *ngIf="isLoadingLocation">⏳</span>
-            <span *ngIf="!isLoadingLocation && !useCurrentLocation">📍</span>
-            <span *ngIf="!isLoadingLocation && useCurrentLocation">✅</span>
+            <i *ngIf="isLoadingLocation" class="fas fa-spinner fa-spin"></i>
+            <i *ngIf="!isLoadingLocation && !useCurrentLocation" class="fas fa-location-arrow"></i>
+            <i *ngIf="!isLoadingLocation && useCurrentLocation" class="fas fa-check-circle"></i>
             <span class="text-sm">
               {{ isLoadingLocation ? 'Detecting...' : (useCurrentLocation ? 'Location Active' : 'Use My Location') }}
             </span>
@@ -112,14 +115,20 @@
       <!-- Improved Location Information Display -->
       <div *ngIf="useCurrentLocation" class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
         <div class="text-sm text-green-800">
-          <p class="font-medium">{{ locationInfo }}</p>
-          <div *ngIf="detectedArea" class="text-xs text-green-600 mt-1">
+          <p class="font-medium flex items-center gap-2">
+            <i class="fas fa-check-circle text-green-600"></i>
+            {{ locationInfo }}
+          </p>
+          <div *ngIf="detectedArea" class="text-xs text-green-600 mt-1 flex items-center gap-2">
+            <i class="fas fa-map-pin"></i>
             {{ detectedArea }}
           </div>
-          <div *ngIf="detectedCoordinates" class="text-xs text-green-500 mt-1">
+          <div *ngIf="detectedCoordinates" class="text-xs text-green-500 mt-1 flex items-center gap-2">
+            <i class="fas fa-crosshairs"></i>
             Coordinates: {{ detectedCoordinates }}
           </div>
-          <div *ngIf="locationAccuracy" class="text-xs text-green-500">
+          <div *ngIf="locationAccuracy" class="text-xs text-green-500 flex items-center gap-2">
+            <i class="fas fa-bullseye"></i>
             {{ locationAccuracy }}
           </div>
         </div>
@@ -128,7 +137,10 @@
 
     <!-- ADDITIONAL FILTERS SECTION (Hidden by default) -->
     <div *ngIf="showFilterSection" class="mb-6 p-4 bg-white rounded-lg shadow-sm">
-      <h3 class="text-sm font-semibold text-gray-800 mb-3">🔧 Additional Filters</h3>
+      <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-sliders-h text-gray-600"></i>
+        Additional Filters
+      </h3>
       
       <div class="flex flex-wrap gap-4">
         <!-- Job Type Filter -->
@@ -165,8 +177,9 @@
         <div class="flex items-end">
           <button
             (click)="resetFilters()"
-            class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
+            <i class="fas fa-redo"></i>
             Reset All Filters
           </button>
         </div>

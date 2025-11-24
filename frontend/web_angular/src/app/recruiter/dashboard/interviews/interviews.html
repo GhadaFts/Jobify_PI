@@ -1,10 +1,9 @@
-<div class="flex h-screen" style="background-color: #f3f4f6">
-  <!-- Main Content with Scrollable Interview List -->
-  <div class="flex-1 p-4 overflow-y-auto">
+<div class="min-h-screen bg-transparent">
+  <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
     <!-- Header Section -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Scheduled Interviews</h1>
-      <p class="text-gray-600">Manage and track all your candidate interviews</p>
+      <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Scheduled Interviews</h1>
+      <p class="text-gray-600 text-sm lg:text-base">Manage and track all your candidate interviews</p>
     </div>
 
     <!-- Search and Filter Bar -->
@@ -29,33 +28,32 @@
           type="text"
           placeholder="Search interviews..."
           [(ngModel)]="searchQuery"
-          class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          style="font-size: 15px"
+          class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
         />
       </div>
     </div>
 
-    <!-- Interview Tabs -->
+    <!-- Interview Tabs - Responsive -->
     <div class="space-y-6">
-      <div class="grid grid-cols-3 rounded-lg" style="background-color: white;">
+      <div class="grid grid-cols-1 sm:grid-cols-3 rounded-lg bg-white">
         <button
           [class]="activeTab === 'all' ? 'border-b-2 border-[#336781] text-[#336781]' : 'text-gray-600'"
           (click)="activeTab = 'all'"
-          style="font-size: 15px; padding: 8px;"
+          class="text-sm lg:text-base py-3 px-4 transition-colors whitespace-nowrap"
         >
           All Interviews ({{ allInterviews.length }})
         </button>
         <button
           [class]="activeTab === 'upcoming' ? 'border-b-2 border-[#336781] text-[#336781]' : 'text-gray-600'"
           (click)="activeTab = 'upcoming'"
-          style="font-size: 15px; padding: 8px;"
+          class="text-sm lg:text-base py-3 px-4 transition-colors whitespace-nowrap"
         >
           Upcoming ({{ upcomingInterviews.length }})
         </button>
         <button
           [class]="activeTab === 'completed' ? 'border-b-2 border-[#336781] text-[#336781]' : 'text-gray-600'"
           (click)="activeTab = 'completed'"
-          style="font-size: 15px; padding: 8px;"
+          class="text-sm lg:text-base py-3 px-4 transition-colors whitespace-nowrap"
         >
           Completed ({{ completedInterviews.length }})
         </button>
@@ -68,8 +66,8 @@
           [interview]="interview"
         ></app-interview-card>
         
-        <div *ngIf="filteredAllInterviews.length === 0" class="text-center py-12">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="#D1D5DB" class="mx-auto mb-4">
+        <div *ngIf="filteredAllInterviews.length === 0" class="text-center py-8 lg:py-12 bg-white rounded-lg">
+          <svg width="40" height="40" class="mx-auto mb-4" viewBox="0 0 24 24" fill="#D1D5DB">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -77,8 +75,8 @@
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             ></path>
           </svg>
-          <h3 style="font-size: 18px; font-weight: 600; color: #111827">No interviews scheduled</h3>
-          <p style="font-size: 15px; color: #6b7280">Schedule interviews to see them here</p>
+          <h3 class="text-lg lg:text-xl font-semibold text-gray-900">No interviews scheduled</h3>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Schedule interviews to see them here</p>
         </div>
       </div>
 
@@ -89,8 +87,8 @@
           [interview]="interview"
         ></app-interview-card>
         
-        <div *ngIf="filteredUpcomingInterviews.length === 0" class="text-center py-12">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="#D1D5DB" class="mx-auto mb-4">
+        <div *ngIf="filteredUpcomingInterviews.length === 0" class="text-center py-8 lg:py-12 bg-white rounded-lg">
+          <svg width="40" height="40" class="mx-auto mb-4" viewBox="0 0 24 24" fill="#D1D5DB">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -98,8 +96,8 @@
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             ></path>
           </svg>
-          <h3 style="font-size: 18px; font-weight: 600; color: #111827">No upcoming interviews</h3>
-          <p style="font-size: 15px; color: #6b7280">Interviews that are scheduled will appear here</p>
+          <h3 class="text-lg lg:text-xl font-semibold text-gray-900">No upcoming interviews</h3>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Interviews that are scheduled will appear here</p>
         </div>
       </div>
 
@@ -110,8 +108,8 @@
           [interview]="interview"
         ></app-interview-card>
         
-        <div *ngIf="filteredCompletedInterviews.length === 0" class="text-center py-12">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="#D1D5DB" class="mx-auto mb-4">
+        <div *ngIf="filteredCompletedInterviews.length === 0" class="text-center py-8 lg:py-12 bg-white rounded-lg">
+          <svg width="40" height="40" class="mx-auto mb-4" viewBox="0 0 24 24" fill="#D1D5DB">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -119,8 +117,8 @@
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             ></path>
           </svg>
-          <h3 style="font-size: 18px; font-weight: 600; color: #111827">No completed interviews</h3>
-          <p style="font-size: 15px; color: #6b7280">Completed interviews will appear here</p>
+          <h3 class="text-lg lg:text-xl font-semibold text-gray-900">No completed interviews</h3>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Completed interviews will appear here</p>
         </div>
       </div>
     </div>

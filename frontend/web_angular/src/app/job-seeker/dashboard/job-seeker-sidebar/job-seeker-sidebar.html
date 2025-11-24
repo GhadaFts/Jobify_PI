@@ -1,52 +1,200 @@
-<div class="h-full bg-white p-4 overflow-hidden " style="border-color: #E5E7EB;">
-  <!-- Trending Communities -->
-  <div class="mb-6">
+<div class="h-full bg-white p-4 overflow-hidden" style="border-color: #E5E7EB;">
+  <!-- Tabs Navigation - Slim Design -->
+  <div class="flex border-b border-gray-200 mb-4">
+    <button
+      [class]="activeTab === 'companies' ? 
+        'border-b-2 border-blue-300 text-blue-600 ' : 
+        'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+      (click)="activeTab = 'companies'"
+      class="flex-1 py-2 text-xs transition-colors flex items-center justify-center relative"
+      [title]="'Companies'"
+    >
+      <i class="fas fa-building"></i>
+    </button>
+    <button
+      [class]="activeTab === 'interviews' ? 
+        'border-b-2 border-blue-300 text-blue-600 ' : 
+        'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+      (click)="activeTab = 'interviews'"
+      class="flex-1 py-2 text-xs transition-colors flex items-center justify-center relative"
+      [title]="'Interview Notifications'"
+    >
+      <i class="fas fa-bell relative">
+        <span *ngIf="getUpcomingInterviewsCount() > 0" 
+              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse text-[10px]">
+          {{ getUpcomingInterviewsCount() }}
+        </span>
+      </i>
+    </button>
+  </div>
+
+  <!-- Companies Tab -->
+  <div *ngIf="activeTab === 'companies'" class="space-y-4">
     <div class="flex items-center gap-2 mb-4">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A73E8">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4zm0 2c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4z"></path>
-      </svg>
-      <h3 style="font-size: 15px; font-weight: 600; color: #111827;">
-        Trending Communities
+      <h3 style="font-size: 14px; font-weight: 600; color: #111827;">
+        Featured Companies
       </h3>
-      <span style="font-size: 12px;">🇮🇳</span>
     </div>
+    
     <div class="space-y-3">
       <div
-        *ngFor="let community of trendingCommunities"
-        class="p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border"
-        style="background-color: #FAFAFA; border-color: #E5E7EB;"
+        *ngFor="let company of featuredCompanies"
+        (click)="openCompanyProfile(company)"
+        class="p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all border border-gray-200 hover:border-blue-200 hover:shadow-sm"
       >
         <div class="flex items-start gap-3">
-          <div
-            class="w-10 h-10 rounded-full flex items-center justify-center"
-            style="background-color: #EBF4FF;"
+          <!-- Company Logo -->
+          <div 
+            class="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0 border border-gray-200"
           >
-            <span style="font-size: 18px;">{{ community.avatar }}</span>
+            <img 
+              [src]="company.logo" 
+              [alt]="company.name"
+              class="w-full h-full object-cover"
+              *ngIf="company.logo; else fallbackLogo"
+            >
+            <ng-template #fallbackLogo>
+              <div class="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-xs">
+                {{ company.name.charAt(0) }}
+              </div>
+            </ng-template>
           </div>
+          
           <div class="flex-1 min-w-0">
-            <h4 style="font-size: 15px; font-weight: 600; color: #111827;">
-              {{ community.name }}
+            <h4 style="font-size: 14px; font-weight: 600; color: #111827;" class="hover:text-blue-600 truncate">
+              {{ company.name }}
             </h4>
-            <p style="font-size: 12px; color: #6B7280;">
-              {{ community.description }}
+            <p style="font-size: 11px; color: #6B7280; line-height: 1.3;" class="mt-1 line-clamp-2">
+              {{ company.description }}
             </p>
             <div class="flex items-center gap-2 mt-2">
-              <span style="font-size: 10px; background-color: #E5E7EB; color: #374151; padding: 2px 6px; border-radius: 4px;">
-                {{ community.category }}
+              <span 
+                style="font-size: 9px; background-color: #E5E7EB; color: #374151; padding: 1px 4px; border-radius: 3px;"
+                class="capitalize"
+              >
+                {{ company.domain }}
               </span>
-              <span style="font-size: 12px; color: #6B7280;">
-                {{ community.members }} members
+              <span style="font-size: 10px; color: #6B7280;" class="flex items-center gap-1">
+                <i class="fas fa-users text-[8px]"></i>
+                {{ company.employees }}
               </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <button
-      class="w-full mt-3 text-blue-600 hover:bg-blue-50 px-3 py-1 rounded"
-      style="color: #1A73E8; font-size: 12px;"
-    >
-      Explore all communities
-    </button>
+
+    <!-- Empty State for Companies -->
+    <div *ngIf="featuredCompanies.length === 0" class="text-center py-6 text-gray-500">
+      <i class="fas fa-building text-2xl mb-2 opacity-50"></i>
+      <p class="text-xs">No companies available</p>
+    </div>
+  </div>
+
+  <!-- Interviews Tab -->
+  <div *ngIf="activeTab === 'interviews'" class="space-y-3">
+    <div class="flex items-center gap-2 mb-4">
+      <h3 style="font-size: 14px; font-weight: 600; color: #111827; ">
+        Interview Notifications
+      </h3>
+    </div>
+
+    <div class="space-y-2">
+      <div
+        *ngFor="let interview of interviewNotifications"
+        class="p-3 rounded-lg border transition-all hover:shadow-sm"
+        [class]="getInterviewCardClass(interview)"
+      >
+        <div class="flex items-start gap-3">
+          <!-- Company Avatar -->
+          <div 
+            class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border border-blue-200"
+          >
+            <i class="fas fa-building text-blue-600 text-[10px]"></i>
+          </div>
+          
+          <div class="flex-1 min-w-0">
+            <!-- Company Name and Time Remaining -->
+            <div class="flex items-start justify-between mb-1">
+              <h4 style="font-size: 13px; font-weight: 600; color: #111827;" class="truncate">
+                {{ interview.companyName }}
+              </h4>
+              <span style="font-size: 9px; padding: 1px 4px; border-radius: 3px;"
+                    [class]="getTimeRemainingBadgeClass(interview)">
+                {{ getTimeRemaining(interview) }}
+              </span>
+            </div>
+
+            <!-- Interview Date and Time -->
+            <div class="flex items-center gap-2 mb-1 text-[11px] text-gray-600">
+              <span class="flex items-center gap-1">
+                <i class="far fa-calendar text-gray-400 text-[10px]"></i>
+                {{ formatInterviewDate(interview.interviewDate) }}
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="far fa-clock text-gray-400 text-[10px]"></i>
+                {{ interview.interviewTime }}
+              </span>
+            </div>
+
+            <!-- Interview Type and Duration -->
+            <div class="flex items-center gap-2 mb-2 text-[11px]">
+              <span class="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px]">
+                <i class="fas fa-hourglass-half text-[8px]"></i>
+                {{ interview.duration }}
+              </span>
+              <span *ngIf="isOnlineInterview(interview)" class="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 text-green-700 rounded text-[10px]">
+                <i class="fas fa-video text-[8px]"></i>
+                Online
+              </span>
+              <span *ngIf="!isOnlineInterview(interview)" class="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px]">
+                <i class="fas fa-map-marker-alt text-[8px]"></i>
+                Local
+              </span>
+            </div>
+
+            <!-- Location Display -->
+            <div class="mb-2">
+              <span class="flex items-center gap-1 text-[11px] text-gray-600" [title]="getLocationDisplay(interview)">
+                <i class="fas fa-map-marker-alt text-[10px] text-gray-400"></i>
+                <span class="truncate">{{ getLocationDisplay(interview) }}</span>
+              </span>
+            </div>
+
+            <!-- Additional Notes (Truncated) -->
+            <div *ngIf="interview.additionalNotes" class="mt-1 p-1.5 bg-gray-50 rounded text-[11px] text-gray-600">
+              <i class="fas fa-sticky-note text-gray-400 mr-1 text-[10px]"></i>
+              <span class="line-clamp-2">{{ interview.additionalNotes }}</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1 mt-2 pt-2 border-t border-gray-100">
+              <button 
+                *ngIf="isOnlineInterview(interview)"
+                (click)="joinInterview(interview)"
+                class="flex-1 px-2 py-1 bg-green-500 text-white text-[10px] rounded hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
+              >
+                <i class="fas fa-video text-[8px]"></i>
+                Join
+              </button>
+              <button 
+                (click)="viewInterviewDetails(interview)"
+                class="flex-1 px-2 py-1 text-[10px] text-gray-600 hover:bg-gray-100 rounded transition-colors flex items-center justify-center gap-1"
+              >
+                <i class="fas fa-info-circle text-[8px]"></i>
+                Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State for Interviews -->
+    <div *ngIf="interviewNotifications.length === 0" class="text-center py-6 text-gray-500">
+      <i class="fas fa-bell-slash text-2xl mb-2 opacity-50"></i>
+      <p class="text-xs">No interview notifications</p>
+      <p class="text-[10px] mt-1">Your upcoming interviews will appear here</p>
+    </div>
   </div>
 </div>

@@ -20,5 +20,5 @@ public class JobOfferResponseDTO {
     private boolean published;
     private List<String> requirements;
     private List<String> skills;
-    private Integer recruiterId;
+    private Double recruiterId;
 }
