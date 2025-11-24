@@ -41,6 +41,9 @@ node_modules/
 
 # Application specific
 application.properties.local
+<<<<<<< HEAD
+=======
 backend/test_career_model/career_model/checkpoint-*/
 *.safetensors
 *.pt
+>>>>>>> 443d2fc9b1957f87fbf2f12d5bad8578f251f5c6
