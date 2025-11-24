@@ -107,6 +107,16 @@ export class JobSeekerSidebar {
       additionalNotes: 'Discussion about IT infrastructure and support procedures.',
       duration: '90 mins',
       interviewType: 'Technical Assessment - Online'
+    },
+    {
+      id: '4',
+      companyName: 'MedCare Hospital',
+      interviewDate: '2024-01-20',
+      interviewTime: '9:00 AM',
+      location: 'https://teams.microsoft.com/l/meetup-join/xxx',
+      additionalNotes: 'Discussion about IT infrastructure and support procedures.',
+      duration: '90 mins',
+      interviewType: 'Technical Assessment - Online'
     }
   ];
 
