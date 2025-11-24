@@ -1,0 +1,242 @@
+:root {
+  --jobi-blue: #336781;
+  --jobi-orange: #db4b23;
+  --jobi-green: #10b981;
+  --jobi-gray: #e5e7eb;
+}
+
+.text-jobiBlue {
+  color: var(--jobi-blue);
+}
+
+.text-jobiOrange {
+  color: var(--jobi-orange);
+}
+
+.text-jobiGreen {
+  color: var(--jobi-green);
+}
+
+.bg-jobiBlue {
+  background-color: var(--jobi-blue);
+}
+
+.bg-jobiOrange {
+  background-color: var(--jobi-orange);
+}
+
+.bg-jobiGreen {
+  background-color: var(--jobi-green);
+}
+
+.border-jobiGray {
+  border-color: var(--jobi-gray);
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Button Styles
+.btn-primary {
+  display: inline-block;
+  padding: 12px 32px;
+  background-color: #336781;
+  color: white;
+  border-radius: 25px;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    background-color: #2a5366;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 32px;
+  background-color: #db4b23;
+  color: white;
+  border-radius: 25px;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    background-color: #c43e1b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// How It Works Section
+.how-it-works-container {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  position: relative;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Connection lines between steps (desktop only)
+.how-it-works-container::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: transparent;
+  z-index: 0;
+
+  @media (min-width: 768px) {
+    background-image: repeating-linear-gradient(
+      to right,
+      #d1d5db 0,
+      #d1d5db 8px,
+      transparent 8px,
+      transparent 16px
+    );
+  }
+}
+
+.step-item {
+  position: relative;
+  z-index: 10;
+}
+
+.step-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+
+  .group:hover & {
+    transform: scale(1.1);
+  }
+}
+
+.step-pink {
+  background-color: #fce7f3;
+  
+  i {
+    color: #ec4899;
+  }
+}
+
+.step-green {
+  background-color: #d1fae5;
+  
+  i {
+    color: #10b981;
+  }
+}
+
+.step-blue {
+  background-color: #dbeafe;
+  
+  i {
+    color: #3b82f6;
+  }
+}
+
+// CTA Section
+.cta-gradient {
+  background: linear-gradient(to right, #336781, #db4b23) !important;
+}
+
+.cta-text {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-cta-white {
+  display: inline-block;
+  padding: 12px 32px;
+  background-color: white;
+  color: #336781;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #f3f4f6;
+    transform: translateY(-2px);
+  }
+}
+
+.btn-cta-outline {
+  display: inline-block;
+  padding: 12px 32px;
+  border: 2px solid white;
+  background-color: transparent;
+  color: white;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+// Hover effects
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Gradient text
+.gradient-text {
+  background: linear-gradient(135deg, var(--jobi-blue), var(--jobi-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Responsive improvements
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+// Animation classes
+.fade-in {
+  animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,29 +1,29 @@
-<div class="h-full bg-white border-r p-6 flex flex-col" [style.border-color]="'#E5E7EB'">
+<div class="h-full bg-white border-r p-4 md:p-6 flex flex-col" [style.border-color]="'#E5E7EB'">
   <!-- Logo -->
-  <div class="mb-8 flex items-center gap-4">
-    <img src="/assets/logo.png" alt="Job Portal Logo" class="w-10 h-auto" />
+  <div class="mb-6 md:mb-8 flex items-center gap-3 md:gap-4">
+    <img src="/assets/logo.png" alt="Job Portal Logo" class="w-8 md:w-10 h-auto" />
     <div>
-      <h1 class="text-xl font-bold" [style.color]="'#336781'">Jobify</h1>
+      <h1 class="text-lg md:text-xl font-bold" [style.color]="'#336781'">Jobify</h1>
       <!-- Subtitle dynamique -->
       <p class="text-xs opacity-70" [style.color]="'#6B7280'">{{ subtitle }}</p>
     </div>
   </div>
   
   <!-- Main Navigation -->
-  <nav class="flex-1 space-y-2">
+  <nav class="flex-1 space-y-1 md:space-y-2">
     <ng-container *ngFor="let item of navigationItems">
       <button
         (click)="onSectionChange(item.id)"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-full text-left transition-all"
+        class="w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-full text-left transition-all text-sm md:text-base"
         [ngClass]="{
-          'bg-blue-50 text-blue-600': activeSection === item.id,
+          'bg-orange-500 text-blue-600': activeSection === item.id,
           'hover:bg-gray-50 text-gray-700': activeSection !== item.id
         }"
         [style.background-color]="activeSection === item.id ? '#EBF4FF' : undefined"
         [style.color]="activeSection === item.id ? '#336781' : '#111827'"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 md:w-5 md:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -36,22 +36,21 @@
             [attr.d]="getIconPath(item.id)"
           ></path>
         </svg>
-        <span [style.font-size]="'15px'">{{ item.label }}</span>
+        <span>{{ item.label }}</span>
       </button>
     </ng-container>
   </nav>
 
   <!-- Secondary Navigation -->
-  <div class="space-y-2 pt-4" [style.border-color]="'#E5E7EB'">
+  <div class="space-y-1 md:space-y-2 pt-3 md:pt-4" [style.border-color]="'#E5E7EB'">
     <ng-container *ngFor="let item of secondaryItems">
       <button
         (click)="onSectionChange(item.id)"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-full text-left hover:bg-gray-50 transition-all"
+        class="w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-full text-left hover:bg-gray-50 transition-all text-sm md:text-base"
         [style.color]="'#6B7280'"
-        [style.font-size]="'15px'"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 md:w-5 md:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -70,19 +69,19 @@
   </div>
 
   <!-- Profile Section dynamique -->
-  <div class="w-full border-t pt-4" [style.border-color]="'#E5E7EB'">
-    <div class="flex items-center gap-3 px-4 py-3 text-left">
+  <div class="w-full border-t pt-3 md:pt-4" [style.border-color]="'#E5E7EB'">
+    <div class="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 text-left">
       <!-- Photo de profil dynamique -->
       <img 
         [src]="profileImage" 
         alt="Profile" 
-        class="w-10 h-10 rounded-full object-cover" 
+        class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" 
       />
-      <div>
+      <div class="min-w-0 flex-1">
         <!-- Nom dynamique -->
-        <h4 class="text-base font-medium" [style.color]="'#111827'">{{ profileName }}</h4>
+        <h4 class="text-sm md:text-base font-medium truncate" [style.color]="'#111827'">{{ profileName }}</h4>
         <!-- Titre dynamique -->
-        <p class="text-sm text-gray-500">{{ profileTitle }}</p>
+        <p class="text-xs md:text-sm text-gray-500 truncate">{{ profileTitle }}</p>
       </div>
     </div>
   </div>

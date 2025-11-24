@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:text="@string/add_expe"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1F4E5F"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Job Position -->
+        <EditText
+            android:id="@+id/inputJobPosition"
+            android:hint="@string/job_position"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Company Name -->
+        <EditText
+            android:id="@+id/inputCompanyName"
+            android:hint="@string/company_name"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Company Address -->
+        <EditText
+            android:id="@+id/inputAddress"
+            android:hint="@string/company_address"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Start and End Date -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/inputStartDate"
+                android:hint="@string/start_date"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_bg"
+                android:padding="10dp"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
+                tools:ignore="TextFields" />
+
+            <EditText
+                android:id="@+id/inputEndDate"
+                android:hint="@string/end_date"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_bg"
+                android:padding="10dp"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
+                tools:ignore="TextFields" />
+        </LinearLayout>
+
+        <!-- Button -->
+        <Button
+            android:id="@+id/btnAddExperience"
+            android:text="@string/add_exp"
+            android:backgroundTint="#1F4E5F"
+            android:textColor="#FFF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</ScrollView>

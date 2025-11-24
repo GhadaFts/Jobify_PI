@@ -1,25 +1,47 @@
-<div class="flex h-screen">
-  <!-- Left Sidebar (Navigation) -->
-  <app-sidebar 
-    [activeSection]="activeSection" 
-    (sectionChange)="onSectionChange($event)"
-    [navigationItems]="navItems"
-    [secondaryItems]="secondaryNavItems"
-    subtitle="Recruiter Portal"
-    profileName="Sarah Johnson"
-    profileTitle="Recruitment Manager"
-    class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto" style="left: 0;">
-  </app-sidebar>
+<div class="flex h-screen bg-gray-50">
+  <!-- Mobile Header -->
+  <div class="lg:hidden bg-white border-b p-4 flex items-center justify-between fixed top-0 left-0 right-0 z-50" style="border-color: #E5E7EB;">
+    <button (click)="toggleLeftSidebar()" class="p-2 rounded-lg hover:bg-gray-100">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <div class="flex items-center gap-2">
+      <img src="/assets/logo.png" alt="Job Portal Logo" class="w-8 h-auto" />
+      <h1 class="text-lg font-bold" style="color: #336781">Jobify</h1>
+    </div>
+    <button (click)="toggleRightSidebar()" class="p-2 rounded-lg hover:bg-gray-100">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+      </svg>
+    </button>
+  </div>
 
-  <!-- Main Content Area with Proper Margins -->
-  <main class="ml-64 mr-80 p-4" style="background-color: #F3F4F6; width: calc(100% - 36rem); margin-left: 16rem; margin-right: 20rem;">
+  <!-- Left Sidebar -->
+  <div class="hidden lg:block fixed left-0 top-0 h-full z-40" 
+       [class.hidden]="!leftSidebarOpen && window.innerWidth < 1024"
+       [class.fixed]="window.innerWidth < 1024"
+       [class.absolute]="window.innerWidth >= 1024">
+    <app-sidebar 
+      [activeSection]="activeSection" 
+      (sectionChange)="onSectionChange($event)"
+      [navigationItems]="navItems"
+      [secondaryItems]="secondaryNavItems"
+      subtitle="Recruiter Portal"
+      profileName="Sarah Johnson"
+      profileTitle="Recruitment Manager"
+      style="border-color: #E5E7EB;"
+      class="w-72 bg-gray-100 p-0 fixed h-full overflow-y-auto" style="left: 0;">
+    ></app-sidebar>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 lg:ml-64 lg:mr-80 p-4 lg:p-6 mt-16 lg:mt-0" style="background-color: #F3F4F6;">
     <ng-container [ngSwitch]="activeSection">
-      <app-publish-job *ngSwitchCase="'publish-job'"></app-publish-job>
+      <app-publish-job *ngSwitchCase="'publish-job'" class="overflow-y-auto "></app-publish-job>
       <app-interviews *ngSwitchCase="'interviews'"></app-interviews>
       <app-edit-profile-recruiter *ngSwitchCase="'edit-profile'"></app-edit-profile-recruiter>
 
-
-      <!-- Vous pourrez ajouter d'autres composants plus tard -->
       <div *ngSwitchDefault class="text-center py-12">
         <h2 class="text-2xl font-bold text-gray-700">Bienvenue sur le Dashboard Recruiter</h2>
         <p class="text-gray-500 mt-2">Sélectionnez une option dans le menu de navigation</p>
@@ -28,5 +50,19 @@
   </main>
 
   <!-- Right Sidebar -->
-  <app-recruiter-sidebar class="w-80 bg-white p-4 fixed right-0 top-0 h-screen overflow-y-auto border-l z-10" style="border-color: #E5E7EB;"></app-recruiter-sidebar>
+  <div class="hidden lg:block fixed right-0 top-0 h-full z-40"
+       [class.hidden]="!rightSidebarOpen && window.innerWidth < 1024"
+       [class.fixed]="window.innerWidth < 1024"
+       [class.absolute]="window.innerWidth >= 1024">
+    <app-recruiter-sidebar class="w-80 bg-white  fixed right-0 top-0 h-screen overflow-y-auto no-scrollbar border-l z-10" style="border-color: #E5E7EB;"></app-recruiter-sidebar>
+  </div>
+
+  <!-- Overlays for mobile -->
+  <div *ngIf="leftSidebarOpen && window.innerWidth < 1024" 
+       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30" 
+       (click)="leftSidebarOpen = false"></div>
+       
+  <div *ngIf="rightSidebarOpen && window.innerWidth < 1024" 
+       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30" 
+       (click)="rightSidebarOpen = false"></div>
 </div>
