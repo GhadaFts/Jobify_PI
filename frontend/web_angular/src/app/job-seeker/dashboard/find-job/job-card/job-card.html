@@ -1,7 +1,8 @@
 <div class="border rounded-lg p-4 hover:shadow-md transition-shadow mb-6 mt-6" style="background-color: #FFFFFF !important;">
   <div class="flex items-start justify-between">
     <div class="flex items-start gap-4 flex-1">
-      <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+      <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 cursor-pointer"  (click)="openCompanyProfile(job.company)"
+>
         <img [src]="job.companyLogo" [alt]="job.company" class="w-full h-full object-cover" *ngIf="job.companyLogo; else fallback">
         <ng-template #fallback>
           <span class="flex items-center justify-center w-full h-full text-gray-600 font-bold">{{ job.company.charAt(0) }}</span>
@@ -18,8 +19,8 @@
             {{ job.status }}
           </span>
         </div>
-        <div class="flex items-center gap-2 mb-2">
-          <p style="font-size: 15px; color: #1A73E8; font-weight: 600;">{{ job.company }}</p>
+        <div class="flex items-center gap-2 mb-2 cursor-pointer" (click)="openCompanyProfile(job.company)" >
+          <p style="font-size: 15px; color: #1A73E8; font-weight: 600;"  >{{ job.company }}</p>
         </div>
         <div class="flex items-center gap-4 text-sm">
           <div class="flex items-center gap-1">

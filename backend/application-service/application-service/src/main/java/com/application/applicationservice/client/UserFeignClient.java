@@ -11,5 +11,5 @@ public interface UserFeignClient {
     UserDTO getUser(@PathVariable("id") Integer id);
     
     @GetMapping("/api/jobseekers/{id}/exists")
-    Boolean validateUserExists(@PathVariable("id") Integer id);
+    Boolean validateUserExists(@PathVariable("id") Double id);
 }

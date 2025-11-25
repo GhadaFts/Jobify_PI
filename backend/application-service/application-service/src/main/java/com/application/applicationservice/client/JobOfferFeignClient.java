@@ -11,5 +11,5 @@ public interface JobOfferFeignClient {
     JobOfferDTO getJobOffer(@PathVariable("id") Integer id);
     
     @GetMapping("/api/joboffers/{id}/exists")
-    Boolean validateJobExists(@PathVariable("id") Integer id);
+    Boolean validateJobExists(@PathVariable("id") Double id);
 }

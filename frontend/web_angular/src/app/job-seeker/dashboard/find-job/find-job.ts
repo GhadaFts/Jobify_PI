@@ -191,7 +191,7 @@ export class FindJob implements OnInit {
 
   // REAL-TIME GEOLOCATION FILTER
   private filterJobsByGeolocation(jobs: JobOffer[]): JobOffer[] {
-    console.log('📍 Filtering by real-time geolocation:', this.currentLocation);
+    console.log(' Filtering by real-time geolocation:', this.currentLocation);
     
     return jobs.filter(job => {
       if (!job.coordinates) return false;
@@ -228,7 +228,7 @@ export class FindJob implements OnInit {
         this.detectedCoordinates = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
         this.locationAccuracy = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(0) + 'm' : 'Unknown'}`;
         
-        console.log('📍 Raw coordinates:', this.detectedCoordinates);
+        console.log(' Raw coordinates:', this.detectedCoordinates);
         
         // IMPROVED REVERSE GEOCODING WITH BETTER LOGIC
         this.geocodingService.getCityFromCoords(position.lat, position.lng).subscribe({
@@ -239,7 +239,7 @@ export class FindJob implements OnInit {
               const bestResult = data.results[0];
               const components = bestResult.components;
               
-              console.log('📍 All location components:', components);
+              console.log(' All location components:', components);
               
               // IMPROVED LOCATION DETECTION STRATEGY
               let detectedLocation = this.extractBestLocationName(components);
@@ -247,32 +247,32 @@ export class FindJob implements OnInit {
               if (detectedLocation) {
                 this.detectedCity = detectedLocation;
                 this.detectedArea = this.extractAreaDetails(components);
-                this.locationInfo = `📍 Your location: ${detectedLocation}`;
+                this.locationInfo = ` Your location: ${detectedLocation}`;
                 
                 console.log('✅ Detected location:', detectedLocation);
-                console.log('📍 Area details:', this.detectedArea);
+                console.log(' Area details:', this.detectedArea);
               } else {
                 this.detectedCity = 'Your current area';
-                this.locationInfo = '📍 Real-time location active';
+                this.locationInfo = ' Real-time location active';
                 console.warn('⚠️ No specific location name found');
               }
               
             } else {
               this.detectedCity = 'Your current position';
-              this.locationInfo = '📍 Real-time location active';
-              console.error('❌ No results from geocoding API');
+              this.locationInfo = ' Real-time location active';
+              console.error('No results from geocoding API');
             }
             this.isLoadingLocation = false;
           },
           error: (error) => {
-            console.error('❌ Reverse geocoding error:', error);
+            console.error(' Reverse geocoding error:', error);
             this.detectedCity = 'Your current position';
-            this.locationInfo = '📍 Real-time location active (API error)';
+            this.locationInfo = ' Real-time location active (API error)';
             this.isLoadingLocation = false;
           }
         });
       } catch (error) {
-        console.error('❌ Geolocation error:', error);
+        console.error('Geolocation error:', error);
         
         let errorMessage = 'Unknown error';
         if (error instanceof Error) {
@@ -283,16 +283,16 @@ export class FindJob implements OnInit {
           errorMessage = String(error);
         }
         
-        this.locationInfo = `❌ Error: ${errorMessage}`;
+        this.locationInfo = ` Error: ${errorMessage}`;
         this.useCurrentLocation = false;
         this.isLoadingLocation = false;
         
         if (errorMessage.includes('permission')) {
-          alert('📍 Please allow location access in your browser settings to use this feature.');
+          alert(' Please allow location access in your browser settings to use this feature.');
         } else if (errorMessage.includes('unavailable')) {
-          alert('📍 Location unavailable. Please check your GPS signal and try again.');
+          alert(' Location unavailable. Please check your GPS signal and try again.');
         } else if (errorMessage.includes('timeout')) {
-          alert('📍 Location detection timeout. Please try again.');
+          alert(' Location detection timeout. Please try again.');
         }
       }
     }

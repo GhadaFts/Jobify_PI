@@ -1,13 +1,11 @@
 .flex-1 {
   flex: 1;
 }
-
-.overflow-y-auto {
-  overflow-y: auto;
-}
-
 .bg-white {
   background-color: #ffffff;
+}
+.overflow-y-auto {
+  overflow-y: auto;
 }
 .overflow-y-auto::-webkit-scrollbar {
   width: 4px;

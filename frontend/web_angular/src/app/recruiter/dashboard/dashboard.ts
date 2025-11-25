@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router'; 
 
 @Component({
@@ -9,6 +9,10 @@ import { Router } from '@angular/router';
 })
 export class RecruiterDashboard {
   activeSection = 'publish-job';
+  leftSidebarOpen = false;
+  rightSidebarOpen = false;
+  window = window;
+
 
   navItems = [
   { id: 'publish-job', label: 'Publish Job' },
@@ -22,9 +26,19 @@ export class RecruiterDashboard {
   ];
 
   constructor(private router: Router) {}
+  ngOnInit() {
+    // Sur desktop, les sidebars sont ouvertes par défaut
+    if (window.innerWidth >= 1024) {
+      this.leftSidebarOpen = true;
+      this.rightSidebarOpen = true;
+    }
+  }
 
   onSectionChange(section: string) {
     this.activeSection = section;
+    if (window.innerWidth < 1024) {
+      this.leftSidebarOpen = false;
+    }
     // Navigate to the corresponding route
     switch (section) {
       case 'publish-job':
@@ -38,5 +52,33 @@ export class RecruiterDashboard {
         this.router.navigate(['/login']);
         break;
     }
+     
   }
+  toggleLeftSidebar() {
+    this.leftSidebarOpen = !this.leftSidebarOpen;
+    // Fermer la droite si on ouvre la gauche sur mobile
+    if (this.leftSidebarOpen && window.innerWidth < 1024) {
+      this.rightSidebarOpen = false;
+    }
+  }
+
+  toggleRightSidebar() {
+    this.rightSidebarOpen = !this.rightSidebarOpen;
+    // Fermer la gauche si on ouvre la droite sur mobile
+    if (this.rightSidebarOpen && window.innerWidth < 1024) {
+      this.leftSidebarOpen = false;
+    }
+  }
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    // Réinitialiser l'état des sidebars sur desktop
+    if (event.target.innerWidth >= 1024) {
+      this.leftSidebarOpen = true;
+      this.rightSidebarOpen = true;
+    } else {
+      this.leftSidebarOpen = false;
+      this.rightSidebarOpen = false;
+    }
+  }
+  
 }

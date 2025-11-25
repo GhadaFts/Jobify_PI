@@ -218,10 +218,66 @@ html {
 }
 
 // Responsive improvements
-@media (max-width: 768px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+@media (max-width: 767px) {
+  // Hero section adjustments
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+
+  // Features section mobile adjustments
+  #features {
+    .relative {
+      overflow: hidden;
+      text-align: center;
+      
+      // Ajuster les images dans les cartes features
+      img {
+        position: relative !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 120px !important;
+        margin: 1rem auto 0 auto;
+      }
+    }
+  }
+
+  // How it works section mobile
+  .how-it-works-container {
+    gap: 3rem;
+    
+    &::before {
+      display: none; // Cache la ligne sur mobile
+    }
+  }
+
+  // CTA section mobile
+  .cta-gradient {
+    padding: 2rem 1rem !important;
+    
+    .btn-cta-white,
+    .btn-cta-outline {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  // Footer mobile
+  footer {
+    .grid {
+      gap: 2rem;
+    }
+  }
+}
+
+// Tablet adjustments
+@media (max-width: 1024px) and (min-width: 768px) {
+  #features {
+    .relative {
+      img {
+        width: 160px !important;
+        right: -20px !important;
+      }
+    }
   }
 }
 
@@ -238,5 +294,15 @@ html {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// Mobile menu improvements
+@media (max-width: 767px) {
+  nav {
+    .flex {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }
