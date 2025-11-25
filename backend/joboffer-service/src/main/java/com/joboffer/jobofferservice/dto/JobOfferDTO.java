@@ -1,52 +1,23 @@
-package com.joboffer.jobofferservice.model;
+package com.joboffer.jobofferservice.dto;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "job_offers")
-public class JobOffer {
+public class JobOfferDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(nullable = false)
     private String jobPosition;
-
     private String experience;
-
     private String salary;
-
-    @Column(length = 2000)
     private String description;
-
     private String type;
-
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private String status;
-
-    @ElementCollection
-    @CollectionTable(name = "job_requirements", joinColumns = @JoinColumn(name = "job_offer_id"))
-    @Column(name = "requirement")
     private List<String> requirements;
-
-    @ElementCollection
-    @CollectionTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_offer_id"))
-    @Column(name = "skill")
     private List<String> skills;
-
     private boolean published;
-
-    // Additional fields from diagram
     private String location;
     private String company;
     private String currency;
@@ -54,7 +25,7 @@ public class JobOffer {
     private LocalDateTime applicationDeadline;
 
     // Constructors
-    public JobOffer() {
+    public JobOfferDTO() {
     }
 
     // Getters and Setters
@@ -200,16 +171,5 @@ public class JobOffer {
 
     public void setApplicationDeadline(LocalDateTime applicationDeadline) {
         this.applicationDeadline = applicationDeadline;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }
