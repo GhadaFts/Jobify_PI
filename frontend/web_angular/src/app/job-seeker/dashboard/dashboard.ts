@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router'; 
 import { NavigationItem } from '../../shared/sidebar/sidebar';
 
@@ -12,6 +12,8 @@ import { NavigationItem } from '../../shared/sidebar/sidebar';
 })
 export class Dashboard {
   activeSection = 'find-job';
+  leftOpen = false;
+  rightOpen = false;
 
   navItems: NavigationItem[] = [
     { id: 'find-job', label: 'Find Job' },
@@ -48,5 +50,29 @@ export class Dashboard {
     }
   }
 
+  toggleLeft() {
+    this.leftOpen = !this.leftOpen;
+    // close right if opening left (optional UX)
+    if (this.leftOpen) { this.rightOpen = false; }
+  }
+
+  toggleRight() {
+    this.rightOpen = !this.rightOpen;
+    if (this.rightOpen) { this.leftOpen = false; }
+  }
+
+  closeAll() {
+    this.leftOpen = false;
+    this.rightOpen = false;
+  }
+  
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    const w = window.innerWidth || (event && (event.target as Window).innerWidth) || 0;
+    if (w > 1023) {
+      // ensure mobile sidebars are closed when returning to desktop size
+      this.closeAll();
+    }
+  }
   
 }
