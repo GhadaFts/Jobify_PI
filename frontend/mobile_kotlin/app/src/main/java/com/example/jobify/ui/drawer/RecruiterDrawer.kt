@@ -38,37 +38,23 @@ fun RecruiterDrawerContent(
             .fillMaxWidth(0.75f)
             .background(Color.White)
     ) {
-        // Header with logo and title
+
+        // ======= HEADER (LOGO REMOVED) =======
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(46.dp)
         ) {
-            // Logo
-            Surface(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape),
-                color = Color(0xFFE3F2FD)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_soc),
-                    contentDescription = "Jobify Logo",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            }
             Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 "Jobify",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 color = Color(0xFF1F2937)
             )
+
             Text(
                 "Recruiter Portal",
                 fontSize = 12.sp,
@@ -78,7 +64,7 @@ fun RecruiterDrawerContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Menu Items
+        // ======= MENU ITEMS =======
         DrawerMenuItem(
             icon = Icons.Default.Edit,
             label = "Publish Job",
@@ -104,7 +90,6 @@ fun RecruiterDrawerContent(
             thickness = 1.dp
         )
 
-        // Settings and Logout
         DrawerMenuItem(
             icon = Icons.Default.Settings,
             label = "Settings",
@@ -121,7 +106,7 @@ fun RecruiterDrawerContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Recruiter Profile at bottom
+        // Bottom Profile
         RecruiterProfileSection()
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +140,9 @@ private fun DrawerMenuItem(
                 modifier = Modifier.size(24.dp),
                 tint = Color(0xFF6B7280)
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Text(
                 label,
                 fontSize = 16.sp,
@@ -173,9 +160,9 @@ private fun RecruiterProfileSection() {
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
     ) {
+
         HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             color = Color(0xFFE5E7EB),
             thickness = 1.dp
         )
@@ -189,6 +176,7 @@ private fun RecruiterProfileSection() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             // Profile Image
             Surface(
                 modifier = Modifier
@@ -206,7 +194,6 @@ private fun RecruiterProfileSection() {
                 )
             }
 
-            // Profile Info
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -216,6 +203,7 @@ private fun RecruiterProfileSection() {
                     fontSize = 14.sp,
                     color = Color(0xFF1F2937)
                 )
+
                 Text(
                     "Recruitment\nManager",
                     fontSize = 11.sp,
@@ -226,4 +214,3 @@ private fun RecruiterProfileSection() {
         }
     }
 }
-

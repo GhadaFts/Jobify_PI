@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import java.io.File
 import java.io.FileOutputStream
 
@@ -79,40 +80,40 @@ class InterviewPreparationActivity : AppCompatActivity() {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        menuHomeLayout.setOnClickListener {
-            showMessage("Home clicked")
+        // Drawer item clicks
+        findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
-        menuProfileLayout.setOnClickListener {
-            showMessage("Profile clicked")
+        findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        findViewById<LinearLayout>(R.id.menuCorrectCVLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, CvCorrectionActivity::class.java))
+        }
+        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout)?.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, InterviewPreparationActivity::class.java))
+        }
+        findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
+            // Close drawer first
+            drawerLayout.closeDrawer(GravityCompat.START)
+
+
+        }
+
+        findViewById<LinearLayout>(R.id.menuHelpLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
-        menuLogoutLayout.setOnClickListener {
-            showMessage("Logged out")
+        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
         }
 
-        menuHelpLayout.setOnClickListener {
-            showMessage("Help center")
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        menuCorrectCVLayout.setOnClickListener {
-            showMessage("Correct CV")
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        menuInterviewTrainingLayout.setOnClickListener {
-            showMessage("Interview Training")
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        menuJobMarketAnalyseLayout.setOnClickListener {
-            showMessage("Job Market Analyse")
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
     }
 
     // -------------------------

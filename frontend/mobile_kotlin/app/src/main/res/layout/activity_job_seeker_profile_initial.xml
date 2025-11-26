@@ -20,11 +20,12 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="24dp">
 
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_home"
-                android:contentDescription="Logo"/>
+            <TextView
+                android:id="@+id/ivLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 💼"
+                android:textSize="48sp"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"

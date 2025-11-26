@@ -175,7 +175,6 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         binding.btnBrowseJobs.setOnClickListener {
             if (validatePersonalInfo()) {
                 // Navigate to dashboard
-                startActivity(Intent(this, JobOpportunitiesActivity::class.java))
                 finish()
             } else {
                 Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()

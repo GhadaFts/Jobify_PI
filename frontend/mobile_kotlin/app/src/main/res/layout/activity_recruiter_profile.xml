@@ -12,7 +12,8 @@
         android:id="@+id/scrollViewRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F5F7FA">
+        android:background="#F5F7FA"
+        android:layout_marginTop="26pt">
 
         <LinearLayout
             android:orientation="vertical"
@@ -21,187 +22,454 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- HEADER: MENU -->
+            <!-- HEADER: MENU + EDIT BUTTON -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp">
 
                 <ImageView
                     android:id="@+id/btnMenu"
                     android:src="@drawable/ic_menu"
                     android:contentDescription="@string/menu"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"/>
-            </LinearLayout>
-
-            <!-- COMPANY IMAGE -->
-            <ImageView
-                android:id="@+id/companyImage"
-                android:src="@drawable/ic_user_placeholder"
-                android:layout_width="370dp"
-                android:layout_height="170dp"
-                android:layout_marginTop="20dp"
-                android:scaleType="centerCrop"
-                android:background="@drawable/rounded_edittext"/>
-
-            <!-- RECRUITER NAME -->
-            <TextView
-                android:id="@+id/txtRecruiterName"
-                android:text="Recruiter Name"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#1F4E5F"
-                android:layout_marginTop="12dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <!-- COUNTRY -->
-            <TextView
-                android:id="@+id/txtCountry"
-                android:text="Tunisia"
-                android:textSize="14sp"
-                android:textColor="#6E7A8A"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <!-- POSTS / EMPLOYEES -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="16dp">
-
-                <TextView
-                    android:id="@+id/txtPosts"
-                    android:text="Posts\n43"
-                    android:gravity="center"
-                    android:textColor="#1F4E5F"
-                    android:padding="12dp"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
 
                 <View
-                    android:layout_width="1dp"
-                    android:layout_height="30dp"
-                    android:background="#C4C4C4"/>
-
-                <TextView
-                    android:id="@+id/txtEmployees"
-                    android:text="Employees\n254"
-                    android:gravity="center"
-                    android:textColor="#1F4E5F"
-                    android:padding="12dp"
-                    android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <ImageView
+                    android:id="@+id/btnEdit"
+                    android:src="@drawable/ic_edit"
+                    android:contentDescription="Edit Profile"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
 
-            <!-- BIO -->
-            <TextView
-                android:id="@+id/txtBio"
-                android:text="A short description about the company (location, address...)"
-                android:textColor="#1F4E5F"
-                android:gravity="center"
+            <!-- COMPANY IMAGE WITH SHADOW EFFECT -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
                 android:layout_marginTop="16dp"
-                android:padding="12dp"
-                android:background="#D4DDE2"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/companyImage"
+                        android:src="@drawable/ic_user_placeholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"/>
+
+                    <!-- EDIT PHOTO BUTTON -->
+                    <ImageView
+                        android:id="@+id/btnEditPhoto"
+                        android:src="@drawable/ic_camera"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="16dp"
+                        android:padding="12dp"
+                        android:background="@drawable/rounded_button"
+                        android:elevation="4dp"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- PROFILE INFO CARD -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clipToOutline="true"
-                android:lineSpacingExtra="2dp"/>
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginHorizontal="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:gravity="center_horizontal">
+
+                    <!-- RECRUITER NAME -->
+                    <TextView
+                        android:id="@+id/txtRecruiterName"
+                        android:text="Recruiter Name"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:textColor="#1F4E5F"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <!-- COUNTRY -->
+                    <TextView
+                        android:id="@+id/txtCountry"
+                        android:text="Tunisia"
+                        android:textSize="15sp"
+                        android:textColor="#6E7A8A"
+                        android:layout_marginTop="6dp"
+                        android:drawablePadding="6dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <!-- POSTS / EMPLOYEES STATS -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="20dp"
+                        android:background="#F5F7FA"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/txtPostsCount"
+                                android:text="43"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="#1F4E5F"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+
+                            <TextView
+                                android:text="Posts"
+                                android:textSize="14sp"
+                                android:textColor="#6E7A8A"
+                                android:layout_marginTop="4dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="2dp"
+                            android:layout_height="40dp"
+                            android:background="#D4DDE2"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/txtEmployeesCount"
+                                android:text="254"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="#1F4E5F"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+
+                            <TextView
+                                android:text="Employees"
+                                android:textSize="14sp"
+                                android:textColor="#6E7A8A"
+                                android:layout_marginTop="4dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- SOCIAL LINKS -->
+                    <LinearLayout
+                        android:id="@+id/socialLinksView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="16dp"
+                        android:padding="8dp"
+                        android:background="@drawable/rounded_edittext">
+
+                        <ImageView
+                            android:id="@+id/btnTwitter"
+                            android:src="@drawable/ic_twitter"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:padding="8dp"
+                            android:layout_margin="4dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone"/>
+
+                        <ImageView
+                            android:id="@+id/btnWeb"
+                            android:src="@drawable/ic_web"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:padding="8dp"
+                            android:layout_margin="4dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone"/>
+
+                        <ImageView
+                            android:id="@+id/btnGithub"
+                            android:src="@drawable/ic_github"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:padding="8dp"
+                            android:layout_margin="4dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone"/>
+
+                        <ImageView
+                            android:id="@+id/btnFacebook"
+                            android:src="@drawable/ic_facebook"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:padding="8dp"
+                            android:layout_margin="4dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- CONTACT INFO SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp">
+
+                <!-- PHONE -->
+                <LinearLayout
+                    android:id="@+id/phoneLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:text="📞"
+                        android:textSize="24sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtPhone"
+                        android:text="+216 12 345 678"
+                        android:textSize="16sp"
+                        android:textColor="#1F4E5F"
+                        android:layout_marginStart="12dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- DOMAINE -->
+                <LinearLayout
+                    android:id="@+id/domaineLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="16dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:text="🏢"
+                        android:textSize="24sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtDomaine"
+                        android:text="Information Technology"
+                        android:textSize="16sp"
+                        android:textColor="#1F4E5F"
+                        android:layout_marginStart="12dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- ADDRESS -->
+                <LinearLayout
+                    android:id="@+id/addressLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="16dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:text="📍"
+                        android:textSize="24sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtAddress"
+                        android:text="Tunis, Tunisia"
+                        android:textSize="16sp"
+                        android:textColor="#1F4E5F"
+                        android:layout_marginStart="12dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- DESCRIPTION CARD -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginHorizontal="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:text="About"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#1F4E5F"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtBio"
+                        android:text="A short description about the company"
+                        android:textColor="#6E7A8A"
+                        android:textSize="15sp"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- SERVICES SECTION -->
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginHorizontal="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:text="Services"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#1F4E5F"
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
+
+                        <ImageView
+                            android:id="@+id/btnAddService"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_add"
+                            android:contentDescription="Add Service"
+                            android:padding="4dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone"
+                            android:background="?attr/selectableItemBackgroundBorderless"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtNoService"
+                        android:text="No services added yet"
+                        android:textColor="#9AA1A8"
+                        android:layout_marginTop="12dp"
+                        android:textSize="15sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"/>
+
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/servicesContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        app:flexWrap="wrap"
+                        app:justifyContent="flex_start"
+                        app:alignItems="flex_start"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SAVE BUTTON (EDIT MODE) -->
+            <Button
+                android:id="@+id/btnSave"
+                android:text="Save Changes"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:background="@drawable/rounded_button"
+                android:elevation="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
                 android:layout_marginTop="24dp"
-                android:gravity="center_vertical">
+                android:layout_marginHorizontal="8dp"
+                android:visibility="gone"/>
 
-                <TextView
-                    android:text="Services"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#1F4E5F"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <ImageView
-                    android:id="@+id/btnAddService"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add"
-                    android:contentDescription="Add Service"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtNoService"
-                android:text="No services added yet"
-                android:textColor="#9AA1A8"
-                android:layout_marginTop="8dp"
+            <!-- BOTTOM SPACING -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"/>
-
-            <LinearLayout
-                android:id="@+id/servicesContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"/>
-
-            <!-- SPECIALIZATION -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:text="Specializations"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#1F4E5F"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <ImageView
-                    android:id="@+id/btnAddSpecialization"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add"
-                    android:contentDescription="Add Specialization"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtNoSpecialization"
-                android:text="No specializations added yet"
-                android:textColor="#9AA1A8"
-                android:layout_marginTop="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"/>
-
-            <LinearLayout
-                android:id="@+id/specializationsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"/>
+                android:layout_height="16dp"/>
 
         </LinearLayout>
     </ScrollView>
@@ -252,7 +520,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
-
 
             <LinearLayout
                 android:id="@+id/menuProfileLayout"

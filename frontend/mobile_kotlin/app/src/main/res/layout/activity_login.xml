@@ -9,15 +9,18 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:layout_marginTop="55dp">
 
         <!-- Logo and Title -->
-        <ImageView
+
+        <TextView
+
             android:id="@+id/ivLogo"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_home"
-            android:contentDescription="@string/app_logo"
+            android:text=" 💼"
+            android:textSize="48sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
