@@ -5,15 +5,15 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "application-service", path = "/api/applications")
+@FeignClient(name = "application-service")
 public interface ApplicationFeignClient {
 
     @GetMapping("/{id}")
     ResponseEntity<ApplicationDetailsDTO> getApplicationById(@PathVariable Long id);
 
-    @PutMapping("/{id}/status")
-    ResponseEntity<Void> updateApplicationStatus(
-            @PathVariable Long id,
+    @PatchMapping("/{id}/status")
+    ResponseEntity<Void> updateStatus(
+            @PathVariable String id,
             @RequestParam String status
     );
 

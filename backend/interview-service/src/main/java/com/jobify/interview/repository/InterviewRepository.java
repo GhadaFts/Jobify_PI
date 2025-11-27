@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
-    List<Interview> findByApplicationId(Long applicationId);
+    List<Interview> findByApplicationId(String applicationId);
 
     List<Interview> findByJobSeekerId(String jobSeekerId);
 
@@ -50,9 +50,9 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             @Param("status") InterviewStatus status
     );
 
-    boolean existsByApplicationIdAndStatusIn(
-            Long applicationId,
-            List<InterviewStatus> statuses
+    boolean existsByApplicationIdAndJobSeekerId(
+            String applicationId,
+            String jobSeekerId
     );
 
     @Query("SELECT COUNT(i) FROM Interview i WHERE i.recruiterId = :recruiterId " +

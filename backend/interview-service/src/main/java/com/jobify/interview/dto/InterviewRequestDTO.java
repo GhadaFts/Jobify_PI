@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 public class InterviewRequestDTO {
 
     @NotNull(message = "Application ID is required")
-    private Long applicationId;
+    private String applicationId;
 
-    @NotBlank(message = "Job seeker ID is required")
+
     private String jobSeekerId;
 
-    @NotBlank(message = "Recruiter ID is required")
+
     private String recruiterId;
 
     @NotNull(message = "Scheduled date is required")

@@ -21,7 +21,7 @@ public class JobOfferDTO {
     private String location;
     private String company;
     private String currency;
-    private String recruiterEmail;
+    private String recruiterId;
     private LocalDateTime applicationDeadline;
 
     // Constructors
@@ -157,12 +157,12 @@ public class JobOfferDTO {
         this.currency = currency;
     }
 
-    public String getRecruiterEmail() {
-        return recruiterEmail;
+    public String getRecruiterId() {
+        return recruiterId;
     }
 
-    public void setRecruiterEmail(String recruiterEmail) {
-        this.recruiterEmail = recruiterEmail;
+    public void setRecruiterId(String recruiterEmail) {
+        this.recruiterId = recruiterEmail;
     }
 
     public LocalDateTime getApplicationDeadline() {

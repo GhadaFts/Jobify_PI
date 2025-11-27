@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApplicationRequestDTO {
-    private Double jobSeekerId;
+    private String jobSeekerId;
     private Double jobOfferId;
     private String cvLink;
     private String motivationLettre;

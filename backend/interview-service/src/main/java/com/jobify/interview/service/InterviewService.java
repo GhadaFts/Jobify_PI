@@ -35,7 +35,7 @@ public class InterviewService {
 
         // Validate interview data
         validateInterviewData(requestDTO);
-
+        /*
         // Verify application exists
         try {
             applicationFeignClient.getApplicationById(requestDTO.getApplicationId());
@@ -43,6 +43,7 @@ public class InterviewService {
             throw new InvalidInterviewDataException("Application not found: " + requestDTO.getApplicationId());
         }
 
+         */
         // Check for existing active interviews
         List<InterviewStatus> activeStatuses = Arrays.asList(
                 InterviewStatus.SCHEDULED,
@@ -50,11 +51,11 @@ public class InterviewService {
         );
 
         boolean hasActiveInterview = interviewRepository
-                .existsByApplicationIdAndStatusIn(requestDTO.getApplicationId(), activeStatuses);
+                .existsByApplicationIdAndJobSeekerId(requestDTO.getApplicationId(), requestDTO.getJobSeekerId());
 
         if (hasActiveInterview) {
             throw new InvalidInterviewDataException(
-                    "An active interview already exists for this application"
+                    "An interview already exists for this application with that candidate"
             );
         }
 
@@ -64,7 +65,7 @@ public class InterviewService {
 
         // Update application status to INTERVIEW_SCHEDULED
         try {
-            applicationFeignClient.updateApplicationStatus(
+            applicationFeignClient.updateStatus(
                     requestDTO.getApplicationId(),
                     "INTERVIEW_SCHEDULED"
             );
@@ -88,7 +89,7 @@ public class InterviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<InterviewResponseDTO> getInterviewsByApplicationId(Long applicationId) {
+    public List<InterviewResponseDTO> getInterviewsByApplicationId(String applicationId) {
         log.info("Fetching interviews for application: {}", applicationId);
         List<Interview> interviews = interviewRepository.findByApplicationId(applicationId);
         return interviews.stream()

@@ -24,7 +24,9 @@ public class ApplicationService {
     private final JobOfferFeignClient jobOfferFeignClient;
 
     public ApplicationResponseDTO create(ApplicationRequestDTO dto) {
+        /*
         // Validate JobSeeker exists (comment out for standalone testing)
+
         try {
             Boolean userExists = userFeignClient.validateUserExists(dto.getJobSeekerId());
             if (userExists == null || !userExists) {
@@ -35,7 +37,9 @@ public class ApplicationService {
             throw new ResourceNotFoundException("JobSeeker service unavailable or JobSeeker not found with ID: " + dto.getJobSeekerId());
         }
 
+
         // Validate JobOffer exists (comment out for standalone testing)
+
         try {
             Boolean jobExists = jobOfferFeignClient.validateJobExists(dto.getJobOfferId());
             if (jobExists == null || !jobExists) {
@@ -45,6 +49,8 @@ public class ApplicationService {
             // Comment this out for standalone testing without other services
             throw new ResourceNotFoundException("JobOffer service unavailable or JobOffer not found with ID: " + dto.getJobOfferId());
         }
+
+         */
 
         // Check for duplicate application
         if (repository.existsByJobOfferIdAndJobSeekerId(dto.getJobOfferId(), dto.getJobSeekerId())) {
@@ -83,7 +89,7 @@ public class ApplicationService {
                 .collect(Collectors.toList());
     }
 
-    public List<ApplicationResponseDTO> getByJobSeekerId(Double jobSeekerId) {
+    public List<ApplicationResponseDTO> getByJobSeekerId(String jobSeekerId) {
         return repository.findByJobSeekerId(jobSeekerId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -142,7 +148,7 @@ public class ApplicationService {
         repository.delete(application);
     }
     
-    public Boolean checkDuplicateApplication(Double jobOfferId, Double jobSeekerId) {
+    public Boolean checkDuplicateApplication(Double jobOfferId, String jobSeekerId) {
         return repository.existsByJobOfferIdAndJobSeekerId(jobOfferId, jobSeekerId);
     }
 

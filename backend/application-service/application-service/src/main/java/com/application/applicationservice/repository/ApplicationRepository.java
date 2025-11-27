@@ -10,9 +10,9 @@ import java.util.List;
 public interface ApplicationRepository extends MongoRepository<Application, String> {
     
     List<Application> findByJobOfferId(Double jobOfferId);
-    List<Application> findByJobSeekerId(Double jobSeekerId);
+    List<Application> findByJobSeekerId(String jobSeekerId);
     List<Application> findByStatus(ApplicationStatus status);
     List<Application> findByJobOfferIdAndStatus(Double jobOfferId, ApplicationStatus status);
     List<Application> findByIsFavoriteTrue();
-    Boolean existsByJobOfferIdAndJobSeekerId(Double jobOfferId, Double jobSeekerId);
+    Boolean existsByJobOfferIdAndJobSeekerId(Double jobOfferId, String jobSeekerId);
 }

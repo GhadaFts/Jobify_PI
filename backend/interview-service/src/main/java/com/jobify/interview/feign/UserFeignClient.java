@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "auth-service", path = "/api/users")
+@FeignClient(name = "auth-service")
 public interface UserFeignClient {
 
     @GetMapping("/{id}")

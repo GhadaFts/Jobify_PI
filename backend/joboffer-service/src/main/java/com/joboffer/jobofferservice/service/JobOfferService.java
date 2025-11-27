@@ -73,7 +73,7 @@ public class JobOfferService {
         if (data.getType() != null) existingJob.setType(data.getType());
         if (data.getSkills() != null) existingJob.setSkills(data.getSkills());
         if (data.getDescription() != null) existingJob.setDescription(data.getDescription());
-        if (data.getRecruiterEmail() != null) existingJob.setRecruiterEmail(data.getRecruiterEmail());
+        if (data.getRecruiterId() != null) existingJob.setRecruiterId(data.getRecruiterId());
         if (data.getApplicationDeadline() != null) existingJob.setApplicationDeadline(data.getApplicationDeadline());
         if (data.getStatus() != null) existingJob.setStatus(data.getStatus());
         
@@ -82,6 +82,15 @@ public class JobOfferService {
 
         JobOffer updatedJob = jobOfferRepository.save(existingJob);
         return convertToDTO(updatedJob);
+    }
+    /**
+     * Get all jobs by recruiter ID
+     */
+    public List<JobOfferDTO> getJobsByRecruiterId(String recruiterId) {
+        List<JobOffer> jobOffers = jobOfferRepository.findByRecruiterId(recruiterId);
+        return jobOffers.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -129,7 +138,7 @@ public class JobOfferService {
         dto.setCurrency(jobOffer.getCurrency());
         dto.setType(jobOffer.getType());
         dto.setSkills(jobOffer.getSkills());
-        dto.setRecruiterEmail(jobOffer.getRecruiterEmail());
+        dto.setRecruiterId(jobOffer.getRecruiterId());
         dto.setApplicationDeadline(jobOffer.getApplicationDeadline());
         dto.setCreatedAt(jobOffer.getCreatedAt());
         dto.setUpdatedAt(jobOffer.getUpdatedAt());
@@ -157,7 +166,7 @@ public class JobOfferService {
         jobOffer.setCurrency(dto.getCurrency());
         jobOffer.setType(dto.getType());
         jobOffer.setSkills(dto.getSkills());
-        jobOffer.setRecruiterEmail(dto.getRecruiterEmail());
+        jobOffer.setRecruiterId(dto.getRecruiterId());
         jobOffer.setApplicationDeadline(dto.getApplicationDeadline());
         jobOffer.setDescription(dto.getDescription());
         jobOffer.setPublished(dto.isPublished());

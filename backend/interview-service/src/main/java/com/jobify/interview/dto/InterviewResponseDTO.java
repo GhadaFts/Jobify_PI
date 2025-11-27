@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class InterviewResponseDTO {
 
     private Long id;
-    private Long applicationId;
+    private String applicationId;
     private String jobSeekerId;
     private String recruiterId;
     private LocalDateTime scheduledDate;

@@ -26,4 +26,5 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, Long>, JpaSp
     List<JobOffer> findByTitleContainingIgnoreCase(String title);
     
     List<JobOffer> findByJobPositionContainingIgnoreCase(String jobPosition);
+    List<JobOffer> findByRecruiterId(String recruiterId);
 }
