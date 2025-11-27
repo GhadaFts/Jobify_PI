@@ -1,11 +1,16 @@
 from flask import Flask, request, jsonify
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
-from flask_cors import CORS 
+from flask_cors import CORS
+import gdown
+import os
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
+if os.path.exists("./career_model") == False:
+    CAREER_MODEL_URL = "https://drive.google.com/drive/folders/13OFPDxTHgZXkJHgsTC8lMT0pMD8n4HlU?usp=sharing"
+    gdown.download_folder(CAREER_MODEL_URL, quiet=False, use_cookies=False)
 
 MODEL_PATH = "career_model"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
