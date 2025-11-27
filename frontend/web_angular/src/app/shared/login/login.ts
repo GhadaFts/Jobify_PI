@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, LoginCredentials } from '../services/auth.service';
-import { ErrorService } from '../services/error.service';
-import { Router } from '@angular/router';
+import { AuthService, LoginCredentials } from '../../services/auth.service';
+import { ErrorService } from '../../services/error.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -24,32 +24,68 @@ export class LoginComponent {
   passwordFocused: boolean = false;
   showPassword: boolean = false;
 
+  // Return URL for redirect after login
+  private returnUrl: string = '';
+
   constructor(
     private authService: AuthService,
     private errorService: ErrorService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    // Get return URL from route parameters or default to '/'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+  }
 
-  onLogin() {
-    this.isLoading = true;
+  ngOnInit(): void {
+    // If user is already logged in, redirect them
+    if (this.authService.isAuthenticated()) {
+      const user = this.authService.getCurrentUser();
+      this.redirectBasedOnRole(user?.role);
+    }
+  }
+
+  onLogin(): void {
+    // Clear previous errors
     this.errors = [];
 
+    // Basic validation
+    if (!this.email || !this.password) {
+      this.errors = ['Please enter both email and password'];
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.errors = ['Please enter a valid email address'];
+      return;
+    }
+
+    this.isLoading = true;
+
     const credentials: LoginCredentials = {
-      email: this.email,
+      email: this.email.trim(),
       password: this.password
     };
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.isLoading = false;
-        if (response.success) {
-          console.log('Login successful:', response);
-          if (response.user.role == 'recruiter') {
-            this.router.navigate(['/recruiter/dashboard/publish-job']);
-          } else {
-            this.router.navigate(['/job-seeker/dashboard/find-job']);
+        console.log('Login successful:', response);
+
+        // Fetch user profile and redirect
+        this.authService.getUserProfile().subscribe({
+          next: (user) => {
+            console.log('User profile loaded:', user);
+            this.redirectBasedOnRole(user.role);
+          },
+          error: (error) => {
+            console.error('Failed to load user profile:', error);
+            // Still redirect even if profile load fails
+            this.router.navigate(['/']);
           }
-        }
+        });
       },
       error: (error) => {
         this.isLoading = false;
@@ -59,30 +95,68 @@ export class LoginComponent {
     });
   }
 
-  onForgotPassword() {
-    if (this.email) {
-      this.isLoading = true;
-      this.authService.forgotPassword(this.email).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success) {
-            alert(response.message);
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errors = this.errorService.handleAuthError(error);
-        }
-      });
-    } else {
+  onForgotPassword(): void {
+    if (!this.email) {
       this.errors = ['Please enter your email address first'];
+      return;
     }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.errors = ['Please enter a valid email address'];
+      return;
+    }
+
+    this.isLoading = true;
+    this.errors = [];
+
+    this.authService.forgotPassword(this.email.trim()).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        alert(response.message || 'Password reset instructions have been sent to your email');
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errors = this.errorService.handleAuthError(error);
+      }
+    });
   }
 
-  navigateToSignup() {
-    this.router.navigate(['/signup']);
+  navigateToSignup(): void {
+    this.router.navigate(['/signup'], {
+      queryParams: this.returnUrl !== '/' ? { returnUrl: this.returnUrl } : {}
+    });
   }
-  togglePasswordVisibility() {
+
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  /**
+   * Redirect user based on their role
+   */
+  private redirectBasedOnRole(role?: string): void {
+    if (this.returnUrl && this.returnUrl !== '/') {
+      // If there's a return URL, use it
+      this.router.navigate([this.returnUrl]);
+    } else {
+      // Otherwise, redirect based on role
+      switch (role?.toLowerCase()) {
+        case 'recruiter':
+          this.router.navigate(['/recruiter/dashboard/publish-job']);
+          break;
+        case 'job_seeker':
+        case 'jobseeker':
+          this.router.navigate(['/job-seeker/dashboard/find-job']);
+          break;
+        case 'admin':
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        default:
+          this.router.navigate(['/dashboard']);
+          break;
+      }
+    }
   }
 }
