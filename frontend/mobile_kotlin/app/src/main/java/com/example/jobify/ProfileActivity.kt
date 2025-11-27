@@ -20,6 +20,47 @@ import java.util.*
 
 class ProfileActivity : AppCompatActivity() {
 
+    // ... dans la classe ProfileActivity, avec vos autres variables de classe
+
+    private val interviewNotifications = listOf(
+        InterviewNotification(
+            id = "1",
+            companyName = "TekUp",
+            interviewDate = "Nov 21, 2025",
+            interviewTime = "1:00 AM",
+            location = "Online Meeting",
+            additionalNotes = "Please have your portfolio ready. Technical assessment will include live coding.",
+            duration = "60 mins",
+            interviewType = "Online",
+            isCompleted = true,
+            meetingLink = "https://meet.google.com/tekup-interview-link" // Lien de réunion simulé
+        ),
+        InterviewNotification(
+            id = "2",
+            companyName = "Tech Solutions SARL",
+            interviewDate = "Jan 12, 2026",
+            interviewTime = "2:30 PM",
+            location = "Tech Park, Ariana, Tunisi...",
+            additionalNotes = "Bring your ID and previous work samples. Dress code: Business casual.",
+            duration = "45 mins",
+            interviewType = "Local",
+            isCompleted = false
+        ),
+        InterviewNotification(
+            id = "3",
+            companyName = "MedCare Hospital",
+            interviewDate = "Jan 20, 2024",
+            interviewTime = "9:00 AM",
+            location = "Online Meeting",
+            additionalNotes = "Please bring your CV and diploma for verification.",
+            duration = "90 mins",
+            interviewType = "Online",
+            isCompleted = true,
+            meetingLink = "https://meet.google.com/medcare-interview-link" // Lien de réunion simulé
+        )
+    )
+
+    // ...
     // Données du profil
     private var id: Int = 1
     private var email = "example@email.com"
@@ -51,7 +92,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var txtName: TextView
     private lateinit var txtCountry: TextView
     private lateinit var txtBio: TextView
-
+    private lateinit var btnNotification: ImageView
     private lateinit var experienceContainer: LinearLayout
     private lateinit var txtNoExperience: TextView
     private lateinit var educationContainer: LinearLayout
@@ -75,6 +116,20 @@ class ProfileActivity : AppCompatActivity() {
         var field: String,
         var startDate: String,
         var endDate: String
+    )
+
+    // Ajoutez cette data class dans ProfileActivity.kt, avant la fonction onCreate
+    data class InterviewNotification(
+        val id: String,
+        val companyName: String,
+        val interviewDate: String, // ISO string ou date lisible, nous utiliserons la date lisible pour la démo
+        val interviewTime: String,
+        val location: String,
+        val additionalNotes: String,
+        val duration: String,
+        val interviewType: String, // "Online" ou "Local"
+        val isCompleted: Boolean,
+        val meetingLink: String = "" // Pour le bouton "Join"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,6 +165,8 @@ class ProfileActivity : AppCompatActivity() {
         // Languages
         languagesContainer = findViewById(R.id.languagesContainer)
         txtNoLanguage = findViewById(R.id.txtNoLanguage)
+        btnNotification = findViewById(R.id.btnNotification)
+
     }
 
     private fun loadProfileFromPreferences() {
@@ -176,7 +233,7 @@ class ProfileActivity : AppCompatActivity() {
         btnAddExperience.setOnClickListener { showAddExperienceDialog() }
         btnAddEducation.setOnClickListener { showAddEducationDialog() }
         btnEditSkills.setOnClickListener { showAddSkillDialog() }
-
+        btnNotification.setOnClickListener { showInterviewNotificationsDialog() }
         // Click on elements to edit
         txtName.setOnClickListener { showEditBasicInfoDialog() }
         txtCountry.setOnClickListener { showEditContactDialog() }
@@ -186,6 +243,81 @@ class ProfileActivity : AppCompatActivity() {
         setupDarkMode(btnTheme)
     }
 
+    /**
+     * Affiche un modal (AlertDialog) avec la liste des notifications d'entrevue.
+     */
+    private fun showInterviewNotificationsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_interview_notifications, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        val container = dialogView.findViewById<LinearLayout>(R.id.notificationsContainer)
+
+        interviewNotifications.forEach { notification ->
+            val notificationCard = layoutInflater.inflate(R.layout.item_interview_notification, container, false)
+
+            // Définition des champs
+            notificationCard.findViewById<TextView>(R.id.tvCompanyName).text = notification.companyName
+            notificationCard.findViewById<TextView>(R.id.tvDuration).text = notification.duration
+            notificationCard.findViewById<TextView>(R.id.tvType).text = notification.interviewType
+            notificationCard.findViewById<TextView>(R.id.tvDate).text = notification.interviewDate
+            notificationCard.findViewById<TextView>(R.id.tvTime).text = notification.interviewTime
+            notificationCard.findViewById<TextView>(R.id.tvLocation).text = notification.location
+            notificationCard.findViewById<TextView>(R.id.tvNotes).text = notification.additionalNotes
+
+            val btnJoin = notificationCard.findViewById<Button>(R.id.btnJoin)
+            val tvCompleted = notificationCard.findViewById<TextView>(R.id.tvCompleted)
+            val btnDetails = notificationCard.findViewById<Button>(R.id.btnDetails)
+            val typeIcon = notificationCard.findViewById<ImageView>(R.id.iconType)
+
+            // Logique 'Completed' vs. 'Join'
+            if (notification.isCompleted) {
+                btnJoin.visibility = View.GONE
+                tvCompleted.visibility = View.VISIBLE
+                tvCompleted.text = "Completed"
+            } else {
+                btnJoin.visibility = View.VISIBLE
+                tvCompleted.visibility = View.GONE
+            }
+
+            // Logique de l'icône de type (Online/Local)
+            if (notification.interviewType == "Online") {
+                typeIcon.setImageResource(R.drawable.ic_videocam) // Assurez-vous d'avoir cet icône
+            } else {
+                typeIcon.setImageResource(R.drawable.ic_location) // Assurez-vous d'avoir cet icône
+            }
+
+            // Gérer le bouton 'Join' pour les réunions en ligne
+            if (notification.interviewType == "Online" && !notification.isCompleted) {
+                btnJoin.setOnClickListener {
+                    try {
+                        // Ouvre le lien de la réunion (Google Meet, Zoom, etc.)
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(notification.meetingLink))
+                        startActivity(intent)
+                        dialog.dismiss() // Fermer le modal après avoir cliqué sur Join
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Impossible d'ouvrir le lien: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                // Désactiver le bouton Join si non-en ligne ou complété
+                btnJoin.isEnabled = false
+                btnJoin.alpha = 0.5f // Optionnel : rendre le bouton semi-transparent
+            }
+
+            // Gérer le bouton 'Details' (vous pouvez afficher plus d'infos ou fermer le modal)
+            btnDetails.setOnClickListener {
+                Toast.makeText(this, "Details for ${notification.companyName}", Toast.LENGTH_SHORT).show()
+                // Vous pouvez ajouter ici une autre boite de dialogue pour les détails
+            }
+
+            container.addView(notificationCard)
+        }
+
+        dialog.show()
+    }
     private fun loadProfileData() {
         txtName.text = fullName
         txtCountry.text = nationality
