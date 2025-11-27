@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#FFFFFF">
+
+    <!-- TITLE -->
+    <TextView
+        android:text="Edit Biography"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#1F4E5F"
+        android:layout_marginBottom="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- SUBTITLE -->
+    <TextView
+        android:text="Tell us about yourself, your experience, and what makes you unique"
+        android:textSize="13sp"
+        android:textColor="#6E7A8A"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- BIO INPUT -->
+    <TextView
+        android:text="Biography"
+        android:textSize="12sp"
+        android:textColor="#6E7A8A"
+        android:layout_marginBottom="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/inputBio"
+        android:hint="Tell us about yourself..."
+        android:inputType="textMultiLine|textCapSentences"
+        android:minLines="6"
+        android:maxLines="10"
+        android:gravity="top|start"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_edit_text"
+        android:textSize="14sp"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- CHARACTER COUNT -->
+    <TextView
+        android:id="@+id/txtCharCount"
+        android:text="0 / 500 characters"
+        android:textSize="11sp"
+        android:textColor="#9AA1A8"
+        android:gravity="end"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- BUTTONS -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnCancelBio"
+            android:text="Cancel"
+            android:textColor="#6E7A8A"
+            android:background="@drawable/bg_button_secondary"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="20dp"
+            android:layout_marginEnd="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <Button
+            android:id="@+id/btnSaveBio"
+            android:text="Save Bio"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_button_primary"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>

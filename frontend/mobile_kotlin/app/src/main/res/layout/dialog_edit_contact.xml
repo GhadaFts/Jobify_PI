@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- TITLE -->
+        <TextView
+            android:text="Edit Contact Information"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#1F4E5F"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- EMAIL -->
+        <TextView
+            android:text="Email"
+            android:textSize="12sp"
+            android:textColor="#6E7A8A"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/inputEmail"
+            android:hint="example@email.com"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_edit_text"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- PHONE NUMBER -->
+        <TextView
+            android:text="Phone Number"
+            android:textSize="12sp"
+            android:textColor="#6E7A8A"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/inputPhone"
+            android:hint="+216 12 345 678"
+            android:inputType="phone"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_edit_text"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- NATIONALITY -->
+        <TextView
+            android:text="Nationality"
+            android:textSize="12sp"
+            android:textColor="#6E7A8A"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/inputNationality"
+            android:hint="Tunisia"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_edit_text"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- DIVIDER -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginVertical="8dp"/>
+
+        <!-- SOCIAL LINKS SECTION -->
+        <TextView
+            android:text="Social Links"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1F4E5F"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- TWITTER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:src="@drawable/ic_twitter"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Twitter"/>
+
+            <EditText
+                android:id="@+id/inputTwitter"
+                android:hint="Twitter Link"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:background="@drawable/bg_edit_text"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- GITHUB -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:src="@drawable/ic_github"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="GitHub"/>
+
+            <EditText
+                android:id="@+id/inputGithub"
+                android:hint="GitHub Link"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:background="@drawable/bg_edit_text"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- FACEBOOK -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:src="@drawable/ic_facebook"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Facebook"/>
+
+            <EditText
+                android:id="@+id/inputFacebook"
+                android:hint="Facebook Link"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:background="@drawable/bg_edit_text"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- WEBSITE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <ImageView
+                android:src="@drawable/ic_web"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Website"/>
+
+            <EditText
+                android:id="@+id/inputWebsite"
+                android:hint="Website Link"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:background="@drawable/bg_edit_text"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- BUTTONS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnCancelContact"
+                android:text="Cancel"
+                android:textColor="#6E7A8A"
+                android:background="@drawable/bg_button_secondary"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="20dp"
+                android:layout_marginEnd="12dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/borderlessButtonStyle"/>
+
+            <Button
+                android:id="@+id/btnSaveContact"
+                android:text="Save Changes"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_button_primary"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
