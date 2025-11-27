@@ -69,3 +69,132 @@
 .flex-1 {
   flex: 1;
 }
+
+/* Hidden by default; shown only on small screens via media query */
+.mobile-left-toggle, .mobile-right-toggle, .mobile-controls { display: none; }
+
+/* Job-seeker dashboard responsive rules (inspired by recruiter page) */
+
+@media (max-width: 1023px) {
+  /* Slide-in left sidebar (overlay) */
+  .left-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    background: var(--card-bg, #fff);
+  }
+  .left-sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Slide-in right widgets */
+  .right-sidebar, .jobseeker-right-widgets {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 320px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 35;
+    background: var(--card-bg, #fff);
+  }
+  .right-sidebar.open, .jobseeker-right-widgets.open {
+    transform: translateX(0);
+  }
+
+  /* Keep main content centered and constrained so it remains visible like recruiter page */
+  .jobseeker-main {
+    max-width: 920px;
+    margin: 1rem auto !important;
+    width: calc(100% - 2rem) !important;
+    padding: 1rem !important;
+  }
+
+  /* Mobile controls (show on small screens) */
+  .mobile-controls { display: flex !important; justify-content: flex-end; position: sticky; top: 0; z-index: 20; background: transparent; padding-bottom: 8px; }
+  .mobile-toggle { padding:6px 10px; border-radius:6px; border:1px solid #e5e7eb; background:#fff; }
+  /* Make controls fixed and above sidebars so they're always clickable */
+  .mobile-controls { position: fixed !important; top: 8px; right: 12px; z-index: 60; }
+
+  /* Backdrop between main content and sidebars. Clicking it should close sidebars. */
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.24);
+    z-index: 30; /* below sidebars but above main content */
+  }
+
+  /* Left / Right separate toggles */
+  .mobile-left-toggle { position: fixed; top: 10px; left: 10px; z-index: 60; display: none; }
+  .mobile-right-toggle { position: fixed; top: 10px; right: 10px; z-index: 60; display: none; }
+  .mobile-toggle { box-shadow: 0 6px 18px rgba(16,24,40,0.06); padding:8px 10px; border-radius: 8px; background: #fff; border: 1px solid rgba(0,0,0,0.06); }
+
+  /* Sidebar container wrappers (positioning for close button) */
+  .left-sidebar-container { position: fixed; left: 0; top: 0; height: 100vh; width: 280px; z-index: 40; pointer-events: none; }
+  .left-sidebar-container app-sidebar { pointer-events: auto; }
+  .right-sidebar-container { position: fixed; right: 0; top: 0; height: 100vh; width: 320px; z-index: 40; pointer-events: none; }
+  .right-sidebar-container app-job-seeker-sidebar { pointer-events: auto; }
+
+  .sidebar-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 70;
+    background: rgba(255,255,255,0.95);
+    border: 0;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-close.left { right: 8px; }
+  .sidebar-close.right { right: 8px; }
+
+  /* Show the left/right toggles on small screens */
+  .mobile-left-toggle, .mobile-right-toggle { display: block; }
+
+  .job-card, .job-listing {
+    width: 100% !important;
+  }
+}
+
+/* Tablet and small screens */
+@media (max-width: 768px) {
+  .jobseeker-main {
+    padding: 0.75rem !important;
+    margin-top: 4rem; /* if header is fixed */
+  }
+
+  .job-card .description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .skills-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .skills-row::-webkit-scrollbar { display: none; }
+  .skills-row { scrollbar-width: none; -ms-overflow-style: none; }
+}
+
+/* Small phones - tighter spacing */
+@media (max-width: 480px) {
+  .job-card {
+    padding: 0.75rem !important;
+  }
+  .job-card .title { font-size: 1rem; }
+  .job-card .meta { font-size: 0.875rem; }
+}

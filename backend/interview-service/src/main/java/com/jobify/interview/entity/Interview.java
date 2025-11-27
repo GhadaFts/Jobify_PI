@@ -18,7 +18,7 @@ public class Interview {
     private Long id;
 
     @Column(nullable = false)
-    private Long applicationId;
+    private String applicationId;
 
     @Column(nullable = false)
     private String jobSeekerId;

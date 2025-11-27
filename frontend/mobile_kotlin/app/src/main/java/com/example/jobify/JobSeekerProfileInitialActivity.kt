@@ -175,7 +175,6 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         binding.btnBrowseJobs.setOnClickListener {
             if (validatePersonalInfo()) {
                 // Navigate to dashboard
-                startActivity(Intent(this, JobOpportunitiesActivity::class.java))
                 finish()
             } else {
                 Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()
@@ -405,12 +404,12 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         experiences.forEachIndexed { index, experience ->
             val experienceView = layoutInflater.inflate(R.layout.item_experience, null)
 
-            experienceView.findViewById<TextView>(R.id.tvPosition).text = experience.position
-            experienceView.findViewById<TextView>(R.id.tvCompany).text = experience.company
+            experienceView.findViewById<TextView>(R.id.tvJobPosition).text = experience.position
+            experienceView.findViewById<TextView>(R.id.tvCompanyName).text = experience.company
             experienceView.findViewById<TextView>(R.id.tvAddress).text = experience.description
-            experienceView.findViewById<TextView>(R.id.tvDuration).text = "${experience.startDate} - ${experience.endDate}"
+            experienceView.findViewById<TextView>(R.id.tvWorkDuration).text = "${experience.startDate} - ${experience.endDate}"
 
-            experienceView.findViewById<Button>(R.id.btnRemoveExperience).setOnClickListener {
+            experienceView.findViewById<Button>(R.id.btnDeleteExperience).setOnClickListener {
                 experiences.removeAt(index)
                 displayExperiences() // Refresh the list
                 Toast.makeText(this, "Experience removed", Toast.LENGTH_SHORT).show()

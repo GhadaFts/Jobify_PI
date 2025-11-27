@@ -29,7 +29,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api'; // Update with your backend URL
+  private apiUrl = 'http://localhost:8888/auth-service'; // Gateway URL
   
   // Mock user storage (remove when backend is ready)
   private mockUsers = [
@@ -44,43 +44,19 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     // TODO: Replace with actual API call
     console.log('Login attempt:', credentials);
-    
-    // Mock implementation
-    const user = this.mockUsers.find(u => 
-      u.email === credentials.email && u.password === credentials.password
-    );
 
-    if (user) {
-      const mockResponse: AuthResponse = {
-        success: true,
-        message: 'Login successful',
-        token: 'mock-jwt-token',
-        user: { ...user, password: undefined } // Remove password from response
-      };
-      return of(mockResponse).pipe(
-        tap(response => this.storeAuthData(response))
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap(response => {
+          if (response.success && response.token) {
+            this.storeAuthData(response);
+          }
+        }),
+        catchError(error => {
+          console.error('Login error:', error);
+          return throwError(() => error);
+        })
       );
-    } else {
-      const errorResponse: AuthResponse = {
-        success: false,
-        message: 'Invalid email or password'
-      };
-      return throwError(() => errorResponse);
-    }
-
-    // Real implementation (uncomment when backend is ready):
-    // return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
-    //   .pipe(
-    //     tap(response => {
-    //       if (response.success && response.token) {
-    //         this.storeAuthData(response);
-    //       }
-    //     }),
-    //     catchError(error => {
-    //       console.error('Login error:', error);
-    //       return throwError(() => error);
-    //     })
-    //   );
   }
 
   /**
@@ -124,25 +100,14 @@ signup(userData: SignupData): Observable<AuthResponse> {
    * Forgot password
    */
   forgotPassword(email: string): Observable<AuthResponse> {
-    // TODO: Replace with actual API call
-    console.log('Forgot password request for:', email);
-    
-    // Mock implementation
-    const successResponse: AuthResponse = {
-      success: true,
-      message: 'Password reset instructions sent to your email'
-    };
-    
-    return of(successResponse);
 
-    // Real implementation (uncomment when backend is ready):
-    // return this.http.post<AuthResponse>(`${this.apiUrl}/auth/forgot-password`, { email })
-    //   .pipe(
-    //     catchError(error => {
-    //       console.error('Forgot password error:', error);
-    //       return throwError(() => error);
-    //     })
-    //   );
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/forgot-password`, { email })
+      .pipe(
+        catchError(error => {
+          console.error('Forgot password error:', error);
+          return throwError(() => error);
+        })
+      );
   }
 
   /**

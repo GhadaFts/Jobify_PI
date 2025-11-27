@@ -39,6 +39,8 @@ class JobOpportunitiesActivity : AppCompatActivity() {
         // Drawer item clicks
         findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, JobOpportunitiesActivity::class.java))
+
         }
 
         findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
@@ -50,7 +52,10 @@ class JobOpportunitiesActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, CvCorrectionActivity::class.java))
         }
-
+        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout)?.setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, InterviewPreparationActivity::class.java))
+        }
         findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
             // Close drawer first
             drawerLayout.closeDrawer(GravityCompat.START)

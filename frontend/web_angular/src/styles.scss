@@ -37,3 +37,40 @@
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+/* Dans le fichier CSS global ou du composant */
+@media (max-width: 1023px) {
+  .fixed-sidebar {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    z-index: 40;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .left-sidebar {
+    left: 0;
+    transform: translateX(-100%);
+  }
+  
+  .left-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .right-sidebar {
+    right: 0;
+    transform: translateX(100%);
+  }
+  
+  .right-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+
+
+/* Ajustements pour mobile */
+@media (max-width: 768px) {
+  .mobile-mt {
+    margin-top: 4rem; /* Pour compenser le header fixe */
+  }
+}

@@ -23,6 +23,7 @@ import { AppliedJobCard } from './dashboard/find-job/applied-job-card/applied-jo
 import { InterviewPreparation } from './dashboard/interview-preparation/interview-preparation';
 import { ChatbotLogo } from './dashboard/interview-preparation/chatbot-logo/chatbot-logo';
 import { Chat } from './dashboard/interview-preparation/chat/chat';
+import { CompanyProfileDialog } from './dashboard/find-job/job-card/company-profile-dialog/company-profile-dialog';
 
 
 
@@ -44,6 +45,7 @@ import { Chat } from './dashboard/interview-preparation/chat/chat';
     InterviewPreparation,
     ChatbotLogo,
     Chat,
+    CompanyProfileDialog,
     
     
   ],

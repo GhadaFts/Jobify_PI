@@ -56,14 +56,20 @@
             app:cardElevation="0dp"
             app:cardBackgroundColor="#FFF5F3">
 
-            <ImageView
+            <TextView
+
                 android:id="@+id/ivLogo"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_home"
-                android:contentDescription="App Logo"
-                app:tint="@color/jobi_orange"/>
+                android:layout_width="85dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="13dp"
+                android:layout_marginTop="20dp"
+
+                android:text=" 💼"
+                android:textSize="48sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.cardview.widget.CardView>
 
         <!-- App Name -->
@@ -94,12 +100,7 @@
                 android:textColor="@color/text_primary"
                 android:letterSpacing="0.02"/>
 
-            <TextView
-                android:id="@+id/tvEmoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" 💼"
-                android:textSize="48sp"/>
+
         </LinearLayout>
 
         <!-- Welcome Text -->

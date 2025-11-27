@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDTO {
     private Integer id;
+    private String keycloakId;
     private String email;
     private String fullName;
     private String role;

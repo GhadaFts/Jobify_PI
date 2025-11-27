@@ -94,8 +94,12 @@ class CvCorrectionActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, JobOpportunitiesActivity::class.java))
-        }
 
+        }
+        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
+        }
         findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, ProfileActivity::class.java))
@@ -109,11 +113,6 @@ class CvCorrectionActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             startActivity(Intent(this, InterviewPreparationActivity::class.java))
 
-        }
-
-        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
         }
 
         findViewById<LinearLayout>(R.id.menuHelpLayout)?.setOnClickListener {

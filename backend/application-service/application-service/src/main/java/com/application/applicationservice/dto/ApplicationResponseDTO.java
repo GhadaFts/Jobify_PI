@@ -17,7 +17,7 @@ public class ApplicationResponseDTO {
     private ApplicationStatus status;
     private String cvLink;
     private String motivationLettre;
-    private Double jobSeekerId;
+    private String jobSeekerId;
     private Double jobOfferId;
     private Double aiScore;
     private Boolean isFavorite;

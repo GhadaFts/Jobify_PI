@@ -1,5 +1,10 @@
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: http://localhost:8080/realms/jobify-realm
 server:
-  port: 8080
+  port: 8888
 
 spring:
   application:
@@ -41,6 +46,15 @@ spring:
             - Path=/joboffer-service/**
           filters:
             - StripPrefix=1
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+            allowCredentials: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 
       discovery:
         locator:

@@ -11,7 +11,8 @@
         android:id="@+id/scrollViewRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F5F7FA">
+        android:background="#F5F7FA"
+        android:layout_marginTop="26dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -20,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- HEADER: MENU + DARK MODE ICON -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -32,7 +32,9 @@
                     android:contentDescription="@string/tod"
                     android:src="@drawable/ic_menu"
                     android:layout_width="28dp"
-                    android:layout_height="28dp"/>
+                    android:layout_height="28dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
 
                 <View
                     android:layout_width="0dp"
@@ -40,11 +42,21 @@
                     android:layout_weight="1"/>
 
                 <ImageView
+                    android:id="@+id/btnNotification"
+                    android:contentDescription="Notifications"
+                    android:src="@drawable/ic_notification" android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="16dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
+                <ImageView
                     android:id="@+id/btnTheme"
                     android:contentDescription="@string/todo4"
                     android:src="@drawable/ic_sun"
                     android:layout_width="28dp"
-                    android:layout_height="28dp"/>
+                    android:layout_height="28dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
             </LinearLayout>
 
             <!-- PROFILE IMAGE -->
@@ -56,7 +68,9 @@
                 android:layout_height="120dp"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/circle_bg"
-                android:scaleType="centerCrop"/>
+                android:scaleType="centerCrop"
+                android:clickable="true"
+                android:focusable="true"/>
 
             <!-- NAME + EDIT ICON -->
             <LinearLayout
@@ -74,7 +88,9 @@
                     android:textStyle="bold"
                     android:textColor="#1F4E5F"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"/>
 
                 <ImageView
                     android:id="@+id/btnEditName"
@@ -82,7 +98,9 @@
                     android:src="@drawable/ic_edit"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginStart="6dp"/>
+                    android:layout_marginStart="6dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
             </LinearLayout>
 
             <!-- COUNTRY -->
@@ -93,7 +111,11 @@
                 android:textColor="#6E7A8A"
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp"/>
 
             <!-- STATS -->
             <LinearLayout
@@ -108,6 +130,8 @@
                     android:text="@string/applied_n12"
                     android:padding="12dp"
                     android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="#1F4E5F"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
@@ -122,6 +146,8 @@
                     android:text="@string/reviewed_n8"
                     android:padding="12dp"
                     android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="#1F4E5F"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
@@ -136,6 +162,8 @@
                     android:text="@string/interview_n3"
                     android:padding="12dp"
                     android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="#1F4E5F"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
@@ -146,11 +174,146 @@
                 android:id="@+id/txtBio"
                 android:text="@string/a_motivated_android_developer_seeking_new_challenges"
                 android:textColor="#1F4E5F"
+                android:textSize="14sp"
                 android:gravity="center"
                 android:layout_marginTop="20dp"
                 android:padding="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"/>
+
+            <!-- BASIC INFO SECTION -->
+            <LinearLayout
+                android:id="@+id/basicInfoSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:background="#FFFFFF"
+                android:elevation="2dp"
+                android:layout_marginTop="20dp">
+
+                <TextView
+                    android:id="@+id/txtFullName"
+                    android:text="Full Name: "
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:text="Title: "
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtRole"
+                    android:text="Role: "
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtBirthDate"
+                    android:text="Birth Date: "
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtGender"
+                    android:text="Gender: "
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+
+            <!-- CONTACT INFO SECTION -->
+            <LinearLayout
+                android:id="@+id/contactInfoSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:background="#FFFFFF"
+                android:elevation="2dp"
+                android:layout_marginTop="20dp">
+
+                <TextView
+                    android:id="@+id/txtEmail"
+                    android:text="Email:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtPhone"
+                    android:text="Phone:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtNationality"
+                    android:text="Nationality:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtTwitter"
+                    android:text="Twitter:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtGithub"
+                    android:text="GitHub:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtFacebook"
+                    android:text="Facebook:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtWebsite"
+                    android:text="Website:"
+                    android:textColor="#1F4E5F"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
 
             <!-- EXPERIENCES SECTION -->
             <LinearLayout
@@ -171,12 +334,13 @@
 
                 <ImageView
                     android:id="@+id/btnAddExperience"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:src="@drawable/ic_add"
                     android:contentDescription="@string/add_experience"
                     android:clickable="true"
                     android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:layout_marginStart="8dp" />
 
             </LinearLayout>
@@ -185,10 +349,12 @@
                 android:id="@+id/txtNoExperience"
                 android:text="@string/no_experiences_added_yet"
                 android:textColor="#9AA1A8"
+                android:textSize="14sp"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:padding="16dp"/>
 
             <LinearLayout
                 android:id="@+id/experienceItemsContainer"
@@ -216,12 +382,13 @@
 
                 <ImageView
                     android:id="@+id/btnAddEducation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:src="@drawable/ic_add"
                     android:contentDescription="@string/add_education"
                     android:clickable="true"
                     android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:layout_marginStart="8dp" />
 
             </LinearLayout>
@@ -230,10 +397,12 @@
                 android:id="@+id/txtNoEducation"
                 android:text="@string/no_educations_added_yet"
                 android:textColor="#9AA1A8"
+                android:textSize="14sp"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:padding="16dp"/>
 
             <LinearLayout
                 android:id="@+id/educationItemsContainer"
@@ -263,19 +432,24 @@
                 <ImageView
                     android:id="@+id/btnEditSkills"
                     android:contentDescription="@string/todo"
-                    android:src="@drawable/ic_edit"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"/>
+                    android:src="@drawable/ic_add"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
 
             <TextView
                 android:id="@+id/txtNoSkill"
                 android:text="@string/no_skills_added_yet"
                 android:textColor="#9AA1A8"
+                android:textSize="14sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="8dp"
+                android:padding="16dp"/>
 
             <!-- FLEXBOX CONTAINER FOR SKILLS -->
             <com.google.android.flexbox.FlexboxLayout
@@ -307,19 +481,24 @@
                 <ImageView
                     android:id="@+id/btnEditLanguages"
                     android:contentDescription="@string/todo6"
-                    android:src="@drawable/ic_edit"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"/>
+                    android:src="@drawable/ic_add"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
 
             <TextView
                 android:id="@+id/txtNoLanguage"
                 android:text="@string/no_languages_added_yet"
                 android:textColor="#9AA1A8"
+                android:textSize="14sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="8dp"
+                android:padding="16dp"/>
 
             <!-- FLEXBOX CONTAINER FOR LANGUAGES -->
             <com.google.android.flexbox.FlexboxLayout
@@ -329,7 +508,6 @@
                 app:flexWrap="wrap"
                 app:justifyContent="flex_start"
                 android:layout_marginTop="4dp"/>
-
 
             <View
                 android:layout_width="match_parent"
@@ -368,7 +546,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -393,7 +573,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -427,7 +609,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -453,7 +637,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:id="@+id/menuDarkModeIcon"
@@ -488,7 +674,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -522,7 +710,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -547,7 +737,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"
@@ -572,7 +764,9 @@
                 android:orientation="horizontal"
                 android:paddingVertical="12dp"
                 android:gravity="center_vertical"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="24dp"

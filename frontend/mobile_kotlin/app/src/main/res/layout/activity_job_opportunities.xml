@@ -12,16 +12,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+
+        >
 
         <!-- Header: Menu + Dark Mode -->
         <LinearLayout
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="26dp"
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            >
 
             <ImageView
+
                 android:id="@+id/btnMenu"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
@@ -53,7 +60,6 @@
             android:drawableStart="@android:drawable/ic_menu_search"
             android:padding="12dp"
             android:background="@drawable/search_background"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"/>
 
         <!-- Tabs -->
@@ -69,7 +75,7 @@
                 android:id="@+id/tab_schemes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All jobs (50)" />
+                android:text="All jobs (500000)" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_jobs"
@@ -89,6 +95,7 @@
 
     <!-- DRAWER MENU -->
     <ScrollView
+        android:layout_marginTop="40dp"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"

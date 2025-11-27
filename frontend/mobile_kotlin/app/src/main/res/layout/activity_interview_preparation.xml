@@ -11,7 +11,7 @@
         android:id="@+id/scrollViewRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_marginTop="26dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -28,7 +28,7 @@
 
                 <ImageView
                     android:id="@+id/btnMenu"
-                    android:contentDescription="@string/tod"
+                    android:contentDescription="menu"
                     android:src="@drawable/ic_menu"
                     android:layout_width="28dp"
                     android:layout_height="28dp"/>
@@ -40,7 +40,7 @@
 
                 <ImageView
                     android:id="@+id/btnTheme"
-                    android:contentDescription="@string/todo4"
+                    android:contentDescription="switch theme"
                     android:src="@drawable/ic_sun"
                     android:layout_width="28dp"
                     android:layout_height="28dp"/>
@@ -58,7 +58,7 @@
                     android:id="@+id/titleInterview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Préparation Entretien"
+                    android:text="Interview Preparation"
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="#111827" />
@@ -66,7 +66,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Votre coach IA personnel vous guide pas à pas pour réussir vos entretiens"
+                    android:text="Your personal AI coach guides you step by step to ace your interviews"
                     android:textSize="14sp"
                     android:textColor="#6B7280"
                     android:gravity="center"
@@ -81,7 +81,6 @@
                 app:cardElevation="8dp"
                 android:layout_marginBottom="16dp">
 
-                <!-- Placeholder for chat component -->
                 <FrameLayout
                     android:id="@+id/chatContainer"
                     android:layout_width="match_parent"
@@ -91,14 +90,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(app-chat placeholder)"
+                        android:text="(chat placeholder)"
                         android:layout_gravity="center"
                         android:textColor="#9CA3AF"
                         android:textSize="16sp"/>
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Info cards grid (stacked vertically on small screens) -->
+            <!-- Info cards vertical -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -122,7 +121,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="🎯 Objectif"
+                            android:text="🎯 Objective"
                             android:textSize="16sp"
                             android:textColor="#0EA5A4"
                             android:textStyle="bold"/>
@@ -130,7 +129,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Préparation personnalisée selon votre profil et le poste visé"
+                            android:text="Personalized preparation based on your profile and the job position"
                             android:textSize="14sp"
                             android:textColor="#374151"
                             android:layout_marginTop="8dp"/>
@@ -154,7 +153,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="💡 Conseil"
+                            android:text="💡 Tip"
                             android:textSize="16sp"
                             android:textColor="#16A34A"
                             android:textStyle="bold"/>
@@ -162,7 +161,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Réponses analysées et conseils pratiques en temps réel"
+                            android:text="Responses analysed and practical advice in real time"
                             android:textSize="14sp"
                             android:textColor="#374151"
                             android:layout_marginTop="8dp"/>
@@ -185,7 +184,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="🚀 Résultat"
+                            android:text="🚀 Result"
                             android:textSize="16sp"
                             android:textColor="#7C3AED"
                             android:textStyle="bold"/>
@@ -193,7 +192,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Augmentez vos chances de succès grâce à une préparation optimale"
+                            android:text="Boost your chances of success with optimal interview preparation"
                             android:textSize="14sp"
                             android:textColor="#374151"
                             android:layout_marginTop="8dp"/>
@@ -202,7 +201,7 @@
 
             </LinearLayout>
 
-            <!-- Download PDF section -->
+            <!-- Download PDF -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -221,7 +220,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📚 Guide Complet des Questions d'Entretien"
+                        android:text="📚 Complete Interview Questions Guide"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="#FFFFFF"/>
@@ -229,7 +228,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Téléchargez notre guide PDF contenant 50+ questions types classées par catégorie."
+                        android:text="Download our free PDF guide with 50+ categorized interview questions."
                         android:textSize="14sp"
                         android:textColor="#E6F0FF"
                         android:layout_marginTop="8dp"/>
@@ -245,17 +244,16 @@
                             android:id="@+id/btnDownloadPdf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Télécharger le Guide PDF (gratuit)"
+                            android:text="Download PDF Guide (free)"
                             android:paddingLeft="18dp"
                             android:paddingRight="18dp"
                             android:textStyle="bold"/>
-
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📄 Format PDF • ~15 pages"
+                        android:text="📄 PDF Format • ~15 pages"
                         android:textSize="12sp"
                         android:textColor="#DCEEFF"
                         android:layout_marginTop="10dp"/>
@@ -281,7 +279,7 @@
 
             <!-- Main Section -->
             <TextView
-                android:text="@string/main"
+                android:text="Main"
                 android:textSize="14sp"
                 android:textColor="#9AA1A8"
                 android:paddingVertical="8dp"
@@ -301,7 +299,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_home"
-                    android:contentDescription="@string/home_icon"/>
+                    android:contentDescription="home icon"/>
 
                 <TextView
                     android:id="@+id/menuHome"
@@ -326,11 +324,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_profile"
-                    android:contentDescription="@string/profile_icon"/>
+                    android:contentDescription="profile icon"/>
 
                 <TextView
                     android:id="@+id/menuProfile"
-                    android:text="@string/profile"
+                    android:text="Profile"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -340,7 +338,7 @@
 
             <!-- Account Section -->
             <TextView
-                android:text="@string/account"
+                android:text="Account"
                 android:textSize="14sp"
                 android:textColor="#9AA1A8"
                 android:paddingVertical="8dp"
@@ -360,11 +358,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_logout"
-                    android:contentDescription="@string/logout_icon"/>
+                    android:contentDescription="logout icon"/>
 
                 <TextView
                     android:id="@+id/menuLogout"
-                    android:text="@string/log_out"
+                    android:text="Log out"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -387,11 +385,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_dark_mode"
-                    android:contentDescription="@string/dark_mode_icon"/>
+                    android:contentDescription="dark mode icon"/>
 
                 <TextView
                     android:id="@+id/menuDarkMode"
-                    android:text="@string/dark_mode"
+                    android:text="Dark mode"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -401,7 +399,7 @@
 
             <!-- Support Section -->
             <TextView
-                android:text="@string/support"
+                android:text="Support"
                 android:textSize="14sp"
                 android:textColor="#9AA1A8"
                 android:paddingVertical="8dp"
@@ -421,11 +419,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_help"
-                    android:contentDescription="@string/help_icon"/>
+                    android:contentDescription="help icon"/>
 
                 <TextView
                     android:id="@+id/menuHelp"
-                    android:text="@string/help"
+                    android:text="Help"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -435,7 +433,7 @@
 
             <!-- AI Section -->
             <TextView
-                android:text="@string/ai"
+                android:text="AI Tools"
                 android:textSize="14sp"
                 android:textColor="#9AA1A8"
                 android:paddingVertical="8dp"
@@ -455,11 +453,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_cv"
-                    android:contentDescription="@string/correct_cv_icon"/>
+                    android:contentDescription="cv correction icon"/>
 
                 <TextView
                     android:id="@+id/menuCorrectCV"
-                    android:text="@string/correct_cv"
+                    android:text="Correct CV"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -480,11 +478,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_interview"
-                    android:contentDescription="@string/interview_training_icon"/>
+                    android:contentDescription="interview training icon"/>
 
                 <TextView
                     android:id="@+id/menuInterviewTraining"
-                    android:text="@string/interview_training"
+                    android:text="Interview training"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"
@@ -505,11 +503,11 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_market"
-                    android:contentDescription="@string/job_market_analyse_icon"/>
+                    android:contentDescription="job market analysis icon"/>
 
                 <TextView
                     android:id="@+id/menuJobMarketAnalyse"
-                    android:text="@string/job_market_analyse"
+                    android:text="Job market analysis"
                     android:textSize="16sp"
                     android:textColor="#1F4E5F"
                     android:layout_marginStart="16dp"

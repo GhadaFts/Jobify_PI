@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:layout_marginTop="26dp"
+        >
 
         <LinearLayout
             android:id="@+id/rootLayout"
@@ -326,7 +328,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Drawer menu (you already have one; keep existing content) -->
     <!-- DRAWER MENU -->
     <ScrollView
         android:layout_width="240dp"

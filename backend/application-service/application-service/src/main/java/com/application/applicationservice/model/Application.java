@@ -32,7 +32,7 @@ public class Application {
 
     // Foreign Keys (references to other microservices)
     @Indexed
-    private Double jobSeekerId;
+    private String jobSeekerId;
 
     @Indexed
     private Double jobOfferId;
