@@ -1,64 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="@drawable/bg_item_card"
+    android:layout_marginBottom="12dp">
 
+    <!-- Left side - Experience Info -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvPosition"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/tvJobPosition"
             android:text="Software Engineer"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#1F2937" />
+            android:textColor="#1F4E5F"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"/>
 
         <TextView
-            android:id="@+id/tvCompany"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/tvCompanyName"
             android:text="Google Inc."
             android:textSize="14sp"
-            android:textColor="#6B7280"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/tvDuration"
-            android:layout_width="match_parent"
+            android:textColor="#6E7A8A"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Jan 2020 - Present"
-            android:textSize="12sp"
-            android:textColor="#9CA3AF"
-            android:layout_marginTop="2dp" />
+            android:layout_marginBottom="4dp"/>
 
         <TextView
             android:id="@+id/tvAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="Mountain View, CA"
-            android:textSize="12sp"
-            android:textColor="#9CA3AF"
-            android:layout_marginTop="2dp" />
-
-        <Button
-            android:id="@+id/btnRemoveExperience"
+            android:textSize="13sp"
+            android:textColor="#9AA1A8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Remove"
-            android:textColor="#EF4444"
-            android:background="@android:color/transparent"
-            android:layout_gravity="end"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="4dp"/>
 
+        <TextView
+            android:id="@+id/tvWorkDuration"
+            android:text="01/2020 - 12/2022"
+            android:textSize="12sp"
+            android:textColor="#9AA1A8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+
+    <!-- Right side - Action Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/btnEditExperience"
+            android:src="@drawable/ic_edit"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="Edit Experience"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <Button
+            android:id="@+id/btnDeleteExperience"
+            android:text="Remove"
+            android:textSize="11sp"
+            android:textColor="#E74C3C"
+            android:background="@drawable/bg_button_danger"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"
+            tools:ignore="TouchTargetSizeCheck" />
+    </LinearLayout>
+
+</LinearLayout>
