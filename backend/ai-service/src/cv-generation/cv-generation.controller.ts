@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Get,
   HttpException,
   HttpStatus,
   Logger,
@@ -47,7 +48,7 @@ export class CvGenerationController {
     }
   }
 
-  @Post('health')
+  @Get('health')
   async healthCheck(): Promise<{ status: string; service: string }> {
     return {
       status: 'OK',

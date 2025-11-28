@@ -43,12 +43,22 @@ export class AuthService {
     public currentUser$ = this.currentUserSubject.asObservable();
 
     constructor(
-        private http: HttpClient,
-        private router: Router
-    ) {
-        // Load user from localStorage on service initialization
-        this.loadUserFromStorage();
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.loadUserFromStorage();
+    
+    // Si un token existe mais que l'utilisateur n'est pas chargé, le charger
+    if (this.isAuthenticated() && !this.currentUserSubject.value) {
+      this.getUserProfile().subscribe({
+        error: () => {
+          // Si le token est invalide, nettoyer
+          this.clearAuthData();
+        }
+      });
     }
+  }
+
 
     /**
      * Login user with email and password
@@ -219,4 +229,5 @@ export class AuthService {
         localStorage.removeItem('user');
         this.currentUserSubject.next(null);
     }
+    
 }

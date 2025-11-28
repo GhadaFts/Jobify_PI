@@ -8,7 +8,6 @@ import { EurekaService } from './common/services/eureka.service';
 import { HealthController } from './common/controllers/health.controller';
 import { ConfigModule } from '@nestjs/config';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({

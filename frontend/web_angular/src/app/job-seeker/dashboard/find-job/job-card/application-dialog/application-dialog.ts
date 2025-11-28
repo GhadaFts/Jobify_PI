@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { JobOffer, JobSeeker } from '../../../../../types';
-import { CvGenerationService, GenerateCVRequest, GenerateCVResponse } from '../../../../../ai-service/cv-generation.service';
+import { CvGenerationService, GenerateCVRequest, GenerateCVResponse } from '../../../../../services/cv-generation.service';
 import { MockProfileService } from '../../../../../services/mock-profile.service';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { JobSeeker } from '../../../types';
-import { AiService } from '../../../ai-service/ai-service-backend'; // Votre nouveau service
+import { AiService } from '../../../services/ai.service'; // Votre nouveau service
 import * as pdfjsLib from 'pdfjs-dist';
 
 interface ImprovedSummary {
