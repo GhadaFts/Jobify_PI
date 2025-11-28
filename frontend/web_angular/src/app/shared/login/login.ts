@@ -121,6 +121,7 @@ export class LoginComponent {
         this.errors = this.errorService.handleAuthError(error);
       }
     });
+    
   }
 
   navigateToSignup(): void {

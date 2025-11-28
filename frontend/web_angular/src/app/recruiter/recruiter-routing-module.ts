@@ -6,11 +6,15 @@ import { RecruiterDashboard } from './dashboard/dashboard';
 import { PublishJob } from './dashboard/publish-job/publish-job';
 import { Interviews } from './dashboard/interviews/interviews';
 import { EditProfileRecruiter } from './dashboard/edit-profile/edit-profile';
+import { AuthGuard } from '../guards/auth.guard';
+
 const routes: Routes = [
   { path: 'profile-initial', component: ProfileInitial },
   { 
     path: 'dashboard', 
     component: RecruiterDashboard, 
+    canActivate: [AuthGuard],
+        data: { role: 'recruiter' },
     children: [
       { path: 'publish-job', component: PublishJob },
       {path: 'interviews', component: Interviews },

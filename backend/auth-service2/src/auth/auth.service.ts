@@ -14,7 +14,6 @@ import { User, UserDocument } from '../users/schema/user.schema';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserRole } from '../users/schema/userRole.enum';
-
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);

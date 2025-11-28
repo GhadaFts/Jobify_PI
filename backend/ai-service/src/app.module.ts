@@ -6,7 +6,7 @@ import { InterviewBotModule } from './interview-bot/interview-bot.module';
 import { ApplicationRankingModule } from './application-ranking/application-ranking.module';
 import { EurekaService } from './common/services/eureka.service';
 import { HealthController } from './common/controllers/health.controller';
-
+import { CvGenerationModule } from './cv-generation/cv-generation.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -16,6 +16,7 @@ import { HealthController } from './common/controllers/health.controller';
     CvCorrectionModule,
     InterviewBotModule,
     ApplicationRankingModule,
+    CvGenerationModule,
   ],
   controllers: [HealthController],
   providers: [EurekaService],
