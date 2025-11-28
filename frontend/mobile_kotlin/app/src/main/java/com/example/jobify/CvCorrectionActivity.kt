@@ -23,10 +23,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.widget.NestedScrollView
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.jobify.data.CvSuggestion
-import com.example.jobify.data.GeminiResponse
 import com.example.jobify.services.AiService
 import com.example.jobify.services.AiServiceException
+import com.example.jobify.services.CvAnalyzeResponse
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.parser.PdfTextExtractor
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.InputStream
+import com.example.jobify.services.CvSuggestion
 
 class CvCorrectionActivity : AppCompatActivity() {
 
@@ -216,7 +216,7 @@ class CvCorrectionActivity : AppCompatActivity() {
         showLoading(true)
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                // 1) extract text off the UI thread
+                // 1. Extraire le texte du PDF (tu gardes ton code existant)
                 val cvText = withContext(Dispatchers.IO) {
                     extractTextFromPdf(uri)
                 }
@@ -226,69 +226,52 @@ class CvCorrectionActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // 2) call AI (network call)
-                val jsonResponse = withContext(Dispatchers.IO) {
-                    try {
-                        AiService.analyzeCv(cvText)
-                    } catch (e: AiServiceException) {
-                        // rethrow so we catch it specifically below
-                        throw e
-                    }
+                // 2. Appeler le nouveau service (exactement comme Angular)
+                val response = withContext(Dispatchers.IO) {
+                    AiService.analyzeCv(cvText) // jobDescription = null pour l’instant
                 }
 
-                // 3) parse and display
-                try {
-                    val response = Json { isLenient = true; ignoreUnknownKeys = true }
-                        .decodeFromString<GeminiResponse>(jsonResponse)
-                    displayResults(response)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Parsing error", e)
-                    showErrorDialog(getString(R.string.error_parse_response) + "\n\n" + (e.message ?: ""))
-                }
+                // 3. Afficher les résultats
+                displayResults(response)
 
             } catch (e: AiServiceException) {
-                Log.e(TAG, "AI service error", e)
                 showErrorDialog(e.message ?: getString(R.string.error_ai_generic))
             } catch (e: Exception) {
-                Log.e(TAG, "Unexpected error", e)
-                showErrorDialog(getString(R.string.error_unexpected) + "\n\n" + (e.message ?: ""))
+                Log.e(TAG, "Erreur inattendue", e)
+                showErrorDialog(getString(R.string.error_unexpected) + "\n" + e.message)
             } finally {
                 showLoading(false)
             }
         }
     }
 
-    private fun displayResults(response: GeminiResponse) {
-        // show wrapper
+    private fun displayResults(response: CvAnalyzeResponse) {
         resultsWrapper.visibility = View.VISIBLE
 
-        response.profile?.let {
-            profileName.text = "Name: ${it.name ?: getString(R.string.not_provided_label)}"
-            profileTitle.text = "Title: ${it.title ?: getString(R.string.not_provided_label)}"
-            profileNationality.text = "Nationality: ${it.nationality ?: getString(R.string.not_provided_label)}"
-            profileSummary.text = it.summary ?: getString(R.string.no_professional_summary)
-            profileSkills.text = "Skills: ${it.skills?.joinToString() ?: getString(R.string.not_provided_label)}"
-            profileExperience.text = "Experience: ${it.experience?.size ?: 0} positions"
-        } ?: run {
-            profileName.text = getString(R.string.not_provided_label)
-        }
+        // Profile
+        profileName.text = "Name: ${response.profile.fullName ?: getString(R.string.not_provided_label)}"
+        profileTitle.text = "Title: ${response.profile.title ?: getString(R.string.not_provided_label)}"
+        profileNationality.text = "Nationality: ${response.profile.nationality ?: getString(R.string.not_provided_label)}"
+        profileSummary.text = response.profile.description ?: getString(R.string.no_professional_summary)
+        profileSkills.text = "Skills: ${response.profile.skills.joinToString(", ")}"
+        profileExperience.text = "Experience: ${response.profile.experience.size} positions"
 
-        cvScoreText.text = "${response.cvScore ?: 0}%"
+        // Score
+        cvScoreText.text = "${response.cvScore}%"
 
-        // suggestions
+        // Suggestions
         addSuggestions(response.cvSuggestions)
 
-        // improved summary
-        overallAssessment.text = response.improvedSummary?.overallAssessment ?: ""
-        addListItems(strengthsContainer, response.improvedSummary?.strengths)
-        addListItems(improvementsContainer, response.improvedSummary?.improvements)
+        // Improved Summary
+        overallAssessment.text = response.improvedSummary.overallAssessment
+        addListItems(strengthsContainer, response.improvedSummary.strengths)
+        addListItems(improvementsContainer, response.improvedSummary.improvements)
 
-        // scroll to results
+        // Scroll en bas
         mainScroll.post {
             mainScroll.fullScroll(View.FOCUS_DOWN)
         }
     }
-
     private fun addSuggestions(suggestions: List<CvSuggestion>?) {
         cvSuggestionsContainer.removeAllViews()
         if (suggestions.isNullOrEmpty()) {

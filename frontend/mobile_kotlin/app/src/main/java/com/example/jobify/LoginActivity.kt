@@ -2,29 +2,39 @@ package com.example.jobify
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jobify.databinding.ActivityLoginBinding
+import com.example.jobify.repository.AuthRepository
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var sessionManager: SessionManager
+    private lateinit var authRepository: AuthRepository
     private var isLoading = false
-
-    // Static users for demo
-    private val staticUsers = listOf(
-        User("jobseeker@jobify.com", "jobseeker123", "jobseeker", "John Seeker"),
-        User("recruiter@jobify.com", "recruiter123", "recruiter", "Sarah Recruiter")
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        sessionManager = SessionManager(this)
+        authRepository = AuthRepository()
+
+        // Check if user is already logged in
+        checkExistingSession()
+
         setupListeners()
-        showLoginHints()
+    }
+
+    private fun checkExistingSession() {
+        if (sessionManager.isLoggedIn() && !sessionManager.isTokenExpired()) {
+            val role = sessionManager.getUserRole()
+            navigateBasedOnRole(role ?: "")
+        }
     }
 
     private fun setupListeners() {
@@ -40,30 +50,17 @@ class LoginActivity : AppCompatActivity() {
 
         // Forgot password click
         binding.tvForgotPassword.setOnClickListener {
-            showLoginHints()
+            Toast.makeText(
+                this,
+                "Please contact support to reset your password",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         // Sign up click
         binding.tvSignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
-            finish()
         }
-    }
-
-    private fun showLoginHints() {
-        val hint = """
-            Demo Accounts:
-            
-            Job Seeker:
-            Email: jobseeker@jobify.com
-            Password: jobseeker123
-            
-            Recruiter:
-            Email: recruiter@jobify.com
-            Password: recruiter123
-        """.trimIndent()
-
-        Toast.makeText(this, hint, Toast.LENGTH_LONG).show()
     }
 
     private fun validateInputs(email: String, password: String): Boolean {
@@ -87,9 +84,6 @@ class LoginActivity : AppCompatActivity() {
         if (password.isEmpty()) {
             binding.tilPassword.error = "Password is required"
             isValid = false
-        } else if (password.length < 6) {
-            binding.tilPassword.error = "Password must be at least 6 characters"
-            isValid = false
         }
 
         return isValid
@@ -98,42 +92,63 @@ class LoginActivity : AppCompatActivity() {
     private fun performLogin(email: String, password: String) {
         if (isLoading) return
 
-        isLoading = true
-        binding.btnLogin.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        setLoading(true)
 
-        // Simulate API call with delay
-        binding.btnLogin.postDelayed({
-            isLoading = false
-            binding.btnLogin.isEnabled = true
-            binding.progressBar.visibility = View.GONE
+        authRepository.login(
+            email = email,
+            password = password,
+            onSuccess = { loginResponse ->
+                Log.d("LoginActivity", "Login successful, loading profile...")
 
-            // Check against static users
-            val user = staticUsers.find { it.email == email && it.password == password }
+                // Now get user profile
+                authRepository.getUserProfile(
+                    accessToken = loginResponse.accessToken,
+                    onSuccess = { userProfile ->
+                        // Save complete session
+                        sessionManager.saveUserSession(
+                            accessToken = loginResponse.accessToken,
+                            refreshToken = loginResponse.refreshToken,
+                            expiresIn = loginResponse.expiresIn,
+                            email = userProfile.email,
+                            name = userProfile.fullName,
+                            role = userProfile.role,
+                            keycloakId = userProfile.keycloakId
+                        )
 
-            if (user != null) {
-                // Save user session using SessionManager
-                val sessionManager = SessionManager(this)
-                sessionManager.saveUserSession(user.email, user.name, user.role)
+                        setLoading(false)
 
-                Toast.makeText(
-                    this,
-                    "Welcome back, ${user.name}!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                        Toast.makeText(
+                            this,
+                            "Welcome back, ${userProfile.fullName}!",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                // Navigate based on role
-                navigateBasedOnRole(user.role)
-            } else {
-                showError("Invalid email or password. Tap 'Forgot Password?' to see demo accounts.")
+                        // Navigate based on role
+                        navigateBasedOnRole(userProfile.role)
+                    },
+                    onError = { error ->
+                        setLoading(false)
+                        Log.e("LoginActivity", "Failed to load profile: $error")
+                        showError("Login successful but failed to load profile: $error")
+                    }
+                )
+            },
+            onError = { error ->
+                setLoading(false)
+                Log.e("LoginActivity", "Login failed: $error")
+                showError(error)
             }
-        }, 1500)
+        )
     }
 
     private fun navigateBasedOnRole(role: String) {
-        val intent = when (role) {
-            "jobseeker" -> Intent(this, JobOpportunitiesActivity::class.java)
+        val intent = when (role.lowercase()) {
+            "jobseeker", "job_seeker" -> Intent(this, JobOpportunitiesActivity::class.java)
             "recruiter" -> Intent(this, PostsActivity::class.java)
+            "admin" -> {
+                // Navigate to admin dashboard if you have one
+                Intent(this, MainActivity::class.java)
+            }
             else -> Intent(this, MainActivity::class.java)
         }
 
@@ -141,31 +156,18 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun saveUserSession(user: User) {
-        // Save to SharedPreferences
-        val prefs = getSharedPreferences("JobifyPrefs", MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("user_email", user.email)
-            putString("user_name", user.name)
-            putString("user_role", user.role)
-            putBoolean("is_logged_in", true)
-            apply()
-        }
+    private fun setLoading(loading: Boolean) {
+        isLoading = loading
+        binding.btnLogin.isEnabled = !loading
+        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+
+        // Disable inputs during loading
+        binding.etEmail.isEnabled = !loading
+        binding.etPassword.isEnabled = !loading
     }
 
     private fun showError(message: String) {
         binding.tvError.text = message
         binding.tvError.visibility = View.VISIBLE
     }
-
-    // Data class for User
-    data class User(
-        val email: String,
-        val password: String,
-        val role: String,
-        val name: String
-    )
 }
-
-
-

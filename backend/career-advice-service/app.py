@@ -1,11 +1,28 @@
 from flask import Flask, request, jsonify
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
-from flask_cors import CORS 
+from flask_cors import CORS
+import gdown
+import os
+import py_eureka_client.eureka_client as eureka_client
+
 
 app = Flask(__name__)
-CORS(app) 
+# Configuration Eureka
+eureka_server = "http://localhost:8761/eureka"  # URL de votre serveur Eureka
+app_name = "career-advice"
+instance_port = 5000
 
+eureka_client.init(
+    eureka_server=eureka_server,
+    app_name=app_name,
+    instance_port=instance_port,
+    instance_host="localhost"  # Remplacez par votre IP si nécessaire
+)
+
+if os.path.exists("./career_model") == False:
+    CAREER_MODEL_URL = "https://drive.google.com/drive/folders/13OFPDxTHgZXkJHgsTC8lMT0pMD8n4HlU?usp=sharing"
+    gdown.download_folder(CAREER_MODEL_URL, quiet=False, use_cookies=False)
 
 MODEL_PATH = "career_model"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)

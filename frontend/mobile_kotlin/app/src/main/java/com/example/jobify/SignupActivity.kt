@@ -6,10 +6,14 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.jobify.databinding.ActivitySignupBinding
+import com.example.jobify.network.LoginResponse
+import com.example.jobify.repository.AuthRepository
 
 class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
+    private lateinit var authRepository: AuthRepository
+    private lateinit var sessionManager: SessionManager
     private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,6 +21,8 @@ class SignupActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        authRepository = AuthRepository()
+        sessionManager = SessionManager(this)
         setupListeners()
     }
 
@@ -28,9 +34,9 @@ class SignupActivity : AppCompatActivity() {
             val password = binding.etPassword.text.toString().trim()
             val confirmPassword = binding.etConfirmPassword.text.toString().trim()
             val role = when (binding.rgRole.checkedRadioButtonId) {
-                R.id.rbJobSeeker -> "jobseeker"
+                R.id.rbJobSeeker -> "job_seeker"
                 R.id.rbRecruiter -> "recruiter"
-                else -> "jobseeker"
+                else -> "job_seeker"
             }
 
             if (validateInputs(fullName, email, password, confirmPassword)) {
@@ -107,44 +113,136 @@ class SignupActivity : AppCompatActivity() {
     ) {
         if (isLoading) return
 
-        isLoading = true
-        binding.btnSignup.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        setLoading(true)
 
-        // Simulate API call
-        binding.btnSignup.postDelayed({
-            // Here you would make your actual API call
-            // For now, we'll simulate successful registration
-
-            isLoading = false
-            binding.btnSignup.isEnabled = true
-            binding.progressBar.visibility = View.GONE
-
-            // Show success message
-            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
-
-            // Navigate to appropriate profile setup based on role
-            val intent = if (role == "jobseeker") {
-                Intent(this, JobSeekerProfileInitialActivity::class.java)
-            } else {
-                Intent(this, RecruiterProfileInitialActivity::class.java)
+        // Step 1: Register the user
+        authRepository.register(
+            fullName = fullName,
+            email = email,
+            password = password,
+            role = role,
+            onSuccess = { registerResponse ->
+                // Step 2: Auto-login after successful registration
+                performAutoLogin(email, password, fullName, role)
+            },
+            onError = { errorMessage ->
+                setLoading(false)
+                showError(errorMessage)
             }
+        )
+    }
 
-            // Pass user data to profile activity if needed
-            intent.putExtra("fullName", fullName)
-            intent.putExtra("email", email)
-            intent.putExtra("role", role)
+    private fun performAutoLogin(
+        email: String,
+        password: String,
+        fullName: String,
+        role: String
+    ) {
+        authRepository.login(
+            email = email,
+            password = password,
+            onSuccess = { loginResponse ->
+                // Fetch user profile to get complete user data
+                fetchUserProfile(loginResponse, fullName, email, role)
+            },
+            onError = { errorMessage ->
+                setLoading(false)
+                // Registration succeeded but login failed
+                // Show message and redirect to login
+                Toast.makeText(
+                    this,
+                    "Account created! Please login to continue.",
+                    Toast.LENGTH_LONG
+                ).show()
 
-            startActivity(intent)
-            finish()
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.putExtra("email", email)
+                startActivity(intent)
+                finish()
+            }
+        )
+    }
 
-            // If registration fails, show error:
-            // showError("Registration failed. Please try again.")
-        }, 2000)
+    private fun fetchUserProfile(
+        loginResponse: LoginResponse,
+        fallbackName: String,
+        fallbackEmail: String,
+        fallbackRole: String
+    ) {
+        authRepository.getUserProfile(
+            accessToken = loginResponse.accessToken,
+            onSuccess = { userProfile ->
+                // Save complete session with tokens and user data
+                sessionManager.saveUserSession(
+                    accessToken = loginResponse.accessToken,
+                    refreshToken = loginResponse.refreshToken,
+                    expiresIn = loginResponse.expiresIn,
+                    email = userProfile.email,
+                    name = userProfile.fullName,
+                    role = userProfile.role,
+                    keycloakId = userProfile.keycloakId
+                )
+
+                setLoading(false)
+                navigateToProfileSetup(userProfile.fullName, userProfile.email, userProfile.role)
+            },
+            onError = { error ->
+                // Profile fetch failed, but we can still proceed with fallback data
+                sessionManager.saveUserSession(
+                    accessToken = loginResponse.accessToken,
+                    refreshToken = loginResponse.refreshToken,
+                    expiresIn = loginResponse.expiresIn,
+                    email = fallbackEmail,
+                    name = fallbackName,
+                    role = fallbackRole,
+                    keycloakId = ""
+                )
+
+                setLoading(false)
+                navigateToProfileSetup(fallbackName, fallbackEmail, fallbackRole)
+            }
+        )
+    }
+
+    private fun navigateToProfileSetup(fullName: String, email: String, role: String) {
+        Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
+
+        val intent = if (role == "job_seeker") {
+            Intent(this, JobSeekerProfileInitialActivity::class.java)
+        } else {
+            Intent(this, RecruiterProfileInitialActivity::class.java)
+        }
+
+        intent.putExtra("fullName", fullName)
+        intent.putExtra("email", email)
+        intent.putExtra("role", role)
+
+        startActivity(intent)
+        finish()
+    }
+
+    private fun setLoading(loading: Boolean) {
+        isLoading = loading
+        binding.btnSignup.isEnabled = !loading
+        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+
+        // Disable all input fields during loading
+        binding.etFullName.isEnabled = !loading
+        binding.etEmail.isEnabled = !loading
+        binding.etPassword.isEnabled = !loading
+        binding.etConfirmPassword.isEnabled = !loading
+        binding.rgRole.isEnabled = !loading
+        binding.rbJobSeeker.isEnabled = !loading
+        binding.rbRecruiter.isEnabled = !loading
     }
 
     private fun showError(message: String) {
         binding.tvError.text = message
         binding.tvError.visibility = View.VISIBLE
+
+        // Auto-hide error after 5 seconds
+        binding.tvError.postDelayed({
+            binding.tvError.visibility = View.GONE
+        }, 5000)
     }
 }

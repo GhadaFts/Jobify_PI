@@ -7,9 +7,6 @@ export type UserDocument = User & Document;
 @Schema({ discriminatorKey: 'role', collection: 'users', timestamps: true })
 export class User {
     @Prop({ required: true, unique: true })
-    id: number;
-
-    @Prop({ required: true, unique: true })
     email: string;
 
     @Prop({ required: true })

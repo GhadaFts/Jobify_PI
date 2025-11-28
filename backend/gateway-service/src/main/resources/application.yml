@@ -5,6 +5,7 @@ security:
         issuer-uri: http://localhost:8080/realms/jobify-realm
 server:
   port: 8888
+  address: 0.0.0.0
 
 spring:
   application:
@@ -46,10 +47,17 @@ spring:
             - Path=/joboffer-service/**
           filters:
             - StripPrefix=1
+
+        - id: career-advice
+          uri: lb://CAREER-ADVICE  # Utilise le load balancing via Eureka
+          predicates:
+            - Path=/career-advice/**
+          filters:
+            - StripPrefix=1
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "http://localhost:4200"
+            allowedOriginPatterns: "*"
             allowedHeaders: "*"
             allowedMethods: "*"
             allowCredentials: true

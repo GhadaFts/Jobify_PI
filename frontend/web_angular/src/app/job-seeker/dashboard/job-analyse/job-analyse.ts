@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CareerService, CareerAnalysisRequest, ProcessedAdvice } from '../../../ai-service/career-service-backend';
+import { CareerService, CareerAnalysisRequest, ProcessedAdvice } from '../../../services/career-service-backend';
 
 @Component({
   selector: 'app-job-analyse',

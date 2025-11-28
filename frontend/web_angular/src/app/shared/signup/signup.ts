@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, SignupData } from '../services/auth.service';
+import { AuthService, RegisterData } from '../../services/auth.service';
 import { ErrorService } from '../services/error.service';
 import { Router } from '@angular/router';
 
@@ -19,7 +19,7 @@ export class SignupComponent {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'jobseeker'
+    role: 'job_seeker' as 'job_seeker' | 'recruiter'
   };
   errors: string[] = [];
   isLoading: boolean = false;
@@ -38,7 +38,7 @@ export class SignupComponent {
     private router: Router
   ) {}
 
-   togglePasswordVisibility() {
+  togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
 
@@ -50,6 +50,7 @@ export class SignupComponent {
     this.isLoading = true;
     this.errors = [];
 
+    // Validation
     if (this.passwordMismatch()) {
       this.errors.push('Passwords do not match');
       this.isLoading = false;
@@ -62,29 +63,37 @@ export class SignupComponent {
       return;
     }
 
-    const backendData: SignupData = {
+    if (!this.signupData.fullName || !this.signupData.email) {
+      this.errors.push('Please fill in all required fields');
+      this.isLoading = false;
+      return;
+    }
+
+    // Prepare data for backend
+    const registerData: RegisterData = {
       fullName: this.signupData.fullName,
       email: this.signupData.email,
       password: this.signupData.password,
       role: this.signupData.role
     };
 
-    this.authService.signup(backendData).subscribe({
+    // Call the register method from AuthService
+    this.authService.register(registerData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        if (response.success) {
-          console.log('Signup successful:', response);
-          if (this.signupData.role === 'jobseeker') {
-            this.router.navigate(['/job-seeker/profile-initial']);
-          } else if (this.signupData.role === 'recruiter') {
-            this.router.navigate(['/recruiter/profile-initial']);
-          }
+        console.log('Registration successful:', response);
+        
+        // After successful registration and auto-login, redirect based on role
+        if (this.signupData.role === 'job_seeker') {
+          this.router.navigate(['/job-seeker/profile-initial']);
+        } else if (this.signupData.role === 'recruiter') {
+          this.router.navigate(['/recruiter/profile-initial']);
         }
       },
       error: (error) => {
         this.isLoading = false;
         this.errors = this.errorService.handleAuthError(error);
-        console.error('Signup failed:', error);
+        console.error('Registration failed:', error);
       }
     });
   }
