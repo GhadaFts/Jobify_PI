@@ -7,13 +7,16 @@
       [navigationItems]="navItems"
       [secondaryItems]="secondaryNavItems"
       subtitle="Career Network"
-      profileName="John Doe"
-      profileTitle="Software Engineer"
+      [profileName]="currentUser?.fullName || 'Loading...'"
+      [profileTitle]="currentUser?.role === 'job_seeker' ? 'Job Seeker' : 'Professional'"
       profileImage="/assets/img.png"
-      class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto left-sidebar fixed-sidebar" [class.open]="leftOpen" style="left: 0;">
+      class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto left-sidebar fixed-sidebar" 
+      [class.open]="leftOpen" 
+      style="left: 0;">
     </app-sidebar>
     <button *ngIf="leftOpen" class="sidebar-close left" (click)="toggleLeft()" aria-label="Close sidebar">✕</button>
   </div>
+
   <!-- Main Content Area with Proper Margins -->
   <main class="ml-64 mr-80 p-4 jobseeker-main" style="background-color: #F3F4F6; width: calc(100% - 36rem); margin-left: 16rem; margin-right: 20rem;">
     <!-- Backdrop shown when either sidebar is open (click to close) -->
@@ -28,8 +31,9 @@
     <div class="mobile-right-toggle" [hidden]="rightOpen">
       <button type="button" (click)="toggleRight()" aria-label="Open widgets" class="mobile-toggle">▤</button>
     </div>
+
     <ng-container [ngSwitch]="activeSection">
-       <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
+      <app-find-job *ngSwitchCase="'find-job'"></app-find-job>
       <app-cv-correction *ngSwitchCase="'cv-correction'"></app-cv-correction>
       <app-job-analyse *ngSwitchCase="'job-analyse'"></app-job-analyse>
       <app-edit-profile *ngSwitchCase="'edit-profile'"></app-edit-profile>
