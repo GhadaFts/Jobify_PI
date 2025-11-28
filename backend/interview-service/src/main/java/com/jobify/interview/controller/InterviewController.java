@@ -21,7 +21,6 @@ import java.util.Map;
 @RequestMapping("/api/interviews")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class InterviewController {
 
     private final InterviewService interviewService;

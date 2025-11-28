@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { JobOffer, Application } from '../../../types';
+import { JobOfferService } from '../../../services/job-offer.service';
+import { ToastService } from '../../../services/toast.service';
 import { 
   faCheck, 
   faTimes, 
@@ -16,6 +18,7 @@ import {
   styleUrls: ['./publish-job.scss']
 })
 export class PublishJob {
+  isPublishing: boolean = false;
   activeTab: string = 'all';
   searchQuery: string = '';
   isComposerExpanded: boolean = false;
@@ -28,6 +31,7 @@ export class PublishJob {
   faTimes = faTimes;
   faPlus = faPlus;
   faPaperPlane = faPaperPlane;
+  faSpinner = faPaperPlane; // placeholder, will set spinner icon in template via CSS if needed
 
   newJob: Partial<JobOffer> = {
     title: '',
@@ -45,201 +49,66 @@ export class PublishJob {
     posted: 'Just now'
   };
 
-  jobs: JobOffer[] = [
-    {
-      id: '1',
-      title: 'Senior Frontend Developer',
-      company: 'Tech Corp',
-      companyLogo: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=200&fit=crop',
-      location: 'New York',
-      type: 'Full-time',
-      experience: '5+ years',
-      salary: '$120,000 - $150,000',
-      description: 'We are looking for an experienced Frontend Developer to join our team...',
-      skills: ['React', 'TypeScript', 'Next.js', 'CSS'],
-      requirements: [
-        'Bachelor\'s degree in Computer Science or related field',
-        '5+ years of professional frontend development experience',
-        'Strong proficiency in React and TypeScript',
-        'Experience with modern build tools and CI/CD'
-      ],
-      posted: '2 days ago',
-      applicants: 3,
-      status: 'actively hiring',
-      published: true,
-      applications: [
-        {
-          id: 1,
-          applicationDate: '2024-01-20',
-          status: 'new',
-          cv_link: '/cv/cv1.pdf',
-          motivation_lettre: 'Je suis très intéressé par ce poste de développeur frontend...',
-          jobOfferId: '1',
-          jobSeeker: {
-            id: 1,
-            email: "mohamed.ali@email.com",
-            password: "password",
-            fullName: "Mohamed Ali",
-            role: "jobseeker",
-            photo_profil: "assets/condidat_profile.png",
-            twitter_link: "https://twitter.com/mohamed",
-            web_link: "https://mohamed.dev",
-            github_link: "https://github.com/mohamed",
-            facebook_link: "https://facebook.com/mohamed",
-            description: "Développeur passionné avec 5 ans d'expérience en React et TypeScript...",
-            phone_number: "+212 612-345678",
-            nationality: "Marocaine",
-            skills: ["React", "TypeScript", "Next.js", "CSS", "Node.js"],
-            experience: [
-              {
-                position: "Tech Lead",
-                company: "XYZ Company",
-                startDate: "2020-01-01",
-                endDate: "2024-01-01",
-                description: "Lead d'une équipe de 5 développeurs sur des projets React/Node.js"
-              },
-              {
-                position: "Développeur Frontend",
-                company: "ABC Corp",
-                startDate: "2018-01-01",
-                endDate: "2020-01-01",
-                description: "Développement d'applications web avec React et Redux"
+  // file upload fields
+  logoFile?: File;
+  logoPreview?: string;
+  logoUrl?: string;
+
+  constructor(private jobService: JobOfferService, private toastService: ToastService) {}
+
+  jobs: JobOffer[] = [];
+  isUpdating: boolean = false;
+  ngOnInit(): void {
+    this.loadMyJobs();
+  }
+
+  private loadMyJobs(): void {
+    this.jobService.getMyJobs().subscribe({
+      next: (res: any) => {
+        // expect res to be an array of job DTOs
+        if (Array.isArray(res)) {
+          this.jobs = res.map((created: any) => ({
+            id: created.id ? String(created.id) : Date.now().toString(),
+            title: created.title || '',
+            company: created.company || '',
+            // Normalize companyLogo: if backend returns a filename or relative path, prefix with gateway+service path
+            companyLogo: ((): string => {
+              const raw = created.companyLogo || '';
+              if (!raw) return '';
+              // if already absolute URL, return as-is
+              if (/^https?:\/\//i.test(raw)) return raw;
+              // if starts with /, assume it's already a root path like /uploads/...
+              if (raw.startsWith('/')) return `http://localhost:8888/joboffer-service${raw}`;
+              // otherwise assume it's a filename or relative path under uploads
+              if (raw.startsWith('uploads/') || raw.includes('company-logos')) {
+                return `http://localhost:8888/joboffer-service/${raw}`;
               }
-            ],
-            education: [
-              {
-                degree: "Master",
-                field: "Informatique",
-                school: "Université Hassan II",
-                graduationDate: "2018-06-01"
-              },
-              {
-                degree: "Licence",
-                field: "Génie Logiciel",
-                school: "ENSA Marrakech",
-                graduationDate: "2016-06-01"
-              }
-            ],
-            title: "Développeur Full Stack Senior",
-            date_of_birth: "1990-05-15",
-            gender: "Male"
-          }
-        },
-        {
-          id: 2,
-          applicationDate: '2024-01-18',
-          status: 'new',
-          cv_link: '/cv/cv2.pdf',
-          motivation_lettre: 'Votre offre correspond parfaitement à mon profil de développeuse frontend...',
-          jobOfferId: '1',
-          jobSeeker: {
-            id: 2,
-            email: "fatima.zahra@email.com",
-            password: "password",
-            fullName: "Fatima Zahra",
-            role: "jobseeker",
-            photo_profil: "assets/condidat_profile.png",
-            twitter_link: "https://twitter.com/fatima",
-            web_link: "https://fatima.dev",
-            github_link: "https://github.com/fatima",
-            facebook_link: "https://facebook.com/fatima",
-            description: "Développeuse front-end créative avec 4 ans d'expérience...",
-            phone_number: "+212 612-987654",
-            nationality: "Marocaine",
-            skills: ["React", "Vue.js", "JavaScript", "CSS", "SASS"],
-            experience: [
-              {
-                position: "Frontend Developer",
-                company: "Digital Agency",
-                startDate: "2021-01-01",
-                endDate: "2024-01-01",
-                description: "Développement d'interfaces utilisateur responsive avec Vue.js et React"
-              }
-            ],
-            education: [
-              {
-                degree: "Licence",
-                field: "Génie Logiciel",
-                school: "ENSET",
-                graduationDate: "2020-06-01"
-              }
-            ],
-            title: "Développeuse Frontend",
-            date_of_birth: "1995-08-22",
-            gender: "Female"
-          }
+              // otherwise treat as filename
+              return `http://localhost:8888/joboffer-service/uploads/company-logos/${raw}`;
+            })(),
+            location: created.location || '',
+            type: created.type || '',
+            experience: created.experience || '',
+            salary: created.salary || '',
+            description: created.description || '',
+            skills: created.skills || [],
+            requirements: created.requirements || [],
+            posted: created.posted || '',
+            applicants: created.applicants || 0,
+            status: created.status || 'open',
+            published: !!created.published,
+            applications: created.applications || []
+          }));
+        } else {
+          console.warn('Unexpected response from getMyJobs', res);
         }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Product Manager',
-      company: 'StartUp Inc',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'San Francisco',
-      type: 'Full-time',
-      experience: '3+ years',
-      salary: '$100,000 - $130,000',
-      description: 'Lead product development and strategy for our growing platform...',
-      skills: ['Product Strategy', 'Agile', 'User Research', 'Analytics'],
-      requirements: [
-        '3+ years of product management experience',
-        'Proven track record of launching successful products',
-        'Strong analytical and problem-solving skills',
-        'Excellent communication and leadership abilities'
-      ],
-      posted: '1 day ago',
-      applicants: 1,
-      status: 'new',
-      published: false,
-      applications: [
-        {
-          id: 3,
-          applicationDate: '2024-01-22',
-          status: 'new',
-          cv_link: '/cv/cv3.pdf',
-          motivation_lettre: 'Je suis impatient de contribuer à votre équipe produit...',
-          jobOfferId: '2',
-          jobSeeker: {
-            id: 3,
-            email: "karim.benjelloun@email.com",
-            password: "password",
-            fullName: "Karim Benjelloun",
-            role: "jobseeker",
-            photo_profil: "assets/condidat_profile.png",
-            twitter_link: "https://twitter.com/karim",
-            web_link: "https://karim.dev",
-            github_link: "https://github.com/karim",
-            facebook_link: "https://facebook.com/karim",
-            description: "Product Manager avec expertise en stratégie produit et développement agile...",
-            phone_number: "+212 600-112233",
-            nationality: "Marocaine",
-            skills: ["Product Strategy", "Agile", "User Research", "Analytics", "Roadmapping"],
-            experience: [
-              {
-                position: "Product Manager",
-                company: "Tech Startup",
-                startDate: "2019-01-01",
-                endDate: "2024-01-01",
-                description: "Gestion du cycle de vie produit et collaboration avec les équipes techniques"
-              }
-            ],
-            education: [
-              {
-                degree: "Diplôme d'Ingénieur",
-                field: "Informatique",
-                school: "EMI",
-                graduationDate: "2018-06-01"
-              }
-            ],
-            title: "Product Manager",
-            date_of_birth: "1992-11-30",
-            gender: "Male"
-          }
-        }
-      ]
-    }
-  ];
+      },
+      error: (err) => {
+        console.error('Failed to load jobs', err);
+        this.toastService.error('Failed to load your jobs.');
+      }
+    });
+  }
 
   get filteredJobs(): JobOffer[] {
     return this.jobs.filter(job =>
@@ -298,42 +167,152 @@ export class PublishJob {
 
   publishJob(): void {
     if (this.isFormValid()) {
-      const job: JobOffer = {
-        id: Date.now().toString(),
-        title: this.newJob.title!,
-        company: this.newJob.company!,
-        location: this.newJob.location!,
-        type: this.newJob.type!,
-        experience: this.newJob.experience!,
-        salary: this.newJob.salary!,
-        description: this.newJob.description!,
-        skills: this.newJob.skills!,
-        requirements: this.newJob.requirements || [],
-        posted: 'Just now',
-        applicants: 0,
-        status: this.newJob.status!,
-        published: true,
-        applications: []
+      // start publishing flow
+      this.isPublishing = true;
+
+      const doCreate = (companyLogoUrl?: string) => {
+        const payload = {
+          title: this.newJob.title,
+          jobPosition: this.newJob.title,
+          company: this.newJob.company,
+          companyLogo: companyLogoUrl || this.newJob.companyLogo || this.logoUrl,
+          location: this.newJob.location,
+          type: this.newJob.type,
+          experience: this.newJob.experience,
+          salary: this.newJob.salary,
+          description: this.newJob.description,
+          skills: this.newJob.skills,
+          requirements: this.newJob.requirements || [],
+          status: this.newJob.status || 'open',
+          published: true
+        };
+
+        this.jobService.createJob(payload).subscribe({
+          next: (created: any) => {
+            // After create, refresh the authoritative list from the server
+            this.loadMyJobs();
+            this.isComposerExpanded = false;
+            this.resetForm();
+            this.logoFile = undefined;
+            this.logoPreview = undefined;
+            this.logoUrl = undefined;
+            this.toastService.success('Job published successfully.');
+          },
+          error: (err) => {
+            console.error('Create job failed', err);
+            this.toastService.error('Failed to publish job.');
+            this.isPublishing = false;
+          },
+          complete: () => {
+            this.isPublishing = false;
+          }
+        });
       };
 
-      this.jobs.unshift(job);
-      this.isComposerExpanded = false;
-      this.resetForm();
+      // If there's a selected file, upload it first
+      if (this.logoFile) {
+        const form = new FormData();
+        form.append('file', this.logoFile, this.logoFile.name);
+        this.jobService.uploadLogo(form).subscribe({
+          next: (res: any) => {
+            const url = res && res.url ? res.url : undefined;
+            this.logoUrl = url;
+            doCreate(url);
+          },
+          error: (err) => {
+            console.error('Logo upload failed', err);
+            this.toastService.error('Failed to upload company logo.');
+            this.isPublishing = false;
+          }
+        });
+      } else {
+        doCreate();
+      }
+    }
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.logoFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => this.logoPreview = e.target.result;
+      reader.readAsDataURL(this.logoFile);
     }
   }
 
   handlePublishJob(jobId: string): void {
     const job = this.jobs.find(j => j.id === jobId);
     if (job) {
-      job.published = true;
+      // If job seems to be persisted (has id), call backend to set published=true
+      this.jobService.updateJob(job.id, { published: true }).subscribe({
+        next: (updated: any) => {
+          job.published = true;
+          this.toastService.success('Job published successfully.');
+        },
+        error: (err) => {
+          console.error('Publish job failed', err);
+          this.toastService.error('Failed to publish job.');
+        }
+      });
     }
   }
 
   handleEditJob(updatedJob: JobOffer): void {
     const index = this.jobs.findIndex(j => j.id === updatedJob.id);
-    if (index !== -1) {
-      this.jobs[index] = updatedJob;
+    if (index === -1) {
+      // If job isn't in local list, just refresh
+      this.loadMyJobs();
+      return;
     }
+
+    // Prepare payload for backend - ensure required fields like jobPosition are included
+    const payload: any = {
+      title: updatedJob.title,
+      jobPosition: updatedJob.title || (updatedJob as any).jobPosition,
+      company: updatedJob.company,
+      location: updatedJob.location,
+      type: updatedJob.type,
+      experience: updatedJob.experience,
+      salary: updatedJob.salary,
+      description: updatedJob.description,
+      skills: updatedJob.skills || [],
+      requirements: updatedJob.requirements || [],
+      status: (updatedJob as any).status || 'open',
+      published: !!updatedJob.published
+    };
+
+    this.isUpdating = true;
+    this.jobService.updateJob(updatedJob.id!, payload).subscribe({
+      next: (res: any) => {
+        // update local copy with server response if present, otherwise use updatedJob
+        const serverJob = res && res.id ? res : updatedJob;
+        this.jobs[index] = {
+          ...this.jobs[index],
+          title: serverJob.title || updatedJob.title,
+          company: serverJob.company || updatedJob.company,
+          location: serverJob.location || updatedJob.location,
+          type: serverJob.type || updatedJob.type,
+          experience: serverJob.experience || updatedJob.experience,
+          salary: serverJob.salary || updatedJob.salary,
+          description: serverJob.description || updatedJob.description,
+          skills: serverJob.skills || updatedJob.skills || [],
+          requirements: serverJob.requirements || updatedJob.requirements || [],
+          published: serverJob.published !== undefined ? serverJob.published : updatedJob.published,
+          applicants: serverJob.applicants || this.jobs[index].applicants,
+          applications: serverJob.applications || this.jobs[index].applications
+        } as JobOffer;
+
+        this.toastService.success('Job updated successfully.');
+      },
+      error: (err) => {
+        console.error('Update job failed', err);
+        this.toastService.error('Failed to update job.');
+      },
+      complete: () => {
+        this.isUpdating = false;
+      }
+    });
   }
 
   // NOUVELLE MÉTHODE : Gestion des changements de statut des applications
