@@ -47,6 +47,13 @@ spring:
             - Path=/joboffer-service/**
           filters:
             - StripPrefix=1
+
+        - id: career-advice
+          uri: lb://CAREER-ADVICE  # Utilise le load balancing via Eureka
+          predicates:
+            - Path=/career-advice/**
+          filters:
+            - StripPrefix=1
       globalcors:
         corsConfigurations:
           '[/**]':

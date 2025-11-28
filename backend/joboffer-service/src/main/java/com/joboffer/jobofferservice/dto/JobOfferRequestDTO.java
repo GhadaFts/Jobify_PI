@@ -19,4 +19,13 @@ public class JobOfferRequestDTO {
     private boolean published;
     private String status;
     private Double recruiterId; // foreign key reference
+    private String companyLogo;
+
+    public String getCompanyLogo() {
+        return companyLogo;
+    }
+
+    public void setCompanyLogo(String companyLogo) {
+        this.companyLogo = companyLogo;
+    }
 }

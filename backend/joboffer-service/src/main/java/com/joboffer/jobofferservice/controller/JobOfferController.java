@@ -20,7 +20,6 @@ import java.util.Map;
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JobOfferController {
 
     private final JobOfferService jobOfferService;
@@ -91,6 +90,9 @@ public class JobOfferController {
 
         // Set the recruiter ID from JWT
         jobOfferDTO.setRecruiterId(recruiterId);
+
+        // Log incoming company logo (helps debug missing logo in DB)
+        log.info("Incoming companyLogo for create: {}", jobOfferDTO.getCompanyLogo());
 
         jobOfferService.validateJobData(jobOfferDTO);
         JobOfferDTO createdJob = jobOfferService.createJob(jobOfferDTO);

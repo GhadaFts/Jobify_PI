@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap , switchMap , of} from 'rxjs';
+import { Observable, BehaviorSubject, tap , switchMap , of, catchError } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface LoginCredentials {
@@ -115,10 +115,25 @@ export class AuthService {
     logout(): Observable<any> {
         const refreshToken = this.getRefreshToken();
 
+        // Clear local auth state immediately so stale tokens are not reused
+        this.clearAuthData();
+        this.router.navigate(['/home']);
+
+        // If there's no refresh token or remote logout will likely fail (expired access token),
+        // still return a resolved observable so callers can continue.
+        if (!refreshToken) {
+            return of({ message: 'Logged out locally' });
+        }
+
         return this.http.post(`${this.apiUrl}/logout`, { refreshToken }).pipe(
             tap(() => {
-                this.clearAuthData();
-                this.router.navigate(['/home']);
+                // remote logout succeeded - nothing more to do
+            }),
+            catchError(err => {
+                // Remote logout failed (likely because access token expired). We've already cleared
+                // local auth data above, so swallow the error and return a resolved observable.
+                console.warn('Remote logout failed, continuing local logout', err);
+                return of({ error: true });
             })
         );
     }

@@ -21,6 +21,7 @@ public class JobOfferDTO {
     private String location;
     private String company;
     private String currency;
+    private String companyLogo;
     private String recruiterId;
     private LocalDateTime applicationDeadline;
 
@@ -155,6 +156,14 @@ public class JobOfferDTO {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getCompanyLogo() {
+        return companyLogo;
+    }
+
+    public void setCompanyLogo(String companyLogo) {
+        this.companyLogo = companyLogo;
     }
 
     public String getRecruiterId() {

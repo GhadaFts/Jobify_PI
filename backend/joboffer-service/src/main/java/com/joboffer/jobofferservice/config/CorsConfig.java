@@ -13,10 +13,8 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*") // or specify your frontend URLs
-                        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                // CORS is handled at the gateway level to avoid duplicate headers.
+                // Keep this method empty to prevent the service from adding Access-Control headers.
             }
         };
     }

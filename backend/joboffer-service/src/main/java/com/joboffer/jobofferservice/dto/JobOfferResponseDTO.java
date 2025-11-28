@@ -21,4 +21,5 @@ public class JobOfferResponseDTO {
     private List<String> requirements;
     private List<String> skills;
     private Double recruiterId;
+    private String companyLogo;
 }
