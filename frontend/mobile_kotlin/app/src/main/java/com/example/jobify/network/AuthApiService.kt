@@ -34,7 +34,7 @@ data class RegisterRequest(
     val fullName: String,
     val email: String,
     val password: String,
-    val role: String? = "JobSeeker"
+    val role: String = "job_seeker" // Changed default to match backend format
 )
 
 data class RefreshTokenRequest(
@@ -54,10 +54,11 @@ data class LoginResponse(
 )
 
 data class RegisterResponse(
-    val message: String,
+    val message: String? = null,
     val keycloakId: String,
-    val email: String,
-    val role: String
+    val email: String? = null,
+    val role: String? = null,
+    val success: Boolean? = null
 )
 
 data class UserProfile(
@@ -66,7 +67,7 @@ data class UserProfile(
     val fullName: String,
     val email: String,
     val role: String,
-    val deleted: Boolean
+    val deleted: Boolean = false
 )
 
 data class LogoutResponse(
@@ -75,5 +76,6 @@ data class LogoutResponse(
 
 data class ErrorResponse(
     val message: String,
-    val statusCode: Int? = null
+    val statusCode: Int? = null,
+    val errorMessage: String? = null
 )
