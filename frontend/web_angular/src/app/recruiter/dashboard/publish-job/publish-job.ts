@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { JobOffer, Application } from '../../../types';
 import { JobOfferService } from '../../../services/job-offer.service';
+import { AuthService } from '../../../services/auth.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApplicationService } from '../../../services/application.service';
 import { ToastService } from '../../../services/toast.service';
 import { 
   faCheck, 
@@ -54,7 +57,13 @@ export class PublishJob {
   logoPreview?: string;
   logoUrl?: string;
 
-  constructor(private jobService: JobOfferService, private toastService: ToastService) {}
+  constructor(
+    private jobService: JobOfferService,
+    private toastService: ToastService,
+    private applicationService: ApplicationService,
+    private authService: AuthService,
+    private http: HttpClient
+  ) {}
 
   jobs: JobOffer[] = [];
   isUpdating: boolean = false;
@@ -99,6 +108,42 @@ export class PublishJob {
             published: !!created.published,
             applications: created.applications || []
           }));
+
+          // Fetch applications for each job and attach them so recruiter UI can display them
+          this.jobs.forEach((job) => {
+            if (!job.id) return;
+            this.applicationService.getByJobOffer(job.id).subscribe({
+              next: (apps: any[]) => {
+                job.applications = apps || [];
+                job.applicants = (apps && apps.length) || 0;
+
+                // For each application, try to enrich with job seeker profile from auth-service
+                job.applications.forEach((app: any) => {
+                  const seekerId = app.jobSeekerId || app.jobSeeker?.id;
+                  if (!seekerId) return;
+
+                  // Use stored access token if available
+                  const token = this.authService.getAccessToken();
+                  const headers = token
+                    ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+                    : new HttpHeaders();
+
+                  this.http.get<any>(`http://localhost:8888/auth-service/user/${seekerId}`, { headers }).subscribe({
+                    next: (user) => {
+                      app.jobSeeker = user;
+                    },
+                    error: (err) => {
+                      // If we cannot fetch profile (unauthorized or not found), leave minimal info
+                      app.jobSeeker = app.jobSeeker || { id: seekerId, fullName: 'Unknown', title: '' };
+                    }
+                  });
+                });
+              },
+              error: (err) => {
+                console.warn('Failed to load applications for job', job.id, err);
+              }
+            });
+          });
         } else {
           console.warn('Unexpected response from getMyJobs', res);
         }
