@@ -36,12 +36,11 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 
-class CvCorrectionActivity : AppCompatActivity() {
+class CvCorrectionActivity : BaseDrawerActivity() {
 
     private val TAG = "CvCorrectionActivity"
+    private lateinit var scrollViewRoot: ScrollView
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var btnMenu: ImageView
     private lateinit var uploadZone: LinearLayout
     private lateinit var fileNameTextView: TextView
     private lateinit var analyzeButton: Button
@@ -89,48 +88,12 @@ class CvCorrectionActivity : AppCompatActivity() {
 
         bindViews()
         setupListeners()
+        initViews()
 
-        // ---------------- MENU ACTIONS ----------------
-        findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, JobOpportunitiesActivity::class.java))
-
-        }
-        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-
-        findViewById<LinearLayout>(R.id.menuCorrectCVLayout)?.setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, CvCorrectionActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, InterviewPreparationActivity::class.java))
-
-        }
-
-        findViewById<LinearLayout>(R.id.menuHelpLayout)?.setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            Toast.makeText(this, "Help section coming soon!", Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
-            // Close drawer first
-            drawerLayout.closeDrawer(GravityCompat.START)
-
-            // Perform logout after drawer closes
-            Handler(Looper.getMainLooper()).postDelayed({
-                performLogout()
-            }, 250)
-        }
     }
-
+    private fun initViews() {
+        scrollViewRoot = findViewById(R.id.scrollViewRoot)
+    }
     private fun bindViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         btnMenu = findViewById(R.id.btnMenu)
