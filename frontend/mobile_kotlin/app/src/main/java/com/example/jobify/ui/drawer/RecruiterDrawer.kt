@@ -1,5 +1,8 @@
 package com.example.jobify.ui.drawer
 
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,11 +22,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.jobify.LoginActivity
 import com.example.jobify.R
+import com.example.jobify.SessionManager
+import com.example.jobify.repository.AuthRepository
 
 @Composable
 fun RecruiterDrawerContent(
@@ -32,6 +39,12 @@ fun RecruiterDrawerContent(
     onSettingsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+
+    // Get user name from session
+    val userName = sessionManager.getUserName() ?: "Sarah Johnson"
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -101,13 +114,15 @@ fun RecruiterDrawerContent(
         DrawerMenuItem(
             icon = Icons.AutoMirrored.Filled.Logout,
             label = "Logout",
-            onClick = onLogoutClick
+            onClick = {
+                performLogout(context, sessionManager)
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Bottom Profile
-        RecruiterProfileSection()
+        RecruiterProfileSection(userName = userName)
 
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -154,7 +169,7 @@ private fun DrawerMenuItem(
 }
 
 @Composable
-private fun RecruiterProfileSection() {
+private fun RecruiterProfileSection(userName: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,7 +213,7 @@ private fun RecruiterProfileSection() {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    "Sarah Johnson",
+                    userName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     color = Color(0xFF1F2937)
@@ -212,5 +227,42 @@ private fun RecruiterProfileSection() {
                 )
             }
         }
+    }
+}
+
+// Logout function
+private fun performLogout(context: Context, sessionManager: SessionManager) {
+    val authRepository = AuthRepository()
+    val accessToken = sessionManager.getAccessToken()
+    val refreshToken = sessionManager.getRefreshToken()
+
+    if (accessToken != null && refreshToken != null) {
+        authRepository.logout(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            onSuccess = {
+                sessionManager.clearSession()
+                Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                navigateToLogin(context)
+            },
+            onError = {
+                sessionManager.clearSession()
+                Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                navigateToLogin(context)
+            }
+        )
+    } else {
+        sessionManager.clearSession()
+        navigateToLogin(context)
+    }
+}
+
+private fun navigateToLogin(context: Context) {
+    val intent = Intent(context, LoginActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    context.startActivity(intent)
+
+    if (context is android.app.Activity) {
+        context.finish()
     }
 }
