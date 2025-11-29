@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Body,
   UseGuards,
@@ -69,5 +70,30 @@ export class UserController {
     }
 
     return user;
+  }
+
+  /**
+   * 
+   * @param initiateData 
+   * intitateData = {
+   * keycloakId: string,
+   * everything else.....
+   * }
+   * @returns 
+   */
+  @Post('initial-profile')
+  async initialProfile(@Body() initiateData: any){
+    const { keycloakId, ...data } = initiateData;
+    const updatedUser = await this.userService.updateProfile(
+      keycloakId,
+      data,
+    );
+
+    // Fixed: Added null check
+    if (!updatedUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return updatedUser;
   }
 }
