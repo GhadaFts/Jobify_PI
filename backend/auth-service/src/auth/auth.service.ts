@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +10,8 @@ import { UserRole } from '../users/schema/userRole.enum';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(@InjectModel(User.name) private userModel: Model<UserDocument>, private jwtService: JwtService) { }
 
     async register(registerDto: RegisterDto) {
@@ -34,17 +36,23 @@ export class AuthService {
     }
 
     async login(loginDto: LoginDto) {
-        const user = await this.validateUser(loginDto);
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
+        try {
+            const user = await this.validateUser(loginDto);
+            if (!user) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
+            const userId = user._id instanceof Types.ObjectId ? user._id.toString() : user._id;
+            const payload = {
+                sub: userId,
+                username: user.email,
+                role: user.role
+            };
+            const token = this.jwtService.sign(payload);
+            return { accessToken: token };
+        } catch (err) {
+            // Log full stack for debugging and rethrow a controlled 500
+            this.logger.error('Error during login', err as any);
+            throw new InternalServerErrorException('Login failed: ' + ((err && (err as any).message) || 'unknown'));
         }
-        const userId = user._id instanceof Types.ObjectId ? user._id.toString() : user._id;
-        const payload = {
-            sub: userId,
-            username: user.email,
-            role: user.role
-        };
-        const token = this.jwtService.sign(payload);
-        return { accessToken: token };
     }
 }

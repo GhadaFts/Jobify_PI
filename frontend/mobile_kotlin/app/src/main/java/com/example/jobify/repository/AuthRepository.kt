@@ -171,11 +171,18 @@ class AuthRepository {
     private fun parseErrorMessage(response: Response<*>): String {
         return try {
             val errorBody = response.errorBody()?.string()
-            if (errorBody != null) {
+            if (!errorBody.isNullOrEmpty()) {
                 val errorResponse = Gson().fromJson(errorBody, ErrorResponse::class.java)
-                errorResponse.message
+                // Ensure we never return a null message
+                errorResponse?.message ?: "Server error: ${response.code()}"
             } else {
-                "Unknown error occurred"
+                when (response.code()) {
+                    401 -> "Invalid email or password"
+                    409 -> "User with this email already exists"
+                    400 -> "Invalid request. Please check your input"
+                    500 -> "Server error. Please try again later"
+                    else -> "Error: ${response.code()}"
+                }
             }
         } catch (e: Exception) {
             when (response.code()) {

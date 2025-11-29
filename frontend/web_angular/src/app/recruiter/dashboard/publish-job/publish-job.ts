@@ -128,13 +128,21 @@ export class PublishJob {
                     ? new HttpHeaders({ Authorization: `Bearer ${token}` })
                     : new HttpHeaders();
 
-                  this.http.get<any>(`http://localhost:8888/auth-service/user/${seekerId}`, { headers }).subscribe({
+                  // Try public auth endpoint that accepts Keycloak ID (used by other microservices)
+                  // This endpoint does not require the request to be from an ADMIN/RECRUITER token.
+                  this.http.get<any>(`http://localhost:8888/auth-service/auth/users/${seekerId}`).subscribe({
                     next: (user) => {
                       app.jobSeeker = user;
                     },
                     error: (err) => {
-                      // If we cannot fetch profile (unauthorized or not found), leave minimal info
-                      app.jobSeeker = app.jobSeeker || { id: seekerId, fullName: 'Unknown', title: '' };
+                      // Fallback: try the guarded /user/{id} endpoint with current token
+                      this.http.get<any>(`http://localhost:8888/auth-service/user/${seekerId}`, { headers }).subscribe({
+                        next: (user) => app.jobSeeker = user,
+                        error: (_err) => {
+                          // If we cannot fetch profile (unauthorized or not found), leave minimal info
+                          app.jobSeeker = app.jobSeeker || { id: seekerId, fullName: 'Unknown', title: '' };
+                        }
+                      });
                     }
                   });
                 });

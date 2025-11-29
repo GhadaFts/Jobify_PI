@@ -22,6 +22,10 @@ interface AuthApiService {
         @Header("Authorization") token: String,
         @Body logoutRequest: LogoutRequest
     ): Call<LogoutResponse>
+
+    // Get user by Keycloak ID (public endpoint used by other microservices)
+    @GET("auth-service/auth/users/{keycloakId}")
+    suspend fun getUserByKeycloakId(@Path("keycloakId") keycloakId: String): retrofit2.Response<UserProfile>
 }
 
 // Request Models
@@ -62,12 +66,14 @@ data class RegisterResponse(
 )
 
 data class UserProfile(
-    val id: Long,
-    val keycloakId: String,
-    val fullName: String,
-    val email: String,
-    val role: String,
-    val deleted: Boolean = false
+    val id: Long?,
+    val keycloakId: String?,
+    val fullName: String?,
+    val email: String?,
+    val role: String?,
+    val deleted: Boolean = false,
+    val profilePicture: String? = null,
+    val jobTitle: String? = null
 )
 
 data class LogoutResponse(

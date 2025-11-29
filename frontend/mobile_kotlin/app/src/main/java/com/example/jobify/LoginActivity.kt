@@ -100,38 +100,47 @@ class LoginActivity : AppCompatActivity() {
             onSuccess = { loginResponse ->
                 Log.d("LoginActivity", "Login successful, loading profile...")
 
-                // Now get user profile
-                authRepository.getUserProfile(
-                    accessToken = loginResponse.accessToken,
+                // Now get user profile. Ensure tokens are non-null before proceeding.
+                val accessToken = loginResponse.accessToken ?: ""
+                val refreshToken = loginResponse.refreshToken ?: ""
+                val expiresIn = loginResponse.expiresIn ?: 0
+
+                if (accessToken.isBlank()) {
+                    setLoading(false)
+                    showError("Login failed: missing access token from server")
+                } else {
+                    authRepository.getUserProfile(
+                    accessToken = accessToken,
                     onSuccess = { userProfile ->
-                        // Save complete session
+                        // Save complete session (use safe defaults for nullable profile fields)
                         sessionManager.saveUserSession(
-                            accessToken = loginResponse.accessToken,
-                            refreshToken = loginResponse.refreshToken,
-                            expiresIn = loginResponse.expiresIn,
-                            email = userProfile.email,
-                            name = userProfile.fullName,
-                            role = userProfile.role,
-                            keycloakId = userProfile.keycloakId
+                            accessToken = accessToken,
+                            refreshToken = refreshToken,
+                            expiresIn = expiresIn,
+                            email = userProfile.email ?: "",
+                            name = userProfile.fullName ?: "",
+                            role = userProfile.role ?: "",
+                            keycloakId = userProfile.keycloakId ?: ""
                         )
 
                         setLoading(false)
 
                         Toast.makeText(
                             this,
-                            "Welcome back, ${userProfile.fullName}!",
+                            "Welcome back, ${userProfile.fullName ?: "user"}!",
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        // Navigate based on role
-                        navigateBasedOnRole(userProfile.role)
+                        // Navigate based on role (use empty string if missing)
+                        navigateBasedOnRole(userProfile.role ?: "")
                     },
                     onError = { error ->
                         setLoading(false)
                         Log.e("LoginActivity", "Failed to load profile: $error")
                         showError("Login successful but failed to load profile: $error")
                     }
-                )
+                    )
+                }
             },
             onError = { error ->
                 setLoading(false)
