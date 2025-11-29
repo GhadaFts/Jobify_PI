@@ -25,6 +25,9 @@ export class Recruiter {
     companyAddress?: string;
 
     @Prop()
+    sepeciality?: string;
+
+    @Prop()
     domaine?: string;
 
     @Prop()
