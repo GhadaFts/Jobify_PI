@@ -20,7 +20,6 @@ import java.util.Map;
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JobOfferController {
 
     private final JobOfferService jobOfferService;

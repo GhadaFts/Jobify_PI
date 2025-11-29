@@ -1,13 +1,22 @@
-// find-job.ts - VERSION COMPLÈTE AVEC BOUTONS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { JobOffer } from '../../../types';
 import { GeocodingService } from '../../../services/geocoding.service';
+import { JobService, JobOfferDTO } from '../../../services/job.service';
+import { LocalBookmarkService } from '../../../services/bookmark.service';
+import { ApplicationService, ApplicationResponseDTO } from '../../../services/application.service';
 
+// Local interface for application data used in UI
 interface ApplicationData {
   generatedCV?: string;
   uploadedFile?: File;
   coverLetter?: string;
   applicationDate: Date;
+  applicationId?: string;
+  status?: string;
+  aiScore?: number;
+  cvLink?: string;
 }
 
 interface Coordinates {
@@ -22,7 +31,10 @@ interface Coordinates {
   templateUrl: './find-job.html',
   styleUrls: ['./find-job.scss']
 })
-export class FindJob implements OnInit {
+export class FindJob implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+
   activeTab: string = 'all';
   searchQuery: string = '';
   
@@ -50,82 +62,132 @@ export class FindJob implements OnInit {
   private currentLocation: Coordinates | null = null;
 
   // JOBS DATA
-  jobs: JobOffer[] = [
-    // Your existing jobs...
-    {
-      id: '1',
-      title: 'Full Stack Developer',
-      company: 'TekUp',
-      companyLogo: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=200&fit=crop',
-      location: 'Tunis Center',
-      type: 'Full-time',
-      experience: '3+ years',
-      salary: '3,500 TND',
-      description: 'Develop modern web applications with Angular and Node.js',
-      skills: ['JavaScript', 'Angular', 'Node.js', 'MongoDB'],
-      requirements: ['Computer Science degree', 'Full stack development experience'],
-      posted: '2 days ago',
-      applicants: 15,
-      status: 'open',
-      published: true,
-      applications: [],
-      coordinates: { lat: 36.8065, lng: 10.1815 }
-    },
-    // ... (include all your existing jobs)
-    
-    // NEW JOBS IN TEBOURBA/MANNOUBA AREA
-    {
-      id: '9',
-      title: 'Agricultural Engineer',
-      company: 'Tebourba Farming Coop',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Tebourba',
-      type: 'Full-time',
-      experience: '2+ years',
-      salary: '2,800 TND',
-      description: 'Manage agricultural operations and crop production',
-      skills: ['Agriculture', 'Crop Management', 'Irrigation', 'French'],
-      requirements: ['Agriculture engineering degree', 'Field experience'],
-      posted: '2 days ago',
-      applicants: 4,
-      status: 'open',
-      published: true,
-      applications: [],
-      coordinates: { lat: 36.8333, lng: 9.8500 }
-    },
-    {
-      id: '10',
-      title: 'School Teacher',
-      company: 'Tebourba Secondary School',
-      companyLogo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop',
-      location: 'Tebourba Center',
-      type: 'Full-time',
-      experience: '3+ years',
-      salary: '2,500 TND',
-      description: 'Teaching mathematics and sciences to secondary students',
-      skills: ['Teaching', 'Mathematics', 'Sciences', 'Pedagogy'],
-      requirements: ['Teaching degree', '3+ years experience'],
-      posted: '1 week ago',
-      applicants: 8,
-      status: 'urgent hiring',
-      published: true,
-      applications: [],
-      coordinates: { lat: 36.8380, lng: 9.8450 }
-    },
-    // ... (include all your Tebourba/Mannouba jobs)
-  ];
+  jobs: JobOffer[] = [];
+  isLoadingJobs: boolean = false;
+  jobsLoadError: string | null = null;
 
+  // APPLICATIONS DATA - Using local ApplicationData interface
   appliedJobs: Map<string, ApplicationData> = new Map();
+  isLoadingApplications: boolean = false;
+  
   bookmarkedJobs: Set<string> = new Set();
 
-  constructor(private geocodingService: GeocodingService) {}
+  constructor(
+    private geocodingService: GeocodingService,
+    private jobService: JobService,
+    private bookmarkService: LocalBookmarkService,
+    private applicationService: ApplicationService
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // Load jobs from backend
+    this.loadJobs();
+    
+    // Load user's applications
+    this.loadMyApplications();
+
+    // Load bookmarks
+    this.bookmarkService.bookmarks$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(bookmarks => {
+        this.bookmarkedJobs = new Set(
+          Array.from(bookmarks).map(id => id.toString())
+        );
+      });
+
+    // Setup search debouncing
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.loadJobs();
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Load jobs from backend
+   */
+  loadJobs(): void {
+    this.isLoadingJobs = true;
+    this.jobsLoadError = null;
+
+    const filters: any = {};
+    
+    if (this.searchQuery.trim()) {
+      filters.title = this.searchQuery.trim();
+    }
+    
+    if (this.jobTypeFilter) {
+      filters.type = this.jobTypeFilter;
+    }
+
+    this.jobService.searchJobs(filters)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (jobDTOs: JobOfferDTO[]) => {
+          this.jobs = jobDTOs.map(dto => this.jobService.convertToJobOffer(dto));
+          this.isLoadingJobs = false;
+          console.log(`✅ Loaded ${this.jobs.length} jobs from backend`);
+        },
+        error: (error) => {
+          console.error('❌ Failed to load jobs:', error);
+          this.jobsLoadError = 'Failed to load jobs. Please try again.';
+          this.isLoadingJobs = false;
+          this.jobs = [];
+        }
+      });
+  }
+
+  /**
+   * Load user's applications and convert to ApplicationData format
+   */
+  loadMyApplications(): void {
+    this.isLoadingApplications = true;
+
+    this.applicationService.getMyApplications()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (applications: ApplicationResponseDTO[]) => {
+          // Map applications by job ID and convert to ApplicationData format
+          this.appliedJobs.clear();
+          applications.forEach(app => {
+            const applicationData: ApplicationData = {
+              applicationDate: new Date(app.applicationDate), // Convert string to Date
+              coverLetter: app.motivationLettre || undefined,
+              cvLink: app.cvLink,
+              applicationId: app.id,
+              status: app.status,
+              aiScore: app.aiScore || undefined
+            };
+            this.appliedJobs.set(app.jobOfferId.toString(), applicationData);
+          });
+          
+          this.isLoadingApplications = false;
+          console.log(`✅ Loaded ${applications.length} applications from backend`);
+        },
+        error: (error) => {
+          console.error('❌ Failed to load applications:', error);
+          this.isLoadingApplications = false;
+        }
+      });
+  }
+
+  /**
+   * Called when search query changes
+   */
+  onSearchQueryChange(): void {
+    this.searchSubject.next(this.searchQuery);
+  }
 
   // TOGGLE SECTIONS
   toggleLocationSection() {
     this.showLocationSection = !this.showLocationSection;
-    // Close filter section if opening location section
     if (this.showLocationSection) {
       this.showFilterSection = false;
     }
@@ -133,7 +195,6 @@ export class FindJob implements OnInit {
 
   toggleFilterSection() {
     this.showFilterSection = !this.showFilterSection;
-    // Close location section if opening filter section
     if (this.showFilterSection) {
       this.showLocationSection = false;
     }
@@ -156,32 +217,14 @@ export class FindJob implements OnInit {
     return deg * (Math.PI/180);
   }
 
-  // MAIN GETTER WITH SEPARATE FILTERS
+  // MAIN GETTER WITH FILTERS
   get allJobs(): JobOffer[] {
     let filteredJobs = this.jobs;
 
-    // MAIN SEARCH
-    if (this.searchQuery.trim() !== '') {
-      const query = this.searchQuery.toLowerCase();
-      filteredJobs = filteredJobs.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.company.toLowerCase().includes(query) ||
-        job.skills.some(skill => skill.toLowerCase().includes(query)) ||
-        job.location.toLowerCase().includes(query)
-      );
-    }
-
-    // JOB TYPE FILTER
-    if (this.jobTypeFilter) {
-      filteredJobs = filteredJobs.filter(job => job.type === this.jobTypeFilter);
-    }
-
-    // JOB STATUS FILTER
     if (this.jobStatusFilter) {
       filteredJobs = filteredJobs.filter(job => job.status === this.jobStatusFilter);
     }
 
-    // REAL-TIME GEOLOCATION FILTER
     if (this.useCurrentLocation && this.currentLocation) {
       filteredJobs = this.filterJobsByGeolocation(filteredJobs);
     }
@@ -189,34 +232,31 @@ export class FindJob implements OnInit {
     return filteredJobs;
   }
 
-  // REAL-TIME GEOLOCATION FILTER
   private filterJobsByGeolocation(jobs: JobOffer[]): JobOffer[] {
-    console.log(' Filtering by real-time geolocation:', this.currentLocation);
+    console.log('🔍 Filtering by real-time geolocation:', this.currentLocation);
     
     return jobs.filter(job => {
       if (!job.coordinates) return false;
+      console.log("📍 Job coordinates:", job.coordinates.lat, job.coordinates.lng);
       
       const distance = this.calculateDistance(
         this.currentLocation!.lat, this.currentLocation!.lng,
         job.coordinates.lat, job.coordinates.lng
       );
       
-      console.log(`📏 ${job.location}: ${distance.toFixed(1)}km (radius: ${this.radius}km)`);
+      console.log(`📍 ${job.location}: ${distance.toFixed(1)}km (radius: ${this.radius}km)`);
       return distance <= this.radius;
     });
   }
 
-  // REAL-TIME GEOLOCATION TOGGLE
   async toggleCurrentLocation() {
     if (this.useCurrentLocation) {
-      // Deactivate
       this.useCurrentLocation = false;
       this.currentLocation = null;
       this.detectedCity = '';
       this.detectedArea = '';
       this.locationInfo = 'Real-time location deactivated';
     } else {
-      // Activate
       this.isLoadingLocation = true;
       this.locationInfo = 'Detecting your precise location...';
       
@@ -228,77 +268,39 @@ export class FindJob implements OnInit {
         this.detectedCoordinates = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
         this.locationAccuracy = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(0) + 'm' : 'Unknown'}`;
         
-        console.log(' Raw coordinates:', this.detectedCoordinates);
-        
-        // IMPROVED REVERSE GEOCODING WITH BETTER LOGIC
         this.geocodingService.getCityFromCoords(position.lat, position.lng).subscribe({
           next: (data: any) => {
-            console.log('🔄 Full geocoding response:', data);
-            
             if (data && data.results && data.results.length > 0) {
-              const bestResult = data.results[0];
-              const components = bestResult.components;
-              
-              console.log(' All location components:', components);
-              
-              // IMPROVED LOCATION DETECTION STRATEGY
+              const components = data.results[0].components;
               let detectedLocation = this.extractBestLocationName(components);
               
               if (detectedLocation) {
                 this.detectedCity = detectedLocation;
                 this.detectedArea = this.extractAreaDetails(components);
-                this.locationInfo = ` Your location: ${detectedLocation}`;
-                
-                console.log('✅ Detected location:', detectedLocation);
-                console.log(' Area details:', this.detectedArea);
+                this.locationInfo = `📍 Your location: ${detectedLocation}`;
               } else {
                 this.detectedCity = 'Your current area';
-                this.locationInfo = ' Real-time location active';
-                console.warn('⚠️ No specific location name found');
+                this.locationInfo = '📍 Real-time location active';
               }
-              
-            } else {
-              this.detectedCity = 'Your current position';
-              this.locationInfo = ' Real-time location active';
-              console.error('No results from geocoding API');
             }
             this.isLoadingLocation = false;
           },
           error: (error) => {
-            console.error(' Reverse geocoding error:', error);
+            console.error('❌ Reverse geocoding error:', error);
             this.detectedCity = 'Your current position';
-            this.locationInfo = ' Real-time location active (API error)';
+            this.locationInfo = '📍 Real-time location active (API error)';
             this.isLoadingLocation = false;
           }
         });
       } catch (error) {
         console.error('Geolocation error:', error);
-        
-        let errorMessage = 'Unknown error';
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        } else {
-          errorMessage = String(error);
-        }
-        
-        this.locationInfo = ` Error: ${errorMessage}`;
+        this.locationInfo = `❌ Error: ${error}`;
         this.useCurrentLocation = false;
         this.isLoadingLocation = false;
-        
-        if (errorMessage.includes('permission')) {
-          alert(' Please allow location access in your browser settings to use this feature.');
-        } else if (errorMessage.includes('unavailable')) {
-          alert(' Location unavailable. Please check your GPS signal and try again.');
-        } else if (errorMessage.includes('timeout')) {
-          alert(' Location detection timeout. Please try again.');
-        }
       }
     }
   }
 
-  // IMPROVED LOCATION EXTRACTION
   private extractBestLocationName(components: any): string {
     const locationPriority = [
       components.city,
@@ -306,26 +308,19 @@ export class FindJob implements OnInit {
       components.village,
       components.municipality,
       components.county,
-      components.suburb,
-      components.neighbourhood,
-      components.state_district,
-      components.state
+      components.suburb
     ];
-
     return locationPriority.find(name => name && name.trim() !== '') || '';
   }
 
   private extractAreaDetails(components: any): string {
     const details = [];
-    
     if (components.road) details.push(components.road);
     if (components.suburb && !components.city) details.push(components.suburb);
     if (components.postcode) details.push(components.postcode);
-    
     return details.length > 0 ? details.join(', ') : 'Area details not available';
   }
 
-  // RESET ALL FILTERS
   resetFilters() {
     this.searchQuery = '';
     this.useCurrentLocation = false;
@@ -335,14 +330,19 @@ export class FindJob implements OnInit {
     this.jobStatusFilter = '';
     this.detectedCity = '';
     this.detectedArea = '';
-    this.detectedCoordinates = '';
-    this.locationAccuracy = '';
-    this.locationInfo = 'Enter a city name or use your current location';
     this.showLocationSection = false;
     this.showFilterSection = false;
+    this.loadJobs();
   }
 
-  // EXISTING METHODS
+  onTypeFilterChange() {
+    this.loadJobs();
+  }
+
+  onStatusFilterChange() {
+    // Status filter is client-side only
+  }
+
   get appliedJobsList(): JobOffer[] {
     return this.jobs.filter(job => this.appliedJobs.has(job.id));
   }
@@ -351,28 +351,61 @@ export class FindJob implements OnInit {
     return this.jobs.filter(job => this.bookmarkedJobs.has(job.id));
   }
 
-  handleApplyJob(applicationData: {
-    jobId: string;
-    generatedCV?: string;
-    uploadedFile?: File;
-    coverLetter?: string;
-  }) {
-    this.appliedJobs.set(applicationData.jobId, {
-      ...applicationData,
-      applicationDate: new Date()
-    });
+  /**
+   * Handle job application submission
+   */
+  handleApplyJob(result: any) {
+    if (result && result.success) {
+      console.log('✅ Application submitted successfully:', result);
+      
+      // Immediately add to appliedJobs map for instant UI update
+      const applicationData: ApplicationData = {
+        applicationDate: new Date(),
+        coverLetter: result.coverLetter || undefined,
+        cvLink: result.cvLink,
+        applicationId: result.applicationId,
+        aiScore: result.atsScore || undefined
+      };
+      this.appliedJobs.set(result.jobId, applicationData);
+      
+      // Also reload from backend to sync
+      this.loadMyApplications();
+    }
   }
 
+  /**
+   * Handle application withdrawal
+   */
   handleWithdrawJob(jobId: string) {
-    this.appliedJobs.delete(jobId);
+    const application = this.appliedJobs.get(jobId);
+    if (!application || !application.applicationId) {
+      console.error('No application found for job:', jobId);
+      return;
+    }
+
+    if (confirm('Are you sure you want to withdraw this application?')) {
+      this.applicationService.deleteApplication(application.applicationId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            console.log('✅ Application withdrawn successfully');
+            this.appliedJobs.delete(jobId);
+            
+            // Reload applications
+            this.loadMyApplications();
+          },
+          error: (error) => {
+            console.error('❌ Failed to withdraw application:', error);
+            alert('Failed to withdraw application. Please try again.');
+          }
+        });
+    }
   }
 
   handleBookmarkJob(jobId: string) {
-    if (this.bookmarkedJobs.has(jobId)) {
-      this.bookmarkedJobs.delete(jobId);
-    } else {
-      this.bookmarkedJobs.add(jobId);
-    }
+    const jobIdNum = parseInt(jobId);
+    this.bookmarkService.toggleBookmark(jobIdNum);
+    console.log('🔖 Bookmark toggled for job:', jobId);
   }
 
   getStatusColor(status: string): string {

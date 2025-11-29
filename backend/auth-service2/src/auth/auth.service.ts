@@ -422,6 +422,9 @@ export class AuthService {
   // Refresh access token
   async refreshToken(refreshToken: string) {
     try {
+      this.logger.log('🔄 Refresh token request received');
+      this.logger.log(`Refresh token preview: ${refreshToken.substring(0, 50)}...`);
+
       const response = await firstValueFrom(
         this.httpService.post(
           `${this.keycloakUrl}/realms/${this.realm}/protocol/openid-connect/token`,
@@ -437,12 +440,17 @@ export class AuthService {
         ),
       );
 
+      this.logger.log('✅ Token refreshed successfully');
       return {
         accessToken: response.data.access_token,
         refreshToken: response.data.refresh_token,
         expiresIn: response.data.expires_in,
       };
     } catch (error) {
+      this.logger.error('❌ Token refresh failed:', error.message);
+      if (error.response) {
+        this.logger.error('Error response:', JSON.stringify(error.response.data));
+      }
       throw new UnauthorizedException('Invalid refresh token');
     }
   }

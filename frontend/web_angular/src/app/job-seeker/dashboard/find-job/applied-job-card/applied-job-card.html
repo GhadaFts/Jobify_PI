@@ -20,8 +20,11 @@
         </div>
         <div class="flex items-center gap-2 mb-2">
           <p style="font-size: 15px; color: #1A73E8; font-weight: 600;">{{ job.company }}</p>
-          <span style="font-size: 12px; color: #10B981; font-weight: 500;">
-            ✓ Applied
+          <span 
+            style="font-size: 12px; color: white; font-weight: 500; padding: 2px 8px; border-radius: 4px;"
+            [style.background-color]="getApplicationStatusColor(applicationData.status)"
+          >
+            {{ formatStatus(applicationData.status) }}
           </span>
         </div>
         <div class="flex items-center gap-4 text-sm">
@@ -37,8 +40,6 @@
       </div>
     </div>
   </div>
-
- 
 
   <div class="mt-4 space-y-4">
     <p style="font-size: 15px; color: #6B7280; line-height: 1.5;">{{ job.description }}</p>
@@ -81,67 +82,87 @@
     </div>
   </div>
 
-   <!-- Section CV et Lettre de Motivation -->
+  <!-- Application Details Section -->
   <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-    <h4 style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 12px;">Your Application</h4>
+    <div class="flex items-center justify-between mb-3">
+      <h4 style="font-size: 14px; font-weight: 600; color: #111827;">Your Application</h4>
+      
+      <!-- AI Score Badge (if available) -->
+      <div *ngIf="applicationData.aiScore" class="flex items-center gap-2 px-3 py-1 bg-purple-100 border border-purple-300 rounded-full">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        <span style="font-size: 12px; font-weight: 600; color: #8B5CF6;">
+          AI Score: {{ applicationData.aiScore }}%
+        </span>
+      </div>
+    </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- CV Section -->
+      <!-- CV Section - Connected to Backend -->
       <div>
-         <div class="flex items-center gap-2 mb-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A73E8">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <span style="font-size: 14px; font-weight: 600; color: #1A73E8;">CV</span>
-      </div>
-      
-      <!-- CV Uploadé -->
-      <div *ngIf="getSafeApplicationData().uploadedFile" class="flex items-center gap-2 p-2 bg-white rounded border">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <span style="font-size: 12px; color: #374151;">{{ getSafeApplicationData().uploadedFile!.name }}</span>
-        <a 
-          [href]="getCVUrl()" 
-          download 
-          class="ml-auto text-blue-600 hover:text-blue-800 text-xs"
-        >
-          Download
-        </a>
-      </div>
-
-
-        <!-- CV Généré -->
-        <div *ngIf="applicationData.generatedCV && !applicationData.uploadedFile" class="flex items-center gap-2 p-2 bg-white rounded border">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-          <span style="font-size: 12px; color: #374151;">AI Generated CV</span>
-          <button 
-            (click)="downloadGeneratedCV()"
-            class="ml-auto text-blue-600 hover:text-blue-800 text-xs"
-          >
-            Download
-          </button>
-        </div>
-
-        <!-- CV par défaut -->
-        <div *ngIf="!applicationData.uploadedFile && !applicationData.generatedCV" class="flex items-center gap-2 p-2 bg-white rounded border">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280">
+        <div class="flex items-center gap-2 mb-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A73E8">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
-          <span style="font-size: 12px; color: #6B7280;">Default CV</span>
+          <span style="font-size: 14px; font-weight: 600; color: #1A73E8;">CV</span>
+        </div>
+        
+        <!-- CV from Backend -->
+        <div *ngIf="hasCVInBackend()" class="flex items-center justify-between gap-2 p-3 bg-white rounded border border-green-200">
+          <div class="flex items-center gap-2 flex-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <div class="flex-1">
+              <span style="font-size: 12px; color: #374151; font-weight: 500;">Uploaded CV</span>
+              <p style="font-size: 10px; color: #6B7280;">{{ getCVFileName() }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              (click)="viewCV()"
+              class="text-blue-600 hover:text-blue-800 p-1"
+              title="View CV"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </button>
+            <button
+              (click)="downloadCV()"
+              class="text-blue-600 hover:text-blue-800 p-1"
+              title="Download CV"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Fallback CV -->
+        <div *ngIf="!hasCVInBackend()" class="flex items-center justify-between gap-2 p-3 bg-white rounded border">
+          <div class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span style="font-size: 12px; color: #6B7280;">Default CV</span>
+          </div>
           <a 
             href="/assets/pdf/ghada.pdf" 
             download 
-            class="ml-auto text-blue-600 hover:text-blue-800 text-xs"
+            class="text-blue-600 hover:text-blue-800"
           >
-            Download
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
           </a>
         </div>
       </div>
 
-      <!-- Lettre de Motivation Section -->
+      <!-- Cover Letter Section -->
       <div>
         <div class="flex items-center gap-2 mb-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A73E8">
@@ -150,8 +171,8 @@
           <span style="font-size: 14px; font-weight: 600; color: #1A73E8;">Cover Letter</span>
         </div>
         
-        <div class="p-2 bg-white rounded border min-h-[60px] max-h-[100px] overflow-y-auto">
-          <p *ngIf="applicationData.coverLetter" style="font-size: 12px; color: #374151; line-height: 1.4;">
+        <div class="p-3 bg-white rounded border min-h-[80px] max-h-[120px] overflow-y-auto">
+          <p *ngIf="applicationData.coverLetter" style="font-size: 12px; color: #374151; line-height: 1.5; white-space: pre-wrap;">
             {{ applicationData.coverLetter }}
           </p>
           <p *ngIf="!applicationData.coverLetter" style="font-size: 12px; color: #6B7280; font-style: italic;">
@@ -161,15 +182,27 @@
       </div>
     </div>
 
-    <!-- Date de candidature -->
-    <div class="mt-3 pt-2 border-t border-blue-200">
-      <p style="font-size: 11px; color: #6B7280;">
-        Applied on: {{ applicationData.applicationDate | date:'medium' }}
-      </p>
+    <!-- Application Metadata -->
+    <div class="mt-3 pt-3 border-t border-blue-200 flex items-center justify-between">
+      <div class="flex items-center gap-4 text-xs text-gray-600">
+        <div class="flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Applied: {{ applicationData.applicationDate | date:'MMM d, y' }}</span>
+        </div>
+        <div *ngIf="applicationData.applicationId" class="flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+          </svg>
+          <span>ID: {{ applicationData.applicationId.substring(0, 8) }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="flex items-center justify-between pt-2 border-t" style="border-color: #E5E7EB;">
+  <!-- Action Buttons -->
+  <div class="flex items-center justify-between pt-4 mt-4 border-t" style="border-color: #E5E7EB;">
     <div class="flex items-center gap-2">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -179,7 +212,7 @@
     <div class="flex items-center gap-2">
       <button
         (click)="openDetailsModal(job)"
-        class="px-3 py-1 rounded-full border border-gray-300 hover:bg-gray-100"
+        class="px-3 py-1.5 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
         style="font-size: 12px;"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" class="inline mr-1">
@@ -189,9 +222,12 @@
       </button>
       <button
         (click)="withdrawApplication()"
-        class="px-3 py-1 rounded-full bg-red-500 text-white hover:bg-red-600"
+        class="px-3 py-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
         style="font-size: 12px;"
       >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="inline mr-1">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
         Withdraw
       </button>
     </div>

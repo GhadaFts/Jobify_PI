@@ -47,15 +47,11 @@ spring:
             - Path=/joboffer-service/**
           filters:
             - StripPrefix=1
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns: "*"
-            allowedHeaders: "*"
-            allowedMethods: "*"
-            allowCredentials: true
+
+      # Remove globalcors from here
+
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
       discovery:
         locator:
