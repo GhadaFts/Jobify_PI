@@ -2,6 +2,7 @@ package com.example.jobify
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.jobify.network.UserProfile
 
 class SessionManager(context: Context) {
 
@@ -17,6 +18,7 @@ class SessionManager(context: Context) {
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_TOKEN_EXPIRY = "token_expiry"
         private const val KEY_KEYCLOAK_ID = "keycloak_id"
+        private const val KEY_USER_ID = "user_id"
     }
 
     // Save complete user session with tokens (for API login)
@@ -27,7 +29,8 @@ class SessionManager(context: Context) {
         email: String,
         name: String,
         role: String,
-        keycloakId: String
+        keycloakId: String,
+        userId: Long? = null
     ) {
         prefs.edit().apply {
             putString(KEY_ACCESS_TOKEN, accessToken)
@@ -37,9 +40,39 @@ class SessionManager(context: Context) {
             putString(KEY_USER_NAME, name)
             putString(KEY_USER_ROLE, role)
             putString(KEY_KEYCLOAK_ID, keycloakId)
+            userId?.let { putLong(KEY_USER_ID, it) }
             putBoolean(KEY_IS_LOGGED_IN, true)
             apply()
         }
+    }
+
+    // Save user profile
+    fun saveUserProfile(profile: UserProfile) {
+        prefs.edit().apply {
+            profile.email?.let { putString(KEY_USER_EMAIL, it) }
+            profile.fullName?.let { putString(KEY_USER_NAME, it) }
+            profile.role?.let { putString(KEY_USER_ROLE, it) }
+            profile.keycloakId?.let { putString(KEY_KEYCLOAK_ID, it) }
+            profile.id?.let { putLong(KEY_USER_ID, it) }
+            putBoolean(KEY_IS_LOGGED_IN, true)
+            apply()
+        }
+    }
+
+    // Get user profile
+    fun getUserProfile(): UserProfile? {
+        val keycloakId = getKeycloakId() ?: return null
+
+        return UserProfile(
+            id = getUserId(),
+            keycloakId = keycloakId,
+            fullName = getUserName(),
+            email = getUserEmail(),
+            role = getUserRole(),
+            deleted = false,
+            profilePicture = null,
+            jobTitle = null
+        )
     }
 
     // Save user session (backward compatibility - without tokens)
@@ -84,6 +117,12 @@ class SessionManager(context: Context) {
         return prefs.getString(KEY_KEYCLOAK_ID, null)
     }
 
+    // Get user ID
+    fun getUserId(): Long? {
+        val id = prefs.getLong(KEY_USER_ID, -1)
+        return if (id != -1L) id else null
+    }
+
     // Get authorization header
     fun getAuthHeader(): String? {
         val token = getAccessToken()
@@ -123,7 +162,8 @@ class SessionManager(context: Context) {
         return mapOf(
             "email" to getUserEmail(),
             "name" to getUserName(),
-            "role" to getUserRole()
+            "role" to getUserRole(),
+            "keycloakId" to getKeycloakId()
         )
     }
 }

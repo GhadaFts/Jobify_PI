@@ -11,17 +11,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.jobify.repository.AuthRepository
 
 abstract class BaseDrawerActivity : AppCompatActivity() {
 
     protected lateinit var drawerLayout: DrawerLayout
     protected lateinit var btnMenu: ImageView
     protected lateinit var btnTheme: ImageView
+    private lateinit var sessionManager: SessionManager
 
     override fun setContentView(layoutResID: Int) {
         super.setContentView(layoutResID)
+        sessionManager = SessionManager(this)
         setupDrawer()
-        setupBackPressHandler() // ✅ Ajoute cette ligne
+        setupBackPressHandler()
     }
 
     private fun setupDrawer() {
@@ -44,7 +47,6 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
         setupMenuItems()
     }
 
-    // ✅ NOUVEAU: Gestion moderne du bouton retour
     private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -96,8 +98,6 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             handleLogout()
         }
-
-
     }
 
     private fun toggleTheme() {
@@ -113,14 +113,39 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
     }
 
     private fun handleLogout() {
-        // Add your logout logic here
-        showMessage("Logged out")
+        val authRepository = AuthRepository()
+        val accessToken = sessionManager.getAccessToken()
+        val refreshToken = sessionManager.getRefreshToken()
+
+        if (accessToken != null && refreshToken != null) {
+            authRepository.logout(
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+                onSuccess = {
+                    sessionManager.clearSession()
+                    showMessage("Logged out successfully")
+                    navigateToLogin()
+                },
+                onError = {
+                    sessionManager.clearSession()
+                    showMessage("Logged out")
+                    navigateToLogin()
+                }
+            )
+        } else {
+            sessionManager.clearSession()
+            navigateToLogin()
+        }
+    }
+
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     protected open fun showMessage(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
-
-    // ❌ SUPPRIMER cette vieille fonction
-    // override fun onBackPressed() { ... }
 }

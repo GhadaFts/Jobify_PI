@@ -1,5 +1,6 @@
 package com.example.jobify
 
+import java.io.Serializable
 import java.util.Date
 
 data class JobPost(
@@ -11,8 +12,8 @@ data class JobPost(
     val description: String,
     val type: String,
     val createdAt: Date,
-    val status: String,
+    var status: String,
     val requirements: List<String>,
     val skills: List<String>,
     val published: Boolean
-)
+) : Serializable

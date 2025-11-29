@@ -6,6 +6,10 @@ import retrofit2.http.*
 
 // Retrofit interface for job offer related endpoints proxied through the gateway
 interface JobApiService {
+    // Get all jobs
+    @GET("joboffer-service/api/jobs")
+    suspend fun getAllJobs(): Response<List<Map<String, Any>>>
+
     // Get jobs for the authenticated recruiter
     @GET("joboffer-service/api/jobs/my-jobs")
     suspend fun getMyJobs(): Response<List<Map<String, Any>>>
