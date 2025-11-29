@@ -11,10 +11,13 @@ class MyApp : Application() {
     companion object {
         private const val TAG = "MyApp"
         const val CRASH_FILE = "last_crash.txt"
+        // Expose application instance for global access (use carefully)
+        lateinit var instance: MyApp
     }
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
 
         // Install default uncaught exception handler that writes stack trace to cache file
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()

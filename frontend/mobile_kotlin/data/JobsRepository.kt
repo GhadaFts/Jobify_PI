@@ -1,142 +1,121 @@
 package com.example.jobify.data
 
-import com.example.jobify.model.Job
 import com.example.jobify.model.Applicant
+import com.example.jobify.model.Job
+import com.example.jobify.network.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-// A fake repository that returns a static list of jobs.
+// Network-backed repository that fetches jobs from the gateway via JobApiService
 class JobsRepository {
-    fun getJobs(): List<Job> {
-        return listOf(
-            Job(
-                id = "1",
-                title = "Senior Frontend Developer",
-                company = "Tech Corp",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "New York",
-                jobType = "Full-time",
-                shortDescription = "We are looking for an experienced Frontend Developer to join our team...",
-                experience = "5+ years",
-                salaryRange = "$120,000 - $150,000",
-                applicantsCount = 2,
-                skills = listOf("React", "TypeScript", "Next.js", "CSS"),
-                badge = "actively hiring",
-                published = true,
-                postedAt = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
-                requirements = listOf(
-                    "Bachelor's degree in Computer Science or related field",
-                    "5+ years of professional frontend development experience"
-                ),
-                applicants = listOf(
-                    Applicant(
-                        id = "app1",
-                        name = "Mohamed Ali",
-                        title = "Senior Full Stack Developer",
-                        profileImageUrl = null,
-                        appliedDate = System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000,
-                        isNew = true,
-                        isFavorite = false,
-                        status = "new"
-                    ),
-                    Applicant(
-                        id = "app2",
-                        name = "Fatima Zahra",
-                        title = "Frontend Developer",
-                        profileImageUrl = null,
-                        appliedDate = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000,
-                        isNew = true,
-                        isFavorite = false,
-                        status = "new"
-                    )
+    private val api = ApiClient.jobService
+
+    suspend fun getJobs(): List<Job> = withContext(Dispatchers.IO) {
+        val resp = api.getMyJobs()
+        if (resp.isSuccessful) {
+            val body = resp.body() ?: emptyList()
+            body.map { dto ->
+                // dto is a Map<String, Any> - extract known fields defensively
+                val id = dto["id"]?.toString() ?: java.util.UUID.randomUUID().toString()
+                val title = (dto["title"] ?: dto["jobPosition"] ?: "").toString()
+                val company = (dto["company"] ?: "").toString()
+                val companyLogo = dto["companyLogo"]?.toString()
+                val location = (dto["location"] ?: "").toString()
+                val type = (dto["type"] ?: "").toString()
+                val experience = (dto["experience"] ?: "").toString()
+                val salary = (dto["salary"] ?: dto["salaryRange"] ?: "").toString()
+                val description = (dto["description"] ?: "").toString()
+                val skills = (dto["skills"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+                val requirements = (dto["requirements"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+                val published = (dto["published"] as? Boolean) ?: false
+                val postedAt = when (val p = dto["postedAt"] ?: dto["posted"]) {
+                    is Number -> p.toLong()
+                    is String -> p.toLongOrNull() ?: System.currentTimeMillis()
+                    else -> System.currentTimeMillis()
+                }
+                val applicantsCount = (dto["applicants"] as? Number)?.toInt() ?: (dto["applicantsCount"] as? Number)?.toInt() ?: 0
+
+                // map applications if present
+                val applicants = mutableListOf<Applicant>()
+                val appsRaw = dto["applications"] as? List<*>
+                if (appsRaw != null) {
+                    for (a in appsRaw) {
+                        val m = a as? Map<*, *> ?: continue
+                        val appId = m["id"]?.toString() ?: m["_id"]?.toString() ?: java.util.UUID.randomUUID().toString()
+                        val name = (m["jobSeekerName"] ?: m["jobSeeker"]?.let { (it as? Map<*, *>)?.get("fullName") } ?: "Unknown").toString()
+                        val titleStr = (m["jobSeekerTitle"] ?: "").toString()
+                        val profileImage = (m["jobSeeker"] as? Map<*, *>)?.get("profileImageUrl")?.toString()
+                        val appliedDate = when (val ad = m["applicationDate"] ?: m["appliedDate"]) {
+                            is Number -> ad.toLong()
+                            is String -> ad.toLongOrNull() ?: System.currentTimeMillis()
+                            else -> System.currentTimeMillis()
+                        }
+                        val status = (m["status"] ?: "new").toString()
+                        applicants.add(Applicant(
+                            id = appId,
+                            name = name,
+                            title = titleStr,
+                            profileImageUrl = profileImage,
+                            appliedDate = appliedDate,
+                            isNew = status == "new",
+                            isFavorite = false,
+                            status = status
+                        ))
+                    }
+                }
+
+                Job(
+                    id = id,
+                    title = title,
+                    company = company,
+                    companyLogoUrl = companyLogo,
+                    location = location,
+                    jobType = type,
+                    shortDescription = description,
+                    experience = experience,
+                    salaryRange = salary,
+                    applicantsCount = applicantsCount,
+                    skills = skills,
+                    badge = dto["badge"]?.toString(),
+                    published = published,
+                    postedAt = postedAt,
+                    requirements = requirements,
+                    applicants = applicants
                 )
-            ),
-            Job(
-                id = "2",
-                title = "Product Manager",
-                company = "Innovate Labs",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "San Francisco",
-                jobType = "Full-time",
-                shortDescription = "Lead product development and strategy for our growing platform...",
-                experience = "3+ years",
-                salaryRange = "$100,000 - $130,000",
-                applicantsCount = 1,
-                skills = listOf("Product Strategy", "Agile", "User Research"),
-                badge = "new",
-                published = true,
-                postedAt = System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000, // 1 day ago
-                requirements = listOf(
-                    "Proven experience as a Product Manager or similar role",
-                    "Experience in product lifecycle management"
-                )
-            ),
-            Job(
-                id = "3",
-                title = "Backend Engineer",
-                company = "Data Solutions",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "Austin",
-                jobType = "Contract",
-                shortDescription = "Design and implement scalable backend services.",
-                experience = "4+ years",
-                salaryRange = "$110,000 - $140,000",
-                applicantsCount = 8,
-                skills = listOf("Node.js", "GraphQL", "PostgreSQL", "AWS"),
-                badge = "hot job",
-                published = true,
-                postedAt = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000,
-                requirements = listOf("Strong proficiency in Node.js", "Experience with cloud services (AWS, GCP, or Azure)")
-            ),
-            Job(
-                id = "4",
-                title = "UX/UI Designer",
-                company = "Creative Minds",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "Remote",
-                jobType = "Freelance",
-                shortDescription = "Create compelling and user-friendly interfaces.",
-                experience = "2+ years",
-                salaryRange = "$70,000 - $90,000",
-                applicantsCount = 5,
-                skills = listOf("Figma", "Sketch", "Adobe XD"),
-                badge = "limited openings",
-                published = true,
-                postedAt = System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000,
-                requirements = listOf("A strong portfolio of successful UX/UI projects", "Excellent visual design skills")
-            ),
-            Job(
-                id = "5",
-                title = "DevOps Engineer",
-                company = "InfraWorks",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "Boston",
-                jobType = "Full-time",
-                shortDescription = "Automate and streamline our operations and processes.",
-                experience = "3+ years",
-                salaryRange = "$115,000 - $135,000",
-                applicantsCount = 2,
-                skills = listOf("Kubernetes", "Docker", "CI/CD", "Terraform"),
-                badge = "urgent hiring",
-                published = true,
-                postedAt = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000,
-                requirements = listOf("Experience with CI/CD tools", "Proficiency in scripting languages")
-            ),
-            Job(
-                id = "6",
-                title = "Data Scientist",
-                company = "Analytics Inc.",
-                companyLogoUrl = "https://via.placeholder.com/150",
-                location = "Chicago",
-                jobType = "Full-time",
-                shortDescription = "Turn raw data into actionable business insights.",
-                experience = "4+ years",
-                salaryRange = "$130,000 - $160,000",
-                applicantsCount = 0,
-                skills = listOf("Python", "R", "SQL", "Machine Learning"),
-                badge = "open",
-                published = false,
-                postedAt = System.currentTimeMillis(), // Today
-                requirements = listOf("Strong experience with statistical analysis", "Hands-on experience with machine learning frameworks")
-            )
-        )
+            }
+        } else {
+            throw Exception("Failed to load jobs: ${resp.code()} ${resp.message()}")
+        }
+    }
+
+    suspend fun createJob(payload: Map<String, Any>): Map<String, Any> = withContext(Dispatchers.IO) {
+        val resp = api.createJob(payload)
+        if (resp.isSuccessful) resp.body() ?: emptyMap() else throw Exception("Create job failed: ${resp.code()} ${resp.message()}")
+    }
+
+    suspend fun updateJob(id: String, payload: Map<String, Any>): Map<String, Any> = withContext(Dispatchers.IO) {
+        // Some JSON parsers convert integer IDs to doubles (e.g. 8 -> 8.0).
+        // Ensure we send a clean integer string for the path parameter expected by the backend (Long).
+        val safeId = try {
+            if (id.contains('.')) {
+                val d = id.toDoubleOrNull()
+                if (d != null) d.toLong().toString() else id
+            } else id
+        } catch (t: Throwable) {
+            id
+        }
+
+        val resp = api.updateJob(safeId, payload)
+        if (resp.isSuccessful) {
+            resp.body() ?: emptyMap()
+        } else {
+            val err = try { resp.errorBody()?.string() } catch (_: Exception) { null }
+            throw Exception("Update job failed: ${resp.code()} ${resp.message()} ${err ?: ""}")
+        }
+    }
+
+    suspend fun uploadLogo(part: okhttp3.MultipartBody.Part): Map<String, Any> = withContext(Dispatchers.IO) {
+        val resp = api.uploadLogo(part)
+        if (resp.isSuccessful) resp.body() ?: emptyMap() else throw Exception("Upload failed: ${resp.code()} ${resp.message()}")
     }
 }

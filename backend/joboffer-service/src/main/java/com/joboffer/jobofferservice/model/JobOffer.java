@@ -49,6 +49,7 @@ public class JobOffer {
     // Additional fields from diagram
     private String location;
     private String company;
+    private String companyLogo;
     private String currency;
     private String recruiterId;
     private LocalDateTime applicationDeadline;
@@ -176,6 +177,14 @@ public class JobOffer {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public String getCompanyLogo() {
+        return companyLogo;
+    }
+
+    public void setCompanyLogo(String companyLogo) {
+        this.companyLogo = companyLogo;
     }
 
     public String getCurrency() {

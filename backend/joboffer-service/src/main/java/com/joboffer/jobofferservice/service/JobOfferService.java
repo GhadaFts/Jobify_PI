@@ -69,6 +69,7 @@ public class JobOfferService {
         if (data.getRequirements() != null) existingJob.setRequirements(data.getRequirements());
         if (data.getLocation() != null) existingJob.setLocation(data.getLocation());
         if (data.getCompany() != null) existingJob.setCompany(data.getCompany());
+        if (data.getCompanyLogo() != null) existingJob.setCompanyLogo(data.getCompanyLogo());
         if (data.getCurrency() != null) existingJob.setCurrency(data.getCurrency());
         if (data.getType() != null) existingJob.setType(data.getType());
         if (data.getSkills() != null) existingJob.setSkills(data.getSkills());
@@ -136,6 +137,7 @@ public class JobOfferService {
         dto.setLocation(jobOffer.getLocation());
         dto.setCompany(jobOffer.getCompany());
         dto.setCurrency(jobOffer.getCurrency());
+        dto.setCompanyLogo(jobOffer.getCompanyLogo());
         dto.setType(jobOffer.getType());
         dto.setSkills(jobOffer.getSkills());
         dto.setRecruiterId(jobOffer.getRecruiterId());
@@ -170,6 +172,7 @@ public class JobOfferService {
         jobOffer.setApplicationDeadline(dto.getApplicationDeadline());
         jobOffer.setDescription(dto.getDescription());
         jobOffer.setPublished(dto.isPublished());
+        jobOffer.setCompanyLogo(dto.getCompanyLogo());
         jobOffer.setStatus(dto.getStatus());
         return jobOffer;
     }

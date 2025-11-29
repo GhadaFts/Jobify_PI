@@ -37,9 +37,10 @@ class PostsViewModel : ViewModel() {
     fun loadJobs() {
         viewModelScope.launch {
             _uiState.value = PostsUiState.Loading
-            delay(500)
             try {
-                _uiState.value = PostsUiState.Success(repository.getJobs())
+                // network call
+                val jobs = repository.getJobs()
+                _uiState.value = PostsUiState.Success(jobs)
             } catch (e: Exception) {
                 _uiState.value = PostsUiState.Error("Failed to load jobs: ${e.message}")
             }
@@ -48,37 +49,72 @@ class PostsViewModel : ViewModel() {
 
     fun createJob(job: Job) {
         viewModelScope.launch {
-            if (_uiState.value is PostsUiState.Success) {
-                val currentJobs = (_uiState.value as PostsUiState.Success).jobs
-                val newJob = job.copy(id = UUID.randomUUID().toString(), postedAt = System.currentTimeMillis())
-                _uiState.value = PostsUiState.Success(listOf(newJob) + currentJobs)
+            try {
+                // Prepare payload expected by backend
+                val payload = mapOf(
+                    "title" to job.title,
+                    "jobPosition" to job.title,
+                    "company" to job.company,
+                    "companyLogo" to (job.companyLogoUrl ?: ""),
+                    "location" to job.location,
+                    "type" to job.jobType,
+                    "experience" to job.experience,
+                    "salary" to job.salaryRange,
+                    "description" to job.shortDescription,
+                    "skills" to job.skills,
+                    "requirements" to job.requirements,
+                    "status" to "open",
+                    "published" to (job.published)
+                )
+
+                repository.createJob(payload)
+                // refresh authoritative list
+                loadJobs()
+            } catch (e: Exception) {
+                // keep previous UI state and optionally expose error
+                _uiState.value = PostsUiState.Error("Failed to create job: ${e.message}")
             }
         }
     }
 
     fun publishJob(jobId: String) {
         viewModelScope.launch {
-            delay(1000) // Simulate network call
-            if (_uiState.value is PostsUiState.Success) {
-                val currentJobs = (_uiState.value as PostsUiState.Success).jobs.toMutableList()
-                val jobIndex = currentJobs.indexOfFirst { it.id == jobId }
-                if (jobIndex != -1) {
-                    currentJobs[jobIndex] = currentJobs[jobIndex].copy(published = true)
-                    _uiState.value = PostsUiState.Success(currentJobs)
-                }
+            try {
+                // Call backend to update published flag
+                val payload = mapOf("published" to true)
+                repository.updateJob(jobId, payload)
+                // Refresh list
+                loadJobs()
+            } catch (e: Exception) {
+                _uiState.value = PostsUiState.Error("Failed to publish job: ${e.message}")
             }
         }
     }
 
     fun saveJob(updatedJob: Job) {
         viewModelScope.launch {
-            if (_uiState.value is PostsUiState.Success) {
-                val currentJobs = (_uiState.value as PostsUiState.Success).jobs.toMutableList()
-                val jobIndex = currentJobs.indexOfFirst { it.id == updatedJob.id }
-                if (jobIndex != -1) {
-                    currentJobs[jobIndex] = updatedJob
-                    _uiState.value = PostsUiState.Success(currentJobs)
-                }
+            try {
+                val payload = mapOf(
+                    "title" to updatedJob.title,
+                    "jobPosition" to updatedJob.title,
+                    "company" to updatedJob.company,
+                    "location" to updatedJob.location,
+                    "type" to updatedJob.jobType,
+                    "experience" to updatedJob.experience,
+                    "salary" to updatedJob.salaryRange,
+                    "description" to updatedJob.shortDescription,
+                    "skills" to updatedJob.skills,
+                    "requirements" to updatedJob.requirements,
+                    "status" to "open",
+                    "published" to updatedJob.published
+                )
+
+                repository.updateJob(updatedJob.id, payload)
+                // Refresh authoritative list
+                loadJobs()
+            } catch (e: Exception) {
+                _uiState.value = PostsUiState.Error("Failed to save job: ${e.message}")
+            } finally {
                 dismissEditJobDialog()
             }
         }

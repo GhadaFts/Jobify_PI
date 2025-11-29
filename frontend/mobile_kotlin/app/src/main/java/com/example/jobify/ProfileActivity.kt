@@ -18,9 +18,10 @@ import com.google.android.flexbox.FlexboxLayout
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseDrawerActivity() {
 
     // ... dans la classe ProfileActivity, avec vos autres variables de classe
+    private lateinit var scrollViewRoot: ScrollView
 
     private val interviewNotifications = listOf(
         InterviewNotification(
@@ -85,7 +86,6 @@ class ProfileActivity : AppCompatActivity() {
     private val educations = mutableListOf<Education>()
 
     private var isDarkMode = false
-    private lateinit var drawerLayout: DrawerLayout
     private lateinit var rootLayout: ScrollView
 
     // UI Elements
@@ -143,7 +143,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        drawerLayout = findViewById(R.id.drawerLayout)
+        scrollViewRoot = findViewById(R.id.scrollViewRoot)
         rootLayout = findViewById(R.id.scrollViewRoot)
 
         txtName = findViewById(R.id.txtName)

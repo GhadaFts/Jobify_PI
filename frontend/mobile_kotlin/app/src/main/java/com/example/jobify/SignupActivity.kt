@@ -169,29 +169,49 @@ class SignupActivity : AppCompatActivity() {
         fallbackEmail: String,
         fallbackRole: String
     ) {
+        val accessToken = loginResponse.accessToken ?: ""
+        val refreshToken = loginResponse.refreshToken ?: ""
+        val expiresIn = loginResponse.expiresIn ?: 0
+
+        if (accessToken.isBlank()) {
+            // No token returned — fall back to using provided fallback values
+            sessionManager.saveUserSession(
+                accessToken = "",
+                refreshToken = refreshToken,
+                expiresIn = expiresIn,
+                email = fallbackEmail,
+                name = fallbackName,
+                role = fallbackRole,
+                keycloakId = ""
+            )
+            setLoading(false)
+            navigateToProfileSetup(fallbackName, fallbackEmail, fallbackRole)
+            return
+        }
+
         authRepository.getUserProfile(
-            accessToken = loginResponse.accessToken,
+            accessToken = accessToken,
             onSuccess = { userProfile ->
-                // Save complete session with tokens and user data
+                // Save complete session with tokens and user data (use safe defaults)
                 sessionManager.saveUserSession(
-                    accessToken = loginResponse.accessToken,
-                    refreshToken = loginResponse.refreshToken,
-                    expiresIn = loginResponse.expiresIn,
-                    email = userProfile.email,
-                    name = userProfile.fullName,
-                    role = userProfile.role,
-                    keycloakId = userProfile.keycloakId
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                    expiresIn = expiresIn,
+                    email = userProfile.email ?: fallbackEmail,
+                    name = userProfile.fullName ?: fallbackName,
+                    role = userProfile.role ?: fallbackRole,
+                    keycloakId = userProfile.keycloakId ?: ""
                 )
 
                 setLoading(false)
-                navigateToProfileSetup(userProfile.fullName, userProfile.email, userProfile.role)
+                navigateToProfileSetup(userProfile.fullName ?: fallbackName, userProfile.email ?: fallbackEmail, userProfile.role ?: fallbackRole)
             },
             onError = { error ->
                 // Profile fetch failed, but we can still proceed with fallback data
                 sessionManager.saveUserSession(
-                    accessToken = loginResponse.accessToken,
-                    refreshToken = loginResponse.refreshToken,
-                    expiresIn = loginResponse.expiresIn,
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                    expiresIn = expiresIn,
                     email = fallbackEmail,
                     name = fallbackName,
                     role = fallbackRole,

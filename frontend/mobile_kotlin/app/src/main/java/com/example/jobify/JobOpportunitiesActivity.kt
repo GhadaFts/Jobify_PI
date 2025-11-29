@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -15,65 +16,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class JobOpportunitiesActivity : AppCompatActivity() {
+class JobOpportunitiesActivity : BaseDrawerActivity() {
+
+    private lateinit var scrollViewRoot: ScrollView
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: JobAdapter
     private val jobList = mutableListOf<JobPost>()
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var btnMenu: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_job_opportunities)
 
-        // Drawer setup
-        drawerLayout = findViewById(R.id.drawer_layout)
-        btnMenu = findViewById(R.id.btnMenu)
+        initViews()
 
-        btnMenu.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        // Drawer item clicks
-        findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, JobOpportunitiesActivity::class.java))
-
-        }
-
-        findViewById<LinearLayout>(R.id.menuProfileLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-
-        findViewById<LinearLayout>(R.id.menuCorrectCVLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, CvCorrectionActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.menuInterviewTrainingLayout)?.setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, InterviewPreparationActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.menuLogoutLayout).setOnClickListener {
-            // Close drawer first
-            drawerLayout.closeDrawer(GravityCompat.START)
-
-            // Perform logout after drawer closes
-            Handler(Looper.getMainLooper()).postDelayed({
-                performLogout()
-            }, 250)
-        }
-
-        findViewById<LinearLayout>(R.id.menuHelpLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        findViewById<LinearLayout>(R.id.menuJobMarketAnalyseLayout).setOnClickListener {
-            drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, AICareerAdvisorActivity::class.java))
-        }
         // RecyclerView setup
         recyclerView = findViewById(R.id.recycler_jobs)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -83,29 +40,10 @@ class JobOpportunitiesActivity : AppCompatActivity() {
         loadFakeJobs()
         loadSavedPosts() // ✅ زيدنا هذا السطر
     }
-    private fun performLogout() {
-        try {
-            // Clear session
-            val sessionManager = SessionManager(this)
-            sessionManager.clearSession()
 
-            // Show logout message
-            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
-
-            // Navigate to MainActivity (splash) which will redirect to login
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            startActivity(intent)
-
-            // Finish current activity
-            finishAffinity() // This ensures all activities are cleared
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Logout error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+    private fun initViews() {
+        scrollViewRoot = findViewById(R.id.scrollViewRoot)
     }
-
     private fun loadFakeJobs() {
         jobList.add(
             JobPost(

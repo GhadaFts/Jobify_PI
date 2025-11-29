@@ -31,8 +31,13 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**").permitAll()
-                        .anyRequest().authenticated()
+                    .requestMatchers("/actuator/**").permitAll()
+                    // Allow uploads endpoints and static uploads during development so images can be fetched without a token
+                    .requestMatchers("/api/uploads/**").permitAll()
+                    .requestMatchers("/uploads/**").permitAll()
+                    // Also permit the gateway-prefixed path if requests include the service id
+                    .requestMatchers("/joboffer-service/uploads/**").permitAll()
+                    .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
