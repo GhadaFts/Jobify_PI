@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectConnection() private readonly connection: Connection
+) {}
 
   async findByKeycloakId(keycloakId: string): Promise<UserDocument | null> {
     const result = await this.userModel.findOne({ keycloakId }).exec();
@@ -18,14 +22,40 @@ export class UserService {
   }
 
   async updateProfile(
-    keycloakId: string,
-    updateData: any,
-  ): Promise<UserDocument | null> {
-    const result = await this.userModel
-      .findOneAndUpdate({ keycloakId }, { $set: updateData }, { new: true })
-      .exec();
-    return result;
+  keycloakId: string,
+  updateData: any,
+): Promise<UserDocument | null> {
+
+  // 1. Find user by keycloak ID
+  const user = await this.userModel.findOne({ keycloakId }).exec();
+  if (!user) return null;
+
+  const role = user.role; // recruiter | jobseeker
+
+  // 2. Compile correct discriminator model manually
+  var ModelToUse;
+
+  if (this.userModel.discriminators?.[role]) {
+    ModelToUse = this.connection.model(
+      role,                      // name of discriminator
+      this.userModel.discriminators[role].schema,  // the schema
+      'users'                    // same collection
+    );
+  } else {
+    ModelToUse = this.userModel; // fallback (admin/basic users)
   }
+
+  // 3. Update using the correct discriminator model
+  const updated = await ModelToUse.findOneAndUpdate(
+    { keycloakId },
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).exec();
+
+  return updated;
+}
+
+
 
   async findAll(): Promise<UserDocument[]> {
     return this.userModel.find({ deleted: false }).exec();
