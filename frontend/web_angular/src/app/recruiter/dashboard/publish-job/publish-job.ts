@@ -112,7 +112,7 @@ export class PublishJob {
           // Fetch applications for each job and attach them so recruiter UI can display them
           this.jobs.forEach((job) => {
             if (!job.id) return;
-            this.applicationService.getByJobOffer(job.id).subscribe({
+            this.applicationService.getApplicationsByJobOfferId(Number(job.id)).subscribe({
               next: (apps: any[]) => {
                 job.applications = apps || [];
                 job.applicants = (apps && apps.length) || 0;
