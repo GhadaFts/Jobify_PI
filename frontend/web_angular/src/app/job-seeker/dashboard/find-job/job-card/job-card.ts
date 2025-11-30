@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { JobDetailsDialog } from './job-details-dialog/job-details-dialog';
 import { ApplicationDialog } from './application-dialog/application-dialog';
-import { CompanyProfileDialog } from './company-profile-dialog/company-profile-dialog'; // À créer
+import { CompanyProfileDialog } from './company-profile-dialog/company-profile-dialog';
 import { JobOffer } from '../../../../types';
 
 @Component({
@@ -25,13 +25,23 @@ export class JobCard {
 
   constructor(public dialog: MatDialog) {}
 
-  // Méthode pour ouvrir le profil de l'entreprise
-  openCompanyProfile(companyName: string) {
+  // Method to open company profile - now passing recruiterId
+  openCompanyProfile(event: Event) {
+    event.stopPropagation(); // Prevent any parent click handlers
+    
+    if (!this.job.recruiterId) {
+      console.warn('No recruiter ID available for this job');
+      // You can show a toast/snackbar message here if needed
+    }
+    
     const dialogRef = this.dialog.open(CompanyProfileDialog, {
       width: '800px',
       maxWidth: '90vw',
       maxHeight: '90vh',
-      data: { companyName: companyName }
+      data: { 
+        companyName: this.job.company,
+        recruiterId: this.job.recruiterId || '' // Pass the recruiter ID from job, or empty string
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -39,7 +49,6 @@ export class JobCard {
     });
   }
 
-  // Les autres méthodes restent inchangées
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
       'open': '#10B981',

@@ -124,7 +124,8 @@ export class JobService {
       status: dto.status || 'open',
       published: dto.published,
       applications: [],
-      coordinates: this.getCoordinatesForLocation(dto.location)
+      coordinates: this.getCoordinatesForLocation(dto.location),
+      recruiterId: dto.recruiterId
     };
   }
 

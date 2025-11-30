@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { Interview } from '../../../../types';
+import { InterviewStatus } from '../../../../types';
+import { FinalInterview } from '../final_interview_type';
 
 @Component({
   selector: 'app-interview-card',
@@ -8,14 +9,14 @@ import { Interview } from '../../../../types';
   styleUrls: ['./interview-card.scss']
 })
 export class InterviewCard {
-  @Input() interview!: Interview;
+  @Input() interview!: FinalInterview;
 
   getTimeBadgeClass(): string {
-    const interviewDateTime = new Date(this.interview.interviewDate + 'T' + this.interview.interviewTime);
+    const interviewDateTime = new Date(this.interview.scheduledDate);
     const now = new Date();
     const timeDiff = interviewDateTime.getTime() - now.getTime();
 
-    if (this.interview.interviewStatus === 'completed') {
+    if (this.interview.status === InterviewStatus.COMPLETED) {
       return 'bg-gray-100 text-gray-800';
     } else if (timeDiff <= 0) {
       return 'bg-red-100 text-red-800';
@@ -27,11 +28,11 @@ export class InterviewCard {
   }
 
  getTimeBadgeText(): string {
-  const interviewDateTime = new Date(this.interview.interviewDate + 'T' + this.interview.interviewTime);
+  const interviewDateTime = new Date(this.interview.scheduledDate);
   const now = new Date();
   const timeDiff = interviewDateTime.getTime() - now.getTime();
 
-  if (this.interview.interviewStatus === 'completed') {
+  if (this.interview.status === InterviewStatus.COMPLETED) {
     return 'Completed';
   } else if (timeDiff <= 0) {
     return 'In Progress';
@@ -56,6 +57,14 @@ export class InterviewCard {
       weekday: 'short',
       month: 'short',
       day: 'numeric'
+    });
+  }
+
+  formatTime(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      hour: "2-digit",
+      minute: "2-digit"
     });
   }
 }

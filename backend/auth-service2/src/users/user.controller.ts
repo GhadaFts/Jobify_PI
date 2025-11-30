@@ -18,7 +18,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
-
   @Get('profile')
   @UseGuards(KeycloakAuthGuard)
   async getProfile(@Request() req) {
@@ -95,5 +94,34 @@ export class UserController {
     }
 
     return updatedUser;
+  }
+  @Get(':keycloakId/public')
+  @UseGuards(KeycloakAuthGuard) // Any authenticated user can view
+  async getPublicProfile(@Param('keycloakId') keycloakId: string) {
+    const user = await this.userService.findByKeycloakId(keycloakId);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Return only public fields (remove sensitive data)
+    const publicProfile = {
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      photo_profil: user['photo_profil'],
+      description: user['description'],
+      phone_number: user['phone_number'],
+      companyAddress: user['companyAddress'],
+      domaine: user['domaine'],
+      employees_number: user['employees_number'],
+      service: user['service'],
+      web_link: user['web_link'],
+      facebook_link: user['facebook_link'],
+      twitter_link: user['twitter_link'],
+      github_link: user['github_link']
+    };
+
+    return publicProfile;
   }
 }
