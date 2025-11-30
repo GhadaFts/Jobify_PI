@@ -142,5 +142,8 @@ dependencies {
 
     // Gson for JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 }
 // Cache-busting comment to force a full project sync

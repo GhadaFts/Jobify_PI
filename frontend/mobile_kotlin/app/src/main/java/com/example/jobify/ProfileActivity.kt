@@ -5,24 +5,68 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.example.jobify.network.*
 import com.google.android.flexbox.FlexboxLayout
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ProfileActivity : BaseDrawerActivity() {
 
-    // ... dans la classe ProfileActivity, avec vos autres variables de classe
     private lateinit var scrollViewRoot: ScrollView
+    private lateinit var sessionManager: SessionManager
 
+    // UI Elements
+    private lateinit var txtName: TextView
+    private lateinit var txtCountry: TextView
+    private lateinit var txtBio: TextView
+    private lateinit var btnNotification: ImageView
+    private lateinit var profileImage: ImageView
+    private lateinit var experienceContainer: LinearLayout
+    private lateinit var txtNoExperience: TextView
+    private lateinit var educationContainer: LinearLayout
+    private lateinit var txtNoEducation: TextView
+    private lateinit var skillsContainer: FlexboxLayout
+    private lateinit var txtNoSkill: TextView
+    private lateinit var progressBar: ProgressBar
+
+    // Profile data
+    private var currentProfile: JobSeekerProfile? = null
+    private var isDarkMode = false
+    private lateinit var rootLayout: ScrollView
+    private var isLoading = false
+
+    // Image picker
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            uploadProfilePhoto(it)
+        }
+    }
+
+    // Mock interview notifications (you can load these from backend later)
     private val interviewNotifications = listOf(
         InterviewNotification(
             id = "1",
@@ -34,121 +78,55 @@ class ProfileActivity : BaseDrawerActivity() {
             duration = "60 mins",
             interviewType = "Online",
             isCompleted = true,
-            meetingLink = "https://meet.google.com/tekup-interview-link" // Lien de réunion simulé
+            meetingLink = "https://meet.google.com/tekup-interview-link"
         ),
         InterviewNotification(
             id = "2",
             companyName = "Tech Solutions SARL",
             interviewDate = "Jan 12, 2026",
             interviewTime = "2:30 PM",
-            location = "Tech Park, Ariana, Tunisi...",
+            location = "Tech Park, Ariana, Tunisia",
             additionalNotes = "Bring your ID and previous work samples. Dress code: Business casual.",
             duration = "45 mins",
             interviewType = "Local",
             isCompleted = false
-        ),
-        InterviewNotification(
-            id = "3",
-            companyName = "MedCare Hospital",
-            interviewDate = "Jan 20, 2024",
-            interviewTime = "9:00 AM",
-            location = "Online Meeting",
-            additionalNotes = "Please bring your CV and diploma for verification.",
-            duration = "90 mins",
-            interviewType = "Online",
-            isCompleted = true,
-            meetingLink = "https://meet.google.com/medcare-interview-link" // Lien de réunion simulé
         )
     )
 
-    // ...
-    // Données du profil
-    private var id: Int = 1
-    private var email = "example@email.com"
-    private var password = "********"
-    private var fullName = "Meriem Bejaoui"
-    private var role = "Android Developer"
-    private var photoProfil = ""
-    private var twitterLink = ""
-    private var webLink = ""
-    private var githubLink = ""
-    private var facebookLink = ""
-    private var description = "A motivated android developer seeking new challenges"
-    private var phoneNumber = "+216 12 345 678"
-    private var nationality = "Tunisia"
-    private var title = "Senior Developer"
-    private var dateOfBirth = "01/01/1995"
-    private var gender = "Female"
-
-    // Listes dynamiques
-    private val skills = mutableListOf<String>()
-    private val experiences = mutableListOf<Experience>()
-    private val educations = mutableListOf<Education>()
-
-    private var isDarkMode = false
-    private lateinit var rootLayout: ScrollView
-
-    // UI Elements
-    private lateinit var txtName: TextView
-    private lateinit var txtCountry: TextView
-    private lateinit var txtBio: TextView
-    private lateinit var btnNotification: ImageView
-    private lateinit var experienceContainer: LinearLayout
-    private lateinit var txtNoExperience: TextView
-    private lateinit var educationContainer: LinearLayout
-    private lateinit var txtNoEducation: TextView
-    private lateinit var skillsContainer: FlexboxLayout
-    private lateinit var txtNoSkill: TextView
-    private lateinit var languagesContainer: FlexboxLayout
-    private lateinit var txtNoLanguage: TextView
-
-    data class Experience(
-        var jobPosition: String,
-        var companyName: String,
-        var address: String,
-        var startDate: String,
-        var endDate: String
-    )
-
-    data class Education(
-        var university: String,
-        var degree: String,
-        var field: String,
-        var startDate: String,
-        var endDate: String
-    )
-
-    // Ajoutez cette data class dans ProfileActivity.kt, avant la fonction onCreate
     data class InterviewNotification(
         val id: String,
         val companyName: String,
-        val interviewDate: String, // ISO string ou date lisible, nous utiliserons la date lisible pour la démo
+        val interviewDate: String,
         val interviewTime: String,
         val location: String,
         val additionalNotes: String,
         val duration: String,
-        val interviewType: String, // "Online" ou "Local"
+        val interviewType: String,
         val isCompleted: Boolean,
-        val meetingLink: String = "" // Pour le bouton "Join"
+        val meetingLink: String = ""
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_candidate_profile)
 
+        sessionManager = SessionManager(this)
+
         initViews()
         setupListeners()
-        loadProfileFromPreferences()
         loadProfileData()
     }
 
     private fun initViews() {
         scrollViewRoot = findViewById(R.id.scrollViewRoot)
         rootLayout = findViewById(R.id.scrollViewRoot)
+        progressBar = findViewById(R.id.progressBar)
 
         txtName = findViewById(R.id.txtName)
         txtCountry = findViewById(R.id.txtCountry)
         txtBio = findViewById(R.id.txtBio)
+        profileImage = findViewById(R.id.profileImage)
+        btnNotification = findViewById(R.id.btnNotification)
 
         // Experience
         experienceContainer = findViewById(R.id.experienceItemsContainer)
@@ -161,333 +139,100 @@ class ProfileActivity : BaseDrawerActivity() {
         // Skills
         skillsContainer = findViewById(R.id.skillsContainer)
         txtNoSkill = findViewById(R.id.txtNoSkill)
-
-        // Languages
-        languagesContainer = findViewById(R.id.languagesContainer)
-        txtNoLanguage = findViewById(R.id.txtNoLanguage)
-        btnNotification = findViewById(R.id.btnNotification)
-
     }
 
-    private fun loadProfileFromPreferences() {
-        val prefs = getSharedPreferences("UserProfile", MODE_PRIVATE)
+    private fun loadProfileData() {
+        isLoading = true
+        showLoading(true)
 
-        // Charger les données depuis SharedPreferences
-        fullName = prefs.getString("fullName", fullName) ?: fullName
-        title = prefs.getString("title", title) ?: title
-        role = prefs.getString("role", role) ?: role
-        dateOfBirth = prefs.getString("birthDate", dateOfBirth) ?: dateOfBirth
-        gender = prefs.getString("gender", gender) ?: gender
-        email = prefs.getString("email", email) ?: email
-        phoneNumber = prefs.getString("phone", phoneNumber) ?: phoneNumber
-        nationality = prefs.getString("nationality", nationality) ?: nationality
-        twitterLink = prefs.getString("twitter", twitterLink) ?: twitterLink
-        githubLink = prefs.getString("github", githubLink) ?: githubLink
-        facebookLink = prefs.getString("facebook", facebookLink) ?: facebookLink
-        webLink = prefs.getString("website", webLink) ?: webLink
+        val token = sessionManager.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            showError("Not authenticated. Please login again.")
+            navigateToLogin()
+            return
+        }
 
-        // Afficher dans les TextViews
-        findViewById<TextView>(R.id.txtFullName).text = "Full Name: $fullName"
-        findViewById<TextView>(R.id.txtTitle).text = "Title: $title"
-        findViewById<TextView>(R.id.txtRole).text = "Role: $role"
-        findViewById<TextView>(R.id.txtBirthDate).text = "Birth Date: $dateOfBirth"
-        findViewById<TextView>(R.id.txtGender).text = "Gender: $gender"
-        findViewById<TextView>(R.id.txtEmail).text = "Email: $email"
-        findViewById<TextView>(R.id.txtPhone).text = "Phone: $phoneNumber"
-        findViewById<TextView>(R.id.txtNationality).text = "Nationality: $nationality"
-        findViewById<TextView>(R.id.txtTwitter).text = "Twitter: $twitterLink"
-        findViewById<TextView>(R.id.txtGithub).text = "GitHub: $githubLink"
-        findViewById<TextView>(R.id.txtFacebook).text = "Facebook: $facebookLink"
-        findViewById<TextView>(R.id.txtWebsite).text = "Website: $webLink"
-    }
+        ApiClient.userService.getJobSeekerProfile("Bearer $token").enqueue(object : Callback<JobSeekerProfile> {
+            override fun onResponse(call: Call<JobSeekerProfile>, response: Response<JobSeekerProfile>) {
+                isLoading = false
+                showLoading(false)
 
-    private fun saveToPreferences() {
-        val prefs = getSharedPreferences("UserProfile", MODE_PRIVATE).edit()
-
-        prefs.putString("fullName", fullName)
-        prefs.putString("title", title)
-        prefs.putString("role", role)
-        prefs.putString("birthDate", dateOfBirth)
-        prefs.putString("gender", gender)
-        prefs.putString("email", email)
-        prefs.putString("phone", phoneNumber)
-        prefs.putString("nationality", nationality)
-        prefs.putString("twitter", twitterLink)
-        prefs.putString("github", githubLink)
-        prefs.putString("facebook", facebookLink)
-        prefs.putString("website", webLink)
-
-        prefs.apply()
-    }
-
-    private fun setupListeners() {
-        val btnMenu = findViewById<ImageView>(R.id.btnMenu)
-        val btnTheme = findViewById<ImageView>(R.id.btnTheme)
-        val btnEditName = findViewById<ImageView>(R.id.btnEditName)
-        val btnAddExperience = findViewById<ImageView>(R.id.btnAddExperience)
-        val btnAddEducation = findViewById<ImageView>(R.id.btnAddEducation)
-        val btnEditSkills = findViewById<ImageView>(R.id.btnEditSkills)
-
-        btnMenu.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
-        btnEditName.setOnClickListener { showEditBasicInfoDialog() }
-        btnAddExperience.setOnClickListener { showAddExperienceDialog() }
-        btnAddEducation.setOnClickListener { showAddEducationDialog() }
-        btnEditSkills.setOnClickListener { showAddSkillDialog() }
-        btnNotification.setOnClickListener { showInterviewNotificationsDialog() }
-        // Click on elements to edit
-        txtName.setOnClickListener { showEditBasicInfoDialog() }
-        txtCountry.setOnClickListener { showEditContactDialog() }
-        txtBio.setOnClickListener { showEditBioDialog() }
-
-        setupDrawerMenu()
-        setupDarkMode(btnTheme)
-    }
-
-    /**
-     * Affiche un modal (AlertDialog) avec la liste des notifications d'entrevue.
-     */
-    private fun showInterviewNotificationsDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_interview_notifications, null)
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(true)
-            .create()
-
-        val container = dialogView.findViewById<LinearLayout>(R.id.notificationsContainer)
-
-        interviewNotifications.forEach { notification ->
-            val notificationCard = layoutInflater.inflate(R.layout.item_interview_notification, container, false)
-
-            // Définition des champs
-            notificationCard.findViewById<TextView>(R.id.tvCompanyName).text = notification.companyName
-            notificationCard.findViewById<TextView>(R.id.tvDuration).text = notification.duration
-            notificationCard.findViewById<TextView>(R.id.tvType).text = notification.interviewType
-            notificationCard.findViewById<TextView>(R.id.tvDate).text = notification.interviewDate
-            notificationCard.findViewById<TextView>(R.id.tvTime).text = notification.interviewTime
-            notificationCard.findViewById<TextView>(R.id.tvLocation).text = notification.location
-            notificationCard.findViewById<TextView>(R.id.tvNotes).text = notification.additionalNotes
-
-            val btnJoin = notificationCard.findViewById<Button>(R.id.btnJoin)
-            val tvCompleted = notificationCard.findViewById<TextView>(R.id.tvCompleted)
-            val btnDetails = notificationCard.findViewById<Button>(R.id.btnDetails)
-            val typeIcon = notificationCard.findViewById<ImageView>(R.id.iconType)
-
-            // Logique 'Completed' vs. 'Join'
-            if (notification.isCompleted) {
-                btnJoin.visibility = View.GONE
-                tvCompleted.visibility = View.VISIBLE
-                tvCompleted.text = "Completed"
-            } else {
-                btnJoin.visibility = View.VISIBLE
-                tvCompleted.visibility = View.GONE
-            }
-
-            // Logique de l'icône de type (Online/Local)
-            if (notification.interviewType == "Online") {
-                typeIcon.setImageResource(R.drawable.ic_videocam) // Assurez-vous d'avoir cet icône
-            } else {
-                typeIcon.setImageResource(R.drawable.ic_location) // Assurez-vous d'avoir cet icône
-            }
-
-            // Gérer le bouton 'Join' pour les réunions en ligne
-            if (notification.interviewType == "Online" && !notification.isCompleted) {
-                btnJoin.setOnClickListener {
-                    try {
-                        // Ouvre le lien de la réunion (Google Meet, Zoom, etc.)
-                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(notification.meetingLink))
-                        startActivity(intent)
-                        dialog.dismiss() // Fermer le modal après avoir cliqué sur Join
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Impossible d'ouvrir le lien: ${e.message}", Toast.LENGTH_LONG).show()
+                if (response.isSuccessful) {
+                    currentProfile = response.body()
+                    currentProfile?.let {
+                        if (it.role.lowercase().replace("_", "") == "jobseeker") {
+                            displayProfile(it)
+                        } else {
+                            showError("This page is only for job seekers")
+                        }
+                    }
+                } else {
+                    when (response.code()) {
+                        401 -> {
+                            showError("Session expired. Please login again.")
+                            navigateToLogin()
+                        }
+                        404 -> showError("Profile not found")
+                        else -> showError("Failed to load profile: ${response.message()}")
                     }
                 }
+            }
+
+            override fun onFailure(call: Call<JobSeekerProfile>, t: Throwable) {
+                isLoading = false
+                showLoading(false)
+                Log.e("ProfileActivity", "Failed to load profile", t)
+                showError("Network error: ${t.message}")
+            }
+        })
+    }
+
+    private fun displayProfile(profile: JobSeekerProfile) {
+        txtName.text = profile.fullName
+        txtCountry.text = profile.nationality ?: "Not specified"
+        txtBio.text = profile.description ?: "No description available"
+
+        // Load profile photo
+        if (!profile.photo_profil.isNullOrEmpty()) {
+            val imageUrl = if (profile.photo_profil.startsWith("http")) {
+                profile.photo_profil
             } else {
-                // Désactiver le bouton Join si non-en ligne ou complété
-                btnJoin.isEnabled = false
-                btnJoin.alpha = 0.5f // Optionnel : rendre le bouton semi-transparent
+                "http://10.0.2.2:8888/auth-service${profile.photo_profil}"
             }
 
-            // Gérer le bouton 'Details' (vous pouvez afficher plus d'infos ou fermer le modal)
-            btnDetails.setOnClickListener {
-                Toast.makeText(this, "Details for ${notification.companyName}", Toast.LENGTH_SHORT).show()
-                // Vous pouvez ajouter ici une autre boite de dialogue pour les détails
-            }
-
-            container.addView(notificationCard)
+            Glide.with(this)
+                .load(imageUrl)
+                .circleCrop()
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
+                .into(profileImage)
+        } else {
+            profileImage.setImageResource(R.drawable.ic_user_placeholder)
         }
 
-        dialog.show()
-    }
-    private fun loadProfileData() {
-        txtName.text = fullName
-        txtCountry.text = nationality
-        txtBio.text = description
+        // Display basic info
+        findViewById<TextView>(R.id.txtFullName).text = "Full Name: ${profile.fullName}"
+        findViewById<TextView>(R.id.txtTitle).text = "Title: ${profile.title ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtRole).text = "Role: ${profile.role}"
+        findViewById<TextView>(R.id.txtBirthDate).text = "Birth Date: ${profile.date_of_birth ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtGender).text = "Gender: ${profile.gender ?: "Not specified"}"
 
-        refreshExperienceList()
-        refreshEducationList()
-        refreshSkillsList()
-    }
+        // Display contact info
+        findViewById<TextView>(R.id.txtEmail).text = "Email: ${profile.email}"
+        findViewById<TextView>(R.id.txtPhone).text = "Phone: ${profile.phone_number ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtNationality).text = "Nationality: ${profile.nationality ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtTwitter).text = "Twitter: ${profile.twitter_link ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtGithub).text = "GitHub: ${profile.github_link ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtFacebook).text = "Facebook: ${profile.facebook_link ?: "Not specified"}"
+        findViewById<TextView>(R.id.txtWebsite).text = "Website: ${profile.web_link ?: "Not specified"}"
 
-    // ============== EDIT BASIC INFO ==============
-    private fun showEditBasicInfoDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_basic_info, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val inputFullName = dialogView.findViewById<EditText>(R.id.inputFullName)
-        val inputTitle = dialogView.findViewById<EditText>(R.id.inputTitle)
-        val inputRole = dialogView.findViewById<EditText>(R.id.inputRole)
-        val inputDateOfBirth = dialogView.findViewById<EditText>(R.id.inputDateOfBirth)
-        val spinnerGender = dialogView.findViewById<Spinner>(R.id.spinnerGender)
-        val btnSave = dialogView.findViewById<Button>(R.id.btnSaveBasicInfo)
-
-        // Populate fields
-        inputFullName.setText(fullName)
-        inputTitle.setText(title)
-        inputRole.setText(role)
-        inputDateOfBirth.setText(dateOfBirth)
-
-        // Gender spinner
-        val genderOptions = arrayOf("Male", "Female", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, genderOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGender.adapter = adapter
-        spinnerGender.setSelection(genderOptions.indexOf(gender))
-
-        inputDateOfBirth.setOnClickListener { showDatePicker(inputDateOfBirth) }
-
-        btnSave.setOnClickListener {
-            fullName = inputFullName.text.toString().trim()
-            title = inputTitle.text.toString().trim()
-            role = inputRole.text.toString().trim()
-            dateOfBirth = inputDateOfBirth.text.toString().trim()
-            gender = spinnerGender.selectedItem.toString()
-
-            txtName.text = fullName
-            saveToPreferences()
-            loadProfileFromPreferences()
-            Toast.makeText(this, "Basic info updated", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
+        // Display experience, education, and skills
+        displayExperience(profile.experience ?: emptyList())
+        displayEducation(profile.education ?: emptyList())
+        displaySkills(profile.skills ?: emptyList())
     }
 
-    // ============== EDIT CONTACT INFO ==============
-    private fun showEditContactDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_contact, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val inputEmail = dialogView.findViewById<EditText>(R.id.inputEmail)
-        val inputPhone = dialogView.findViewById<EditText>(R.id.inputPhone)
-        val inputNationality = dialogView.findViewById<EditText>(R.id.inputNationality)
-        val inputTwitter = dialogView.findViewById<EditText>(R.id.inputTwitter)
-        val inputGithub = dialogView.findViewById<EditText>(R.id.inputGithub)
-        val inputFacebook = dialogView.findViewById<EditText>(R.id.inputFacebook)
-        val inputWebsite = dialogView.findViewById<EditText>(R.id.inputWebsite)
-        val btnSave = dialogView.findViewById<Button>(R.id.btnSaveContact)
-
-        // Populate fields
-        inputEmail.setText(email)
-        inputPhone.setText(phoneNumber)
-        inputNationality.setText(nationality)
-        inputTwitter.setText(twitterLink)
-        inputGithub.setText(githubLink)
-        inputFacebook.setText(facebookLink)
-        inputWebsite.setText(webLink)
-
-        btnSave.setOnClickListener {
-            email = inputEmail.text.toString().trim()
-            phoneNumber = inputPhone.text.toString().trim()
-            nationality = inputNationality.text.toString().trim()
-            twitterLink = inputTwitter.text.toString().trim()
-            githubLink = inputGithub.text.toString().trim()
-            facebookLink = inputFacebook.text.toString().trim()
-            webLink = inputWebsite.text.toString().trim()
-
-            txtCountry.text = nationality
-            saveToPreferences()
-            loadProfileFromPreferences()
-            Toast.makeText(this, "Contact info updated", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    // ============== EDIT BIO ==============
-    private fun showEditBioDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_bio, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val inputBio = dialogView.findViewById<EditText>(R.id.inputBio)
-        val btnSave = dialogView.findViewById<Button>(R.id.btnSaveBio)
-
-        inputBio.setText(description)
-
-        btnSave.setOnClickListener {
-            description = inputBio.text.toString().trim()
-            txtBio.text = description
-            Toast.makeText(this, "Bio updated", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    // ============== EXPERIENCE ==============
-    private fun showAddExperienceDialog(existingExp: Experience? = null, index: Int = -1) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_add_experience, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val jobPosition = dialogView.findViewById<EditText>(R.id.inputJobPosition)
-        val companyName = dialogView.findViewById<EditText>(R.id.inputCompanyName)
-        val address = dialogView.findViewById<EditText>(R.id.inputAddress)
-        val startDate = dialogView.findViewById<EditText>(R.id.inputStartDate)
-        val endDate = dialogView.findViewById<EditText>(R.id.inputEndDate)
-        val addBtn = dialogView.findViewById<Button>(R.id.btnAddExperience)
-
-        // If editing
-        existingExp?.let {
-            jobPosition.setText(it.jobPosition)
-            companyName.setText(it.companyName)
-            address.setText(it.address)
-            startDate.setText(it.startDate)
-            endDate.setText(it.endDate)
-            addBtn.text = "Update"
-        }
-
-        startDate.setOnClickListener { showDatePicker(startDate) }
-        endDate.setOnClickListener { showDatePicker(endDate) }
-
-        addBtn.setOnClickListener {
-            val job = jobPosition.text.toString().trim()
-            val company = companyName.text.toString().trim()
-            val addr = address.text.toString().trim()
-            val start = startDate.text.toString().trim()
-            val end = endDate.text.toString().trim()
-
-            if (job.isEmpty() || company.isEmpty() || addr.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val experience = Experience(job, company, addr, start, end)
-
-            if (index >= 0) {
-                experiences[index] = experience
-            } else {
-                experiences.add(experience)
-            }
-
-            refreshExperienceList()
-            Toast.makeText(this, "Experience saved", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun refreshExperienceList() {
+    private fun displayExperience(experiences: List<Experience>) {
         experienceContainer.removeAllViews()
 
         if (experiences.isEmpty()) {
@@ -495,85 +240,24 @@ class ProfileActivity : BaseDrawerActivity() {
         } else {
             txtNoExperience.visibility = View.GONE
 
-            experiences.forEachIndexed { index, exp ->
+            experiences.forEach { exp ->
                 val itemView = layoutInflater.inflate(R.layout.item_experience, experienceContainer, false)
 
-                itemView.findViewById<TextView>(R.id.tvJobPosition).text = exp.jobPosition
-                itemView.findViewById<TextView>(R.id.tvCompanyName).text = exp.companyName
-                itemView.findViewById<TextView>(R.id.tvAddress).text = exp.address
+                itemView.findViewById<TextView>(R.id.tvJobPosition).text = exp.position
+                itemView.findViewById<TextView>(R.id.tvCompanyName).text = exp.company
+                itemView.findViewById<TextView>(R.id.tvAddress).text = exp.description
                 itemView.findViewById<TextView>(R.id.tvWorkDuration).text = "${exp.startDate} - ${exp.endDate}"
 
-                val btnEdit = itemView.findViewById<ImageView>(R.id.btnEditExperience)
-                val btnDelete = itemView.findViewById<Button>(R.id.btnDeleteExperience)
-
-                btnEdit.setOnClickListener {
-                    showAddExperienceDialog(exp, index)
-                }
-
-                btnDelete.setOnClickListener {
-                    experiences.removeAt(index)
-                    refreshExperienceList()
-                    Toast.makeText(this, "Experience removed", Toast.LENGTH_SHORT).show()
-                }
+                // Hide edit/delete buttons in view mode
+                itemView.findViewById<ImageView>(R.id.btnEditExperience).visibility = View.GONE
+                itemView.findViewById<Button>(R.id.btnDeleteExperience).visibility = View.GONE
 
                 experienceContainer.addView(itemView)
             }
         }
     }
 
-    // ============== EDUCATION ==============
-    private fun showAddEducationDialog(existingEdu: Education? = null, index: Int = -1) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_add_education, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val university = dialogView.findViewById<EditText>(R.id.inputUniversity)
-        val degree = dialogView.findViewById<EditText>(R.id.inputDegree)
-        val field = dialogView.findViewById<EditText>(R.id.inputField)
-        val start = dialogView.findViewById<EditText>(R.id.inputEduStart)
-        val end = dialogView.findViewById<EditText>(R.id.inputEduEnd)
-        val addBtn = dialogView.findViewById<Button>(R.id.btnAddEducation)
-
-        existingEdu?.let {
-            university.setText(it.university)
-            degree.setText(it.degree)
-            field.setText(it.field)
-            start.setText(it.startDate)
-            end.setText(it.endDate)
-            addBtn.text = "Update"
-        }
-
-        start.setOnClickListener { showDatePicker(start) }
-        end.setOnClickListener { showDatePicker(end) }
-
-        addBtn.setOnClickListener {
-            val uni = university.text.toString().trim()
-            val deg = degree.text.toString().trim()
-            val fld = field.text.toString().trim()
-            val startDate = start.text.toString().trim()
-            val endDate = end.text.toString().trim()
-
-            if (uni.isEmpty() || deg.isEmpty() || fld.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val education = Education(uni, deg, fld, startDate, endDate)
-
-            if (index >= 0) {
-                educations[index] = education
-            } else {
-                educations.add(education)
-            }
-
-            refreshEducationList()
-            Toast.makeText(this, "Education saved", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun refreshEducationList() {
+    private fun displayEducation(educations: List<Education>) {
         educationContainer.removeAllViews()
 
         if (educations.isEmpty()) {
@@ -581,59 +265,24 @@ class ProfileActivity : BaseDrawerActivity() {
         } else {
             txtNoEducation.visibility = View.GONE
 
-            educations.forEachIndexed { index, edu ->
+            educations.forEach { edu ->
                 val itemView = layoutInflater.inflate(R.layout.item_education, educationContainer, false)
 
                 itemView.findViewById<TextView>(R.id.tvDegree).text = edu.degree
                 itemView.findViewById<TextView>(R.id.tvField).text = edu.field
-                itemView.findViewById<TextView>(R.id.tvUniversity).text = edu.university
-                itemView.findViewById<TextView>(R.id.tvGraduationDate).text = "${edu.startDate} - ${edu.endDate}"
+                itemView.findViewById<TextView>(R.id.tvUniversity).text = edu.school
+                itemView.findViewById<TextView>(R.id.tvGraduationDate).text = edu.graduationDate
 
-                val btnEdit = itemView.findViewById<ImageView>(R.id.btnEditEducation)
-                val btnDelete = itemView.findViewById<Button>(R.id.btnRemoveEducation)
-
-                btnEdit.setOnClickListener {
-                    showAddEducationDialog(edu, index)
-                }
-
-                btnDelete.setOnClickListener {
-                    educations.removeAt(index)
-                    refreshEducationList()
-                    Toast.makeText(this, "Education removed", Toast.LENGTH_SHORT).show()
-                }
+                // Hide edit/delete buttons in view mode
+                itemView.findViewById<ImageView>(R.id.btnEditEducation).visibility = View.GONE
+                itemView.findViewById<Button>(R.id.btnRemoveEducation).visibility = View.GONE
 
                 educationContainer.addView(itemView)
             }
         }
     }
 
-    // ============== SKILLS ==============
-    private fun showAddSkillDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_add_item, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
-        val title = dialogView.findViewById<TextView>(R.id.dialogTitle)
-        val input = dialogView.findViewById<EditText>(R.id.inputItem)
-        val addBtn = dialogView.findViewById<Button>(R.id.btnAddItem)
-        title.text = "Add Skill"
-
-        addBtn.setOnClickListener {
-            val skill = input.text.toString().trim()
-            if (skill.isEmpty()) {
-                input.error = "Enter skill"
-                return@setOnClickListener
-            }
-
-            skills.add(skill)
-            refreshSkillsList()
-            Toast.makeText(this, "Skill added", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun refreshSkillsList() {
+    private fun displaySkills(skills: List<String>) {
         skillsContainer.removeAllViews()
 
         if (skills.isEmpty()) {
@@ -659,23 +308,155 @@ class ProfileActivity : BaseDrawerActivity() {
                 params.setMargins(12, 12, 12, 12)
                 tv.layoutParams = params
 
-                tv.setOnLongClickListener {
-                    AlertDialog.Builder(this)
-                        .setTitle("Delete Skill")
-                        .setMessage("Remove '$skill'?")
-                        .setPositiveButton("Delete") { _, _ ->
-                            skills.remove(skill)
-                            refreshSkillsList()
-                            Toast.makeText(this, "Skill removed", Toast.LENGTH_SHORT).show()
-                        }
-                        .setNegativeButton("Cancel", null)
-                        .show()
-                    true
-                }
-
                 skillsContainer.addView(tv)
             }
         }
+    }
+
+    private fun uploadProfilePhoto(uri: Uri) {
+        val token = sessionManager.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            showError("Not authenticated")
+            return
+        }
+
+        try {
+            // Create a temporary file from URI
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(cacheDir, "profile_photo.jpg")
+            val outputStream = FileOutputStream(file)
+
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            // Create multipart request
+            val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestBody)
+
+            showLoading(true)
+
+            ApiClient.userService.uploadProfilePhoto("Bearer $token", multipartBody)
+                .enqueue(object : Callback<PhotoUploadResponse> {
+                    override fun onResponse(
+                        call: Call<PhotoUploadResponse>,
+                        response: Response<PhotoUploadResponse>
+                    ) {
+                        showLoading(false)
+
+                        if (response.isSuccessful) {
+                            Toast.makeText(
+                                this@ProfileActivity,
+                                "Photo uploaded successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            // Reload profile
+                            loadProfileData()
+                        } else {
+                            showError("Failed to upload photo: ${response.message()}")
+                        }
+
+                        file.delete()
+                    }
+
+                    override fun onFailure(call: Call<PhotoUploadResponse>, t: Throwable) {
+                        showLoading(false)
+                        Log.e("ProfileActivity", "Photo upload failed", t)
+                        showError("Failed to upload photo: ${t.message}")
+                        file.delete()
+                    }
+                })
+        } catch (e: Exception) {
+            Log.e("ProfileActivity", "Error preparing photo upload", e)
+            showError("Error: ${e.message}")
+        }
+    }
+
+    private fun setupListeners() {
+        val btnMenu = findViewById<ImageView>(R.id.btnMenu)
+        val btnTheme = findViewById<ImageView>(R.id.btnTheme)
+        val btnEditName = findViewById<ImageView>(R.id.btnEditName)
+
+        btnMenu.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
+        btnEditName.setOnClickListener {
+            // Open edit profile activity or show edit dialog
+            Toast.makeText(this, "Edit profile feature - coming soon", Toast.LENGTH_SHORT).show()
+        }
+        btnNotification.setOnClickListener { showInterviewNotificationsDialog() }
+
+        // Click on profile image to change
+        profileImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
+
+        setupDrawerMenu()
+        setupDarkMode(btnTheme)
+    }
+
+    private fun showInterviewNotificationsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_interview_notifications, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        val container = dialogView.findViewById<LinearLayout>(R.id.notificationsContainer)
+
+        interviewNotifications.forEach { notification ->
+            val notificationCard = layoutInflater.inflate(R.layout.item_interview_notification, container, false)
+
+            notificationCard.findViewById<TextView>(R.id.tvCompanyName).text = notification.companyName
+            notificationCard.findViewById<TextView>(R.id.tvDuration).text = notification.duration
+            notificationCard.findViewById<TextView>(R.id.tvType).text = notification.interviewType
+            notificationCard.findViewById<TextView>(R.id.tvDate).text = notification.interviewDate
+            notificationCard.findViewById<TextView>(R.id.tvTime).text = notification.interviewTime
+            notificationCard.findViewById<TextView>(R.id.tvLocation).text = notification.location
+            notificationCard.findViewById<TextView>(R.id.tvNotes).text = notification.additionalNotes
+
+            val btnJoin = notificationCard.findViewById<Button>(R.id.btnJoin)
+            val tvCompleted = notificationCard.findViewById<TextView>(R.id.tvCompleted)
+            val btnDetails = notificationCard.findViewById<Button>(R.id.btnDetails)
+            val typeIcon = notificationCard.findViewById<ImageView>(R.id.iconType)
+
+            if (notification.isCompleted) {
+                btnJoin.visibility = View.GONE
+                tvCompleted.visibility = View.VISIBLE
+                tvCompleted.text = "Completed"
+            } else {
+                btnJoin.visibility = View.VISIBLE
+                tvCompleted.visibility = View.GONE
+            }
+
+            if (notification.interviewType == "Online") {
+                typeIcon.setImageResource(R.drawable.ic_videocam)
+            } else {
+                typeIcon.setImageResource(R.drawable.ic_location)
+            }
+
+            if (notification.interviewType == "Online" && !notification.isCompleted) {
+                btnJoin.setOnClickListener {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(notification.meetingLink))
+                        startActivity(intent)
+                        dialog.dismiss()
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Cannot open link: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                btnJoin.isEnabled = false
+                btnJoin.alpha = 0.5f
+            }
+
+            btnDetails.setOnClickListener {
+                Toast.makeText(this, "Details for ${notification.companyName}", Toast.LENGTH_SHORT).show()
+            }
+
+            container.addView(notificationCard)
+        }
+
+        dialog.show()
     }
 
     private fun getRandomColor(): Int {
@@ -690,16 +471,6 @@ class ProfileActivity : BaseDrawerActivity() {
             Color.parseColor("#FD79A8")
         )
         return colors.random()
-    }
-
-    // ============== UTILITIES ==============
-    private fun showDatePicker(editText: EditText) {
-        val calendar = Calendar.getInstance()
-        val dpd = DatePickerDialog(this, { _, year, month, day ->
-            val selectedDate = String.format("%02d/%02d/%04d", day, month + 1, year)
-            editText.setText(selectedDate)
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        dpd.show()
     }
 
     private fun setupDrawerMenu() {
@@ -750,9 +521,24 @@ class ProfileActivity : BaseDrawerActivity() {
         }
     }
 
+    private fun showLoading(show: Boolean) {
+        progressBar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun navigateToLogin() {
+        sessionManager.clearSession()
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        finishAffinity()
+    }
+
     private fun performLogout() {
         try {
-            val sessionManager = SessionManager(this)
             sessionManager.clearSession()
             Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, MainActivity::class.java)
