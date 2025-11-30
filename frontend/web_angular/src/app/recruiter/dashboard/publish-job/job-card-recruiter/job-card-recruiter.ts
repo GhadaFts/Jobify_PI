@@ -194,20 +194,55 @@ export class JobCardRecruiter implements OnChanges {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        // Mettre à jour le statut de l'application
-        this.applicationStatusChange.emit({
+        // Build interview payload expected by backend
+        const scheduledDateTime = new Date(result.interviewDate + 'T' + result.interviewTime);
+
+        // Map frontend interviewType to backend enum values
+        const typeMap: { [key: string]: string } = {
+          online: 'REMOTE',
+          local: 'ON_SITE'
+        };
+
+        const pad = (n: number) => (n < 10 ? '0' + n : n);
+        const y = scheduledDateTime.getFullYear();
+        const mo = pad(scheduledDateTime.getMonth() + 1);
+        const d = pad(scheduledDateTime.getDate());
+        const hh = pad(scheduledDateTime.getHours());
+        const mm = pad(scheduledDateTime.getMinutes());
+        const localDateTime = `${y}-${mo}-${d}T${hh}:${mm}:00`;
+
+        const payload = {
           applicationId: String(application.id),
-          newStatus: 'interview_scheduled',
-          interviewData: result,
+          jobSeekerId: application.jobSeeker?.id,
+          // recruiterId is set server-side from JWT by the interview-service
+          scheduledDate: localDateTime,
+          duration: result.duration,
+          location: result.interviewLocation,
+          interviewType: typeMap[result.interviewType] || 'REMOTE',
+          notes: result.additionalNotes,
+          meetingLink: result.meetingLink
+        };
+
+        // Call backend to persist the interview
+        this.interviewsService.scheduleInterview(payload).subscribe({
+          next: (response) => {
+            // Update application status UI and notify parent
+            this.applicationStatusChange.emit({
+              applicationId: String(application.id),
+              newStatus: 'interview_scheduled',
+              interviewData: response,
+            });
+
+            this.toastService.success('Interview scheduled and saved.');
+            console.log('Interview scheduled persisted:', response);
+          },
+          error: (err) => {
+            console.error('Failed to persist interview:', err);
+            let msg = 'Failed to schedule interview. Please try again.';
+            if (err && err.error && err.error.message) msg = err.error.message;
+            this.toastService.error(msg);
+          }
         });
-
-        // Ajouter l'interview au service
-        this.interviewsService.addInterview({ application, ...result });
-
-        // Afficher le toast de succès
-        this.toastService.success('Interview has been scheduled successfully.');
-
-        console.log('Interview scheduled and added to list:', result);
       }
     });
   }
