@@ -89,6 +89,7 @@ export interface JobOffer {
     lat: number;
     lng: number;
   };
+  recruiterId?: string;
 }
 export interface Interview {
   id: string;
