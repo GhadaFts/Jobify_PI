@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CompanyProfileDialog } from '../find-job/job-card/company-profile-dialog/company-profile-dialog';
+import { Interview } from '../../../types';
+import { InterviewsService } from '../../../services/interviews.service';
+import { ApplicationService } from '../../../services/application.service';
+import { JobService } from '../../../services/job.service';
 
 interface Company {
   id: string;
@@ -13,7 +17,7 @@ interface Company {
 }
 
 interface InterviewNotification {
-  id: string;
+  id: number;
   companyName: string;
   interviewDate: string; // ISO string
   interviewTime: string;
@@ -29,8 +33,10 @@ interface InterviewNotification {
   styleUrls: ['./job-seeker-sidebar.scss'],
   standalone: false,
 })
-export class JobSeekerSidebar {
+export class JobSeekerSidebar implements OnInit {
+  private myInterviews: Interview[] = []
   activeTab: 'companies' | 'interviews' = 'companies';
+  interviewNotifications: InterviewNotification[] = []
 
   featuredCompanies: Company[] = [
     {
@@ -77,50 +83,33 @@ export class JobSeekerSidebar {
     }
   ];
 
-  interviewNotifications: InterviewNotification[] = [
-    {
-      id: '1',
-      companyName: 'TekUp',
-      interviewDate: '2025-11-21',
-      interviewTime: '13:00 AM',
-      location: 'https://meet.google.com/xxx-xxxx-xxx',
-      additionalNotes: 'Please have your portfolio ready. Technical assessment will include live coding.',
-      duration: '60 mins',
-      interviewType: 'Online'
-    },
-    {
-      id: '2',
-      companyName: 'Tech Solutions SARL',
-      interviewDate: '2026-01-12',
-      interviewTime: '2:30 PM',
-      location: 'Tech Park, Ariana, Tunisia',
-      additionalNotes: 'Bring your ID and previous work samples. Dress code: Business casual.',
-      duration: '45 mins',
-      interviewType: 'local'
-    },
-    {
-      id: '3',
-      companyName: 'MedCare Hospital',
-      interviewDate: '2024-01-20',
-      interviewTime: '9:00 AM',
-      location: 'https://teams.microsoft.com/l/meetup-join/xxx',
-      additionalNotes: 'Discussion about IT infrastructure and support procedures.',
-      duration: '90 mins',
-      interviewType: 'Technical Assessment - Online'
-    },
-    {
-      id: '4',
-      companyName: 'MedCare Hospital',
-      interviewDate: '2024-01-20',
-      interviewTime: '9:00 AM',
-      location: 'https://teams.microsoft.com/l/meetup-join/xxx',
-      additionalNotes: 'Discussion about IT infrastructure and support procedures.',
-      duration: '90 mins',
-      interviewType: 'Technical Assessment - Online'
-    }
-  ];
+  ngOnInit(): void {
+    this.interviewService.getMyUpcomingInterviews().subscribe(interviews => this.myInterviews = interviews)
+    this.myInterviews.forEach(interview => {
+      var company_name = ""
+      this.appService.getApplicationById(interview.applicationId).subscribe(app =>
+        {
+          this.jobService.getJobById(app.jobOfferId).subscribe(job => company_name = job.company)
+        }
+      )
+      const notif: InterviewNotification = {
+        id: interview.id,
+        interviewDate: this.formatInterviewDate(interview.scheduledDate),
+        interviewTime: this.formatInterviewTime(interview.scheduledDate),
+        location: interview.location as string,
+        additionalNotes: interview.notes as string,
+        duration: interview.duration + " mins",
+        interviewType: interview.interviewType,
+        companyName: company_name
+      }
+      this.interviewNotifications.push(notif)
+    })
+    this.interviewNotifications.sort((a,b) => b.id - a.id)
+  }
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private interviewService: InterviewsService,
+    private appService: ApplicationService, private jobService: JobService
+  ) {}
 
   // Company Profile Methods
   openCompanyProfile(company: Company) {
@@ -204,6 +193,14 @@ export class JobSeekerSidebar {
       month: 'short', 
       day: 'numeric',
       year: 'numeric'
+    });
+  }
+
+  formatInterviewTime(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      "hour": "2-digit",
+      "minute": "2-digit"
     });
   }
 
