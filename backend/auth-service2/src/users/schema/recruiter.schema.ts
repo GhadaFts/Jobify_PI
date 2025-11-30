@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { User } from './user.schema';
 import { Document } from 'mongoose';
 
 export type RecruiterDocument = Recruiter & Document;
@@ -7,16 +6,16 @@ export type RecruiterDocument = Recruiter & Document;
 @Schema()
 export class Recruiter {
     @Prop()
-    twitterLink?: string;
+    twitter_link?: string;
 
     @Prop()
-    webLink?: string;
+    web_link?: string;
 
     @Prop()
-    githubLink?: string;
+    github_link?: string;
 
     @Prop()
-    facebookLink?: string;
+    facebook_link?: string;
 
     @Prop({ type: String })
     description?: string;
@@ -25,13 +24,13 @@ export class Recruiter {
     companyAddress?: string;
 
     @Prop()
-    sepeciality?: string;
+    specialty?: string;  // Fixed typo: sepeciality -> specialty
 
     @Prop()
     domaine?: string;
 
     @Prop()
-    employeesNumber?: number;
+    employees_number?: number;  // Changed from employeesNumber
 
     @Prop({ type: [String] })
     service?: string[];

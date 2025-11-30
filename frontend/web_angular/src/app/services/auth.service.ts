@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap , switchMap , of, catchError } from 'rxjs';
+import { Observable, BehaviorSubject, tap, switchMap, of, catchError } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface LoginCredentials {
@@ -39,26 +39,26 @@ export interface User {
 })
 export class AuthService {
     private apiUrl = 'http://localhost:8888/auth-service/auth'; // Gateway URL
+    private userApiUrl = 'http://localhost:8888/auth-service/user'; // User service URL
     private currentUserSubject = new BehaviorSubject<User | null>(null);
     public currentUser$ = this.currentUserSubject.asObservable();
 
     constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    this.loadUserFromStorage();
-    
-    // Si un token existe mais que l'utilisateur n'est pas chargé, le charger
-    if (this.isAuthenticated() && !this.currentUserSubject.value) {
-      this.getUserProfile().subscribe({
-        error: () => {
-          // Si le token est invalide, nettoyer
-          this.clearAuthData();
+        private http: HttpClient,
+        private router: Router
+    ) {
+        this.loadUserFromStorage();
+        
+        // Si un token existe mais que l'utilisateur n'est pas chargé, le charger
+        if (this.isAuthenticated() && !this.currentUserSubject.value) {
+            this.getUserProfile().subscribe({
+                error: () => {
+                    // Si le token est invalide, nettoyer
+                    this.clearAuthData();
+                }
+            });
         }
-      });
     }
-  }
-
 
     /**
      * Login user with email and password
@@ -89,7 +89,6 @@ export class AuthService {
             })
         );
     }
-
 
     /**
      * Refresh access token
@@ -140,7 +139,7 @@ export class AuthService {
     }
 
     /**
-     * Get user profile
+     * Get user profile (basic info)
      */
     getUserProfile(): Observable<User> {
         return this.http.get<User>(`${this.apiUrl}/profile`).pipe(
@@ -167,18 +166,29 @@ export class AuthService {
     }
 
     /**
-     * Handle authentication response
+     * Handle authentication response and load full profile
      */
     private handleAuthResponse(response: any): void {
         this.setTokens(response.accessToken, response.refreshToken);
 
-        // Fetch user profile after login
+        // Fetch basic user profile after login
         this.getUserProfile().subscribe({
             next: (user) => {
-                console.log('User profile loaded:', user);
+                console.log('✅ User profile loaded:', user);
+                
+                // Also fetch the FULL profile (with all discriminator fields)
+                this.http.get<any>(`${this.userApiUrl}/profile`).subscribe({
+                    next: (fullProfile) => {
+                        console.log('✅ Full profile loaded:', fullProfile);
+                        localStorage.setItem('userProfile', JSON.stringify(fullProfile));
+                    },
+                    error: (error) => {
+                        console.error('❌ Failed to load full profile:', error);
+                    }
+                });
             },
             error: (error) => {
-                console.error('Failed to load user profile:', error);
+                console.error('❌ Failed to load user profile:', error);
             }
         });
     }
@@ -243,7 +253,7 @@ export class AuthService {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
+        localStorage.removeItem('userProfile');
         this.currentUserSubject.next(null);
     }
-    
 }

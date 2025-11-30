@@ -1,22 +1,54 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { User } from './user.schema';
 import { Document } from 'mongoose';
 
 export type JobSeekerDocument = JobSeeker & Document;
 
+@Schema({ _id: false })
+class Experience {
+  @Prop()
+  position: string;
+
+  @Prop()
+  company: string;
+
+  @Prop()
+  startDate: string;
+
+  @Prop()
+  endDate: string;
+
+  @Prop()
+  description: string;
+}
+
+@Schema({ _id: false })
+class Education {
+  @Prop()
+  degree: string;
+
+  @Prop()
+  field: string;
+
+  @Prop()
+  school: string;
+
+  @Prop()
+  graduationDate: string;
+}
+
 @Schema()
 export class JobSeeker {
   @Prop()
-  twitterLink?: string;
+  twitter_link?: string;
 
   @Prop()
-  webLink?: string;
+  web_link?: string;
 
   @Prop()
-  githubLink?: string;
+  github_link?: string;
 
   @Prop()
-  facebookLink?: string;
+  facebook_link?: string;
 
   @Prop()
   description?: string;
@@ -25,16 +57,19 @@ export class JobSeeker {
   title?: string;
 
   @Prop()
-  dateOfBirth?: Date;
+  date_of_birth?: string;  // ✅ Changed from dateOfBirth, changed to string to match frontend
+
+  @Prop()
+  gender?: string;  // Note: gender is already in User schema, might be duplicate
 
   @Prop({ type: [String] })
   skills?: string[];
 
-  @Prop({ type: [String] })
-  experience?: string[];
+  @Prop({ type: [Experience] })
+  experience?: Experience[];
 
-  @Prop({ type: [String] })
-  education?: string[];
+  @Prop({ type: [Education] })
+  education?: Education[];
 }
 
 export const JobSeekerSchema = SchemaFactory.createForClass(JobSeeker);

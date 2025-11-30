@@ -25,38 +25,41 @@ export class UserService {
   }
 
   async updateProfile(
-    keycloakId: string,
-    updateData: any,
-  ): Promise<UserDocument | null> {
+      keycloakId: string,
+      updateData: any,
+    ): Promise<UserDocument | null> {
 
-    // 1. Find user by keycloak ID
-    const user = await this.userModel.findOne({ keycloakId }).exec();
-    if (!user) return null;
+      // 1. Find user by keycloak ID
+      const user = await this.userModel.findOne({ keycloakId }).exec();
+      if (!user) return null;
 
-    const role = user.role; // recruiter | jobseeker
+      const role = user.role;
 
     // 2. Compile correct discriminator model manually
-    var ModelToUse;
+    let ModelToUse;
 
     if (this.userModel.discriminators?.[role]) {
       ModelToUse = this.connection.model(
-        role,                      // name of discriminator
-        this.userModel.discriminators[role].schema,  // the schema
-        'users'                    // same collection
+        role,
+        this.userModel.discriminators[role].schema,
+        'users'
       );
     } else {
-      ModelToUse = this.userModel; // fallback (admin/basic users)
+      ModelToUse = this.userModel;
     }
 
-    // 3. Update using the correct discriminator model
-    const updated = await ModelToUse.findOneAndUpdate(
-      { keycloakId },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).exec();
+      // 3. Clean updateData - remove fields that shouldn't be updated
+    const { _id, __v, createdAt, updatedAt, deleted, keycloakId: kId, ...cleanData } = updateData;
 
-    return updated;
-  }
+    // 4. Update using the correct discriminator model
+      const updated = await ModelToUse.findOneAndUpdate(
+        { keycloakId },
+        { $set: cleanData },
+        { new: true, runValidators: true }
+      ).exec();
+
+      return updated;
+    }
 
   async getRecruiters(): Promise<RecruiterDocument[]> {
     return await this.userModel.find({
