@@ -246,9 +246,12 @@
         <div *ngIf="filteredApplications.length > 0" class="space-y-3">
           <div
             *ngFor="let application of filteredApplications; let i = index"
-            class="relative flex items-center gap-3 p-4 bg-white border-2 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200"
-            [class.border-purple-300]="aiRankingEnabled"
-            [class.border-gray-200]="!aiRankingEnabled"
+            class="relative flex items-center gap-3 p-4 border-2 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200"
+            [class.bg-white]="!statusEquals(application,'under_review')"
+            [class.bg-yellow-50]="statusEquals(application,'under_review')"
+            [class.border-yellow-200]="statusEquals(application,'under_review')"
+            [class.border-purple-300]="aiRankingEnabled && !statusEquals(application,'under_review')"
+            [class.border-gray-200]="!aiRankingEnabled && !statusEquals(application,'under_review')"
           >
             <!-- Numéro de rang (si AI activé) -->
             <div *ngIf="aiRankingEnabled" class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
@@ -297,46 +300,21 @@
               </div>
             </div>
             
-            <!-- Boutons d'action -->
-            <div class="flex items-center gap-2">
-              <!-- Étoile Favori -->
-              <button
-                (click)="toggleFavorite(application, $event)"
-                class="p-2 rounded-full hover:bg-yellow-50 transition-colors duration-200"
-                [title]="application.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" 
-                     [attr.fill]="application.isFavorite ? '#F59E0B' : 'none'"
-                     [attr.stroke]="application.isFavorite ? '#F59E0B' : '#9CA3AF'"
-                     stroke-width="2"
-                     class="transition-all duration-200"
-                     [class.scale-110]="application.isFavorite">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            <!-- Overflow menu (three-dot) to avoid layout overlap with right sidebar -->
+            <div style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 9999;">
+              <button (click)="toggleMenu(application)" class="p-2 rounded-full hover:bg-gray-100" aria-label="More actions" [attr.data-app-menu-toggle]="application.id">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5" r="1.5"></circle>
+                  <circle cx="12" cy="12" r="1.5"></circle>
+                  <circle cx="12" cy="19" r="1.5"></circle>
                 </svg>
               </button>
 
-              <!-- Bouton Interview Schedule -->
-              <button
-                *ngIf="application.status !== 'accepted' && application.status !== 'rejected' && application.status !== 'interview_scheduled' && application.status !== 'interview_annulled' && application.status !== 'offer_pending'"
-                (click)="openInterviewSchedule(application)"
-                class="px-3 py-2 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-purple-600 transition-colors duration-200 shadow-sm hover:shadow-md"
-              >
-                 Entretien
-              </button>
-
-              <!-- Bouton Take Action -->
-              <button
-                *ngIf="application.status === 'interview_scheduled' || application.status === 'under_review'"
-                (click)="openTakeAction(application)"
-                class="px-3 py-2 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm hover:shadow-md"
-              >
-                 Action
-              </button>
-
-              <div class="text-gray-400 cursor-pointer hover:text-blue-500 transition-colors duration-200" (click)="openApplicationDetails(application)">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+              <div *ngIf="openMenuFor === (application.id + '')" class="bg-white border rounded-md shadow-lg mt-2" style="min-width:140px;" [attr.data-app-menu-id]="application.id">
+                <button class="w-full text-left px-3 py-2 hover:bg-gray-50" (click)="openInterviewSchedule(application); closeMenu()" *ngIf="statusNotIn(application, ['accepted','rejected','interview_scheduled','interview_annulled','offer_pending'])">Entretien</button>
+                <button class="w-full text-left px-3 py-2 hover:bg-gray-50" (click)="openTakeAction(application); closeMenu()" *ngIf="statusEquals(application,'interview_scheduled') || statusEquals(application,'under_review')">Action</button>
+                <button class="w-full text-left px-3 py-2 hover:bg-gray-50" (click)="toggleFavorite(application, $event); closeMenu()">{{ application.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}</button>
+                <button class="w-full text-left px-3 py-2 hover:bg-gray-50" (click)="openApplicationDetails(application); closeMenu()">View Details</button>
               </div>
             </div>
           </div>

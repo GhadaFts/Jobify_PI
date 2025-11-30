@@ -3,7 +3,7 @@ import { JobOffer, Application } from '../../../types';
 import { JobOfferService } from '../../../services/job-offer.service';
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ApplicationService } from '../../../services/application.service';
+import { ApplicationService, ApplicationStatus } from '../../../services/application.service';
 import { ToastService } from '../../../services/toast.service';
 import { 
   faCheck, 
@@ -463,31 +463,50 @@ export class PublishJob {
   }
 
   // NOUVELLE MÉTHODE : Gestion des changements de statut des applications
-  handleApplicationStatusChange(event: {applicationId: number, newStatus: string, interviewData?: any}) {
+  handleApplicationStatusChange(event: {applicationId: string, newStatus: string, interviewData?: any}) {
     console.log('Changement de statut d\'application:', event);
     
     // Trouver le job et l'application concernés
     for (const job of this.jobs) {
       if (job.applications) {
-        const application = job.applications.find(a => a.id === event.applicationId);
+        const application = job.applications.find(a => String(a.id) === String(event.applicationId));
         if (application) {
           // Sauvegarder l'ancien statut pour le log
           const oldStatus = application.status;
-          
-          // Mettre à jour le statut
+
+          // Optimistic UI update
           application.status = event.newStatus as any;
-          
+
           // Mettre à jour les données d'entretien si fournies
           if (event.interviewData) {
             application.interviewDate = event.interviewData.interviewDate;
             application.interviewLocation = event.interviewData.location;
             application.interviewNotes = event.interviewData.additionalNotes;
           }
-          
-          // Mettre à jour la date de dernier changement
+
+          // Mettre à jour la date de dernier changement localement
           application.lastStatusChange = new Date().toISOString();
-          
-          console.log(`Statut de l'application ${event.applicationId} mis à jour: ${oldStatus} -> ${event.newStatus}`);
+
+          // Persist to backend (RECRUITER endpoint)
+          const appIdStr = String(application.id);
+          // Map to frontend ApplicationStatus enum when possible
+          const statusEnum = (ApplicationStatus as any)[event.newStatus.toUpperCase()] ?? event.newStatus;
+          this.applicationService.updateApplicationStatus(appIdStr, statusEnum).subscribe({
+            next: (resp) => {
+              // Sync with server
+              application.status = resp.status as any;
+              if ((resp as any).lastStatusChange) application.lastStatusChange = (resp as any).lastStatusChange;
+              this.toastService.success('Application status updated.');
+              console.log(`Statut de l'application ${event.applicationId} confirmé par le serveur: ${oldStatus} -> ${resp.status}`);
+            },
+            error: (err) => {
+              console.error('Failed to update application status', err);
+              this.toastService.error('Failed to update application status.');
+              // revert optimistic change
+              application.status = oldStatus;
+            }
+          });
+
           break;
         }
       }

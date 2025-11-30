@@ -24,7 +24,9 @@ public class BookmarkController {
      * Create bookmark - Only JOB_SEEKER can create bookmarks
      */
     @PostMapping
-    @PreAuthorize("hasRole('JOB_SEEKER')")
+    // Allow both job seekers and recruiters to call this endpoint for now.
+    // If bookmarks should be job-seeker-only, revert to hasRole('JOB_SEEKER')
+    @PreAuthorize("hasAnyRole('JOB_SEEKER','RECRUITER')")
     public ResponseEntity<BookmarkDTO> createBookmark(
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody BookmarkRequestDTO dto) {
@@ -38,7 +40,7 @@ public class BookmarkController {
      * Get all bookmarks for current job seeker
      */
     @GetMapping("/my-bookmarks")
-    @PreAuthorize("hasRole('JOB_SEEKER')")
+    @PreAuthorize("hasAnyRole('JOB_SEEKER','RECRUITER')")
     public ResponseEntity<List<BookmarkDTO>> getMyBookmarks(
             @AuthenticationPrincipal Jwt jwt) {
 
@@ -51,7 +53,7 @@ public class BookmarkController {
      * Check if job is bookmarked
      */
     @GetMapping("/check/{jobOfferId}")
-    @PreAuthorize("hasRole('JOB_SEEKER')")
+    @PreAuthorize("hasAnyRole('JOB_SEEKER','RECRUITER')")
     public ResponseEntity<Boolean> isBookmarked(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long jobOfferId) {
@@ -65,7 +67,7 @@ public class BookmarkController {
      * Delete bookmark by job offer ID
      */
     @DeleteMapping("/job/{jobOfferId}")
-    @PreAuthorize("hasRole('JOB_SEEKER')")
+    @PreAuthorize("hasAnyRole('JOB_SEEKER','RECRUITER')")
     public ResponseEntity<Void> deleteBookmark(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long jobOfferId) {

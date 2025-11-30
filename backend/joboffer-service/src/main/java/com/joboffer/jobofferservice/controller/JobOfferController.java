@@ -3,6 +3,7 @@ package com.joboffer.jobofferservice.controller;
 import com.joboffer.jobofferservice.dto.JobOfferDTO;
 import com.joboffer.jobofferservice.model.JobOffer;
 import com.joboffer.jobofferservice.service.JobOfferService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
