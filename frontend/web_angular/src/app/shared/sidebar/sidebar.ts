@@ -1,5 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 
 export interface NavigationItem {
   id: string;
@@ -12,7 +11,7 @@ export interface NavigationItem {
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.scss'],
 })
-export class Sidebar {
+export class Sidebar implements OnInit, OnChanges {
   @Input() activeSection: string = 'find-job';
   @Input() navigationItems: NavigationItem[] = [];
   @Input() secondaryItems: NavigationItem[] = [];
@@ -22,13 +21,57 @@ export class Sidebar {
   @Input() profileImage: string = '/assets/img.png';
   
   @Output() sectionChange = new EventEmitter<string>();
+  
+  imageError = false;
+
+  ngOnInit() {
+    console.log('🎨 Sidebar initialized');
+    console.log('🎨 Initial profileImage:', this.profileImage);
+    console.log('🎨 Initial profileName:', this.profileName);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['profileImage']) {
+      console.log('🔄 Sidebar profileImage changed!');
+      console.log('  Previous:', changes['profileImage'].previousValue);
+      console.log('  Current:', changes['profileImage'].currentValue);
+      console.log('  Is first change:', changes['profileImage'].firstChange);
+      
+      // Reset error flag when image changes
+      if (!changes['profileImage'].firstChange) {
+        this.imageError = false;
+      }
+    }
+    
+    if (changes['profileName']) {
+      console.log('🔄 Sidebar profileName changed:', changes['profileName'].currentValue);
+    }
+  }
 
   onSectionChange(section: string) {
+    console.log('📍 Section changed to:', section);
     this.activeSection = section;
     this.sectionChange.emit(section);
   }
 
-    getIconPath(id: string): string {
+  onImageError(event: any) {
+    console.error('❌ Image failed to load:', this.profileImage);
+    this.imageError = true;
+    event.target.style.display = 'none';
+  }
+
+  getInitials(): string {
+    if (!this.profileName) {
+      console.log('⚠️ No profile name, returning N/A');
+      return 'N/A';
+    }
+    const words = this.profileName.split(' ').filter(word => word.length > 0);
+    const initials = words.length > 0 ? words.map(word => word[0].toUpperCase()).join('') : 'N/A';
+    console.log('🔤 Generated initials:', initials, 'from name:', this.profileName);
+    return initials;
+  }
+
+  getIconPath(id: string): string {
     switch (id) {
       case 'cv-correction':
         return 'M11 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 14H8v-2h2v2zm4-4h-6v-2h6v2zm0-4h-6V7h6v2z';
@@ -41,11 +84,11 @@ export class Sidebar {
       case 'logout':
         return 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1';
       case 'publish-job':
-        return 'M12 6v6m0 0v6m0-6h6m-6 0H6'; // Icône pour publier un job (plus)
+        return 'M12 6v6m0 0v6m0-6h6m-6 0H6';
       case 'interviews':
-      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
+        return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
       case 'interview-preparation':
-      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
+        return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';  
       default:
         return '';
     }

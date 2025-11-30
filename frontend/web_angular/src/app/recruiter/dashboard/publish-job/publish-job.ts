@@ -52,7 +52,7 @@ export class PublishJob {
     status: 'open',
     published: false,
     applicants: 0,
-    posted: 'Just now'
+    posted: 'Just now',
   };
 
   // file upload fields
@@ -378,6 +378,10 @@ export class PublishJob {
         doCreate();
       }
     }
+  }
+getProfileImageUrl(): string {
+    const profile = this.userService.getCurrentProfile();
+    return this.userService.getImageUrl(profile?.photo_profil);
   }
 
   onLogoSelected(event: Event): void {
