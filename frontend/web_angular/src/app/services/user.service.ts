@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { HttpClient , HttpHeaders} from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map , catchError, throwError} from 'rxjs';
 import { JobSeeker, Recruiter } from '../types';
 import { environment } from '../../environments/environment';
 
@@ -14,7 +14,30 @@ export class UserService {
   public currentProfile$ = this.currentProfileSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.loadProfileFromStorage();
+      this.loadProfileFromStorage();
+    
+
+  }
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('access_token') || '';
+
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+  /**
+   * GET /user/:id (secured with Bearer token)
+   */
+  getUserById(keycloakId: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<any>(`${this.apiUrl}/${keycloakId}`, { headers }).pipe(
+      catchError(err => {
+        console.error('Error fetching user:', err);
+        return throwError(() => err);
+      })
+    );
   }
 
   /**
@@ -140,3 +163,4 @@ export class UserService {
     return this.getFullImageUrl(photoPath);
   }
 }
+  

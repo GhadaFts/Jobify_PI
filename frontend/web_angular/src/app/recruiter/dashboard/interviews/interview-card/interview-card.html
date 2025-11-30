@@ -11,21 +11,21 @@
   <div class="flex items-start gap-4 flex-1 pr-16"> <!-- pr-16 pour l'espace du badge -->
     <!-- Candidate Photo -->
     <img
-      [src]="interview.candidatePhoto"
-      [alt]="interview.candidateName"
+      [src]="interview.jobSeeker.profilePicture"
+      [alt]="interview.jobSeeker.fullName"
       class="w-12 h-12 rounded-full object-cover"
     />
     
     <div class="flex-1">
       <!-- Candidate Name seulement -->
       <h3 class="text-lg font-semibold text-gray-900 mb-1">
-        {{ interview.candidateName }}
+        {{ interview.jobSeeker.fullName }}
       </h3>
 
       <!-- Candidate Title and Job Offer -->
       <div class="mb-3">
-        <p class="text-sm text-gray-600">{{ interview.candidateTitle }}</p>
-        <p class="text-sm text-blue-600 font-medium">{{ interview.jobOfferTitle }}</p>
+        <!-- <p class="text-sm text-gray-600">{{ interview.candidateTitle }}</p> -->
+        <p class="text-sm text-blue-600 font-medium">{{ interview.job_title }}</p>
       </div>
 
       <!-- Interview Details -->
@@ -41,7 +41,7 @@
             ></path>
           </svg>
           <span class="text-gray-700 font-medium">
-            {{ formatDate(interview.interviewDate) }} at {{ interview.interviewTime }}
+            {{ formatDate(interview.scheduledDate) }} at {{ formatTime(interview.scheduledDate) }}
           </span>
         </div>
 
@@ -55,17 +55,17 @@
               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
             ></path>
           </svg>
-          <span class="text-gray-600">{{ interview.interviewLocation }}</span>
-          <span *ngIf="interview.interviewType === 'online'" class="text-blue-500 text-xs bg-blue-50 px-2 py-1 rounded">
+          <span class="text-gray-600">{{ interview.location }}</span>
+          <span *ngIf="interview.interviewType === 'REMOTE'" class="text-blue-500 text-xs bg-blue-50 px-2 py-1 rounded">
             Online
           </span>
-          <span *ngIf="interview.interviewType === 'local'" class="text-green-500 text-xs bg-green-50 px-2 py-1 rounded">
+          <span *ngIf="interview.interviewType === 'ON_SITE'" class="text-green-500 text-xs bg-green-50 px-2 py-1 rounded">
             In-person
           </span>
         </div>
 
         <!-- Meeting Link (seulement pour online) -->
-        <div *ngIf="interview.interviewType === 'online' && interview.meetingLink" class="flex items-center gap-2">
+        <div *ngIf="interview.interviewType === 'REMOTE' && interview.meetingLink" class="flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280">
             <path
               stroke-linecap="round"
