@@ -22,39 +22,41 @@ export class UserService {
   }
 
   async updateProfile(
-  keycloakId: string,
-  updateData: any,
-): Promise<UserDocument | null> {
+    keycloakId: string,
+    updateData: any,
+  ): Promise<UserDocument | null> {
 
-  // 1. Find user by keycloak ID
-  const user = await this.userModel.findOne({ keycloakId }).exec();
-  if (!user) return null;
+    // 1. Find user by keycloak ID
+    const user = await this.userModel.findOne({ keycloakId }).exec();
+    if (!user) return null;
 
-  const role = user.role; // recruiter | jobseeker
+    const role = user.role;
 
-  // 2. Compile correct discriminator model manually
-  var ModelToUse;
+    // 2. Compile correct discriminator model manually
+    let ModelToUse;
 
-  if (this.userModel.discriminators?.[role]) {
-    ModelToUse = this.connection.model(
-      role,                      // name of discriminator
-      this.userModel.discriminators[role].schema,  // the schema
-      'users'                    // same collection
-    );
-  } else {
-    ModelToUse = this.userModel; // fallback (admin/basic users)
+    if (this.userModel.discriminators?.[role]) {
+      ModelToUse = this.connection.model(
+        role,
+        this.userModel.discriminators[role].schema,
+        'users'
+      );
+    } else {
+      ModelToUse = this.userModel;
+    }
+
+    // 3. Clean updateData - remove fields that shouldn't be updated
+    const { _id, __v, createdAt, updatedAt, deleted, keycloakId: kId, ...cleanData } = updateData;
+
+    // 4. Update using the correct discriminator model
+    const updated = await ModelToUse.findOneAndUpdate(
+      { keycloakId },
+      { $set: cleanData },
+      { new: true, runValidators: true }
+    ).exec();
+
+    return updated;
   }
-
-  // 3. Update using the correct discriminator model
-  const updated = await ModelToUse.findOneAndUpdate(
-    { keycloakId },
-    { $set: updateData },
-    { new: true, runValidators: true }
-  ).exec();
-
-  return updated;
-}
-
 
 
   async findAll(): Promise<UserDocument[]> {

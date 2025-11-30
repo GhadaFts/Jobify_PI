@@ -9,7 +9,7 @@
       subtitle="Career Network"
       [profileName]="currentUser?.fullName || 'Loading...'"
       [profileTitle]="currentUser?.role === 'job_seeker' ? 'Job Seeker' : 'Professional'"
-      profileImage="/assets/img.png"
+      [profileImage]="getProfileImageUrl()"
       class="w-64 bg-gray-100 p-0 fixed h-full overflow-y-auto left-sidebar fixed-sidebar" 
       [class.open]="leftOpen" 
       style="left: 0;">

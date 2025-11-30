@@ -10,13 +10,13 @@ export class User {
   id: number;
 
   @Prop({ required: true, unique: true })
-  keycloakId: string; // NEW: Link to Keycloak user
+  keycloakId: string;
 
   @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true })
-  password: string; // Will be 'MANAGED_BY_KEYCLOAK' when using Keycloak
+  password: string;
 
   @Prop({ required: true })
   fullName: string;
@@ -24,11 +24,12 @@ export class User {
   @Prop({ enum: UserRole, default: UserRole.JobSeeker })
   role: UserRole;
 
+  // Changed all to snake_case to match frontend
   @Prop()
-  profilePicture?: string;
+  photo_profil?: string;
 
   @Prop()
-  phoneNumber?: string;
+  phone_number?: string;  // ✅ Changed from phoneNumber
 
   @Prop()
   nationality?: string;
