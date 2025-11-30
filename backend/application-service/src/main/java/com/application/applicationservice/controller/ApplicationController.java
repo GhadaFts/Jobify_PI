@@ -69,7 +69,6 @@ public class ApplicationController {
 
     // RECRUITER can view applications by job offer
     @GetMapping("/joboffer/{jobOfferId}")
-    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
     public ResponseEntity<List<ApplicationResponseDTO>> getByJobOfferId(
             @PathVariable Double jobOfferId) {
         return ResponseEntity.ok(service.getByJobOfferId(jobOfferId));

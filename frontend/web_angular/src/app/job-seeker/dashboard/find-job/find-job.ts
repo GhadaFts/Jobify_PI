@@ -37,27 +37,27 @@ export class FindJob implements OnInit, OnDestroy {
 
   activeTab: string = 'all';
   searchQuery: string = '';
-  
+
   // SECTION TOGGLES
   showLocationSection: boolean = false;
   showFilterSection: boolean = false;
-  
+
   // SEPARATE FILTERS
   useCurrentLocation: boolean = false;
   isLoadingLocation: boolean = false;
   radius: number = 50;
-  
+
   // Additional filters
   jobTypeFilter: string = '';
   jobStatusFilter: string = '';
-  
+
   // IMPROVED location detection
   detectedCity: string = '';
   detectedArea: string = '';
   detectedCoordinates: string = '';
   locationAccuracy: string = '';
   locationInfo: string = 'Enter a city name or use your current location';
-  
+
   private coordinatesCache: Map<string, Coordinates> = new Map();
   private currentLocation: Coordinates | null = null;
 
@@ -69,7 +69,7 @@ export class FindJob implements OnInit, OnDestroy {
   // APPLICATIONS DATA - Using local ApplicationData interface
   appliedJobs: Map<string, ApplicationData> = new Map();
   isLoadingApplications: boolean = false;
-  
+
   bookmarkedJobs: Set<string> = new Set();
 
   constructor(
@@ -77,12 +77,12 @@ export class FindJob implements OnInit, OnDestroy {
     private jobService: JobService,
     private bookmarkService: LocalBookmarkService,
     private applicationService: ApplicationService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Load jobs from backend
     this.loadJobs();
-    
+
     // Load user's applications
     this.loadMyApplications();
 
@@ -113,16 +113,19 @@ export class FindJob implements OnInit, OnDestroy {
   /**
    * Load jobs from backend
    */
+  /**
+ * Load jobs from backend
+ */
   loadJobs(): void {
     this.isLoadingJobs = true;
     this.jobsLoadError = null;
 
     const filters: any = {};
-    
+
     if (this.searchQuery.trim()) {
       filters.title = this.searchQuery.trim();
     }
-    
+
     if (this.jobTypeFilter) {
       filters.type = this.jobTypeFilter;
     }
@@ -130,10 +133,14 @@ export class FindJob implements OnInit, OnDestroy {
     this.jobService.searchJobs(filters)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (jobDTOs: JobOfferDTO[]) => {
-          this.jobs = jobDTOs.map(dto => this.jobService.convertToJobOffer(dto));
+        next: (jobs: JobOffer[]) => {
+          this.jobs = jobs;
           this.isLoadingJobs = false;
           console.log(`✅ Loaded ${this.jobs.length} jobs from backend`);
+          // You can also log applicant counts to verify they're working:
+          jobs.forEach(job => {
+            console.log(`Job ${job.title}: ${job.applicants} applicants`);
+          });
         },
         error: (error) => {
           console.error('❌ Failed to load jobs:', error);
@@ -143,7 +150,6 @@ export class FindJob implements OnInit, OnDestroy {
         }
       });
   }
-
   /**
    * Load user's applications and convert to ApplicationData format
    */
@@ -167,7 +173,7 @@ export class FindJob implements OnInit, OnDestroy {
             };
             this.appliedJobs.set(app.jobOfferId.toString(), applicationData);
           });
-          
+
           this.isLoadingApplications = false;
           console.log(`✅ Loaded ${applications.length} applications from backend`);
         },
@@ -205,16 +211,16 @@ export class FindJob implements OnInit, OnDestroy {
     const R = 6371;
     const dLat = this.deg2rad(lat2 - lat1);
     const dLng = this.deg2rad(lng2 - lng1);
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
-      Math.sin(dLng/2) * Math.sin(dLng/2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
   private deg2rad(deg: number): number {
-    return deg * (Math.PI/180);
+    return deg * (Math.PI / 180);
   }
 
   // MAIN GETTER WITH FILTERS
@@ -234,16 +240,16 @@ export class FindJob implements OnInit, OnDestroy {
 
   private filterJobsByGeolocation(jobs: JobOffer[]): JobOffer[] {
     console.log('🔍 Filtering by real-time geolocation:', this.currentLocation);
-    
+
     return jobs.filter(job => {
       if (!job.coordinates) return false;
       console.log("📍 Job coordinates:", job.coordinates.lat, job.coordinates.lng);
-      
+
       const distance = this.calculateDistance(
         this.currentLocation!.lat, this.currentLocation!.lng,
         job.coordinates.lat, job.coordinates.lng
       );
-      
+
       console.log(`📍 ${job.location}: ${distance.toFixed(1)}km (radius: ${this.radius}km)`);
       return distance <= this.radius;
     });
@@ -259,21 +265,21 @@ export class FindJob implements OnInit, OnDestroy {
     } else {
       this.isLoadingLocation = true;
       this.locationInfo = 'Detecting your precise location...';
-      
+
       try {
         const position = await this.geocodingService.getCurrentPosition();
         this.currentLocation = position;
         this.useCurrentLocation = true;
-        
+
         this.detectedCoordinates = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
         this.locationAccuracy = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(0) + 'm' : 'Unknown'}`;
-        
+
         this.geocodingService.getCityFromCoords(position.lat, position.lng).subscribe({
           next: (data: any) => {
             if (data && data.results && data.results.length > 0) {
               const components = data.results[0].components;
               let detectedLocation = this.extractBestLocationName(components);
-              
+
               if (detectedLocation) {
                 this.detectedCity = detectedLocation;
                 this.detectedArea = this.extractAreaDetails(components);
@@ -357,7 +363,7 @@ export class FindJob implements OnInit, OnDestroy {
   handleApplyJob(result: any) {
     if (result && result.success) {
       console.log('✅ Application submitted successfully:', result);
-      
+
       // Immediately add to appliedJobs map for instant UI update
       const applicationData: ApplicationData = {
         applicationDate: new Date(),
@@ -367,7 +373,7 @@ export class FindJob implements OnInit, OnDestroy {
         aiScore: result.atsScore || undefined
       };
       this.appliedJobs.set(result.jobId, applicationData);
-      
+
       // Also reload from backend to sync
       this.loadMyApplications();
     }
@@ -390,7 +396,7 @@ export class FindJob implements OnInit, OnDestroy {
           next: () => {
             console.log('✅ Application withdrawn successfully');
             this.appliedJobs.delete(jobId);
-            
+
             // Reload applications
             this.loadMyApplications();
           },
