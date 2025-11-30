@@ -91,24 +91,36 @@ export interface JobOffer {
   };
 }
 export interface Interview {
-  id: string;
-  candidateName: string;
-  candidateTitle: string;
-  candidatePhoto: string;
-  jobOfferTitle: string;
-  jobOfferId: string;
-  applicationId: number;
-  interviewDate: string; // ISO string
-  interviewTime: string;
-  interviewDuration: number; // in minutes
-  interviewType: string;
-  interviewLocation: string;
-  interviewStatus: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-  interviewer: string;
+  id: number;
+  applicationId: string;
+  jobSeekerId: string;
+  recruiterId: string;
+  scheduledDate: string; // ISO string representing LocalDateTime
+  duration: number; // in minutes
+  location?: string;
+  interviewType: InterviewType;
+  status: InterviewStatus;
   notes?: string;
   meetingLink?: string;
-  rating?: number;
-  feedback?: string;
+  createdAt?: string; // ISO string representing LocalDateTime
+  updatedAt?: string; // ISO string representing LocalDateTime
+}
+
+// Enums to match the Java enum types
+export enum InterviewType {
+  TECHNICAL = 'TECHNICAL',
+  HR = 'HR',
+  MANAGERIAL = 'MANAGERIAL',
+  ON_SITE = 'ON_SITE',
+  REMOTE = 'REMOTE'
+}
+
+export enum InterviewStatus {
+  SCHEDULED = 'SCHEDULED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  NO_SHOW = 'NO_SHOW',
+  RESCHEDULED = 'RESCHEDULED'
 }
 
 export interface JobOfferAIRequest {

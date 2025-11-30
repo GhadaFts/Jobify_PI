@@ -18,7 +18,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
-
   @Get('profile')
   @UseGuards(KeycloakAuthGuard)
   async getProfile(@Request() req) {
