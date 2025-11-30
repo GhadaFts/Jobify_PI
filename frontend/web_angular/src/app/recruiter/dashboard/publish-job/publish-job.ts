@@ -5,6 +5,7 @@ import { AuthService } from '../../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApplicationService, ApplicationStatus } from '../../../services/application.service';
 import { ToastService } from '../../../services/toast.service';
+import { UserService } from '../../../services/user.service';
 import { 
   faCheck, 
   faTimes, 
@@ -51,7 +52,7 @@ export class PublishJob {
     status: 'open',
     published: false,
     applicants: 0,
-    posted: 'Just now'
+    posted: 'Just now',
   };
 
   // file upload fields
@@ -64,7 +65,8 @@ export class PublishJob {
     private toastService: ToastService,
     private applicationService: ApplicationService,
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private userService: UserService
   ) {}
 
   jobs: JobOffer[] = [];
@@ -111,7 +113,7 @@ export class PublishJob {
       id: u.id || seekerId || u.keycloakId || null,
       fullName: u.fullName || u.full_name || u.name || 'Unknown',
       title: u.title || '',
-      photo_profil: u.profilePicture || u.photo_profil || u.avatar || '',
+      photo_profil:this.userService.getImageUrl(u.profilePicture || u.photo_profil || u.avatar || '') ,
       github_link: u.githubLink || u.github_link || '',
       web_link: u.webLink || u.web_link || u.website || '',
       twitter_link: u.twitterLink || u.twitter_link || '',
@@ -376,6 +378,10 @@ export class PublishJob {
         doCreate();
       }
     }
+  }
+getProfileImageUrl(): string {
+    const profile = this.userService.getCurrentProfile();
+    return this.userService.getImageUrl(profile?.photo_profil);
   }
 
   onLogoSelected(event: Event): void {

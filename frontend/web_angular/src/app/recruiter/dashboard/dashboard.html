@@ -30,6 +30,8 @@
       subtitle="Recruiter Portal"
       [profileName]="currentUser?.fullName || 'Loading...'"
       [profileTitle]="currentUser?.role === 'recruiter' ? 'Recruiter' : 'Recruitment Manager'"
+      [profileImage]="getProfileImageUrl()"
+
       style="border-color: #E5E7EB;"
       class="w-72 bg-gray-100 p-0 fixed h-full overflow-y-auto" 
       style="left: 0;">

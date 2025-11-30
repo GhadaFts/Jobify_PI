@@ -71,12 +71,25 @@
   <!-- Profile Section dynamique -->
   <div class="w-full border-t pt-3 md:pt-4" [style.border-color]="'#E5E7EB'">
     <div class="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 text-left">
-      <!-- Photo de profil dynamique -->
-      <img 
-        [src]="profileImage" 
-        alt="Profile" 
-        class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" 
-      />
+      <!-- Photo de profil dynamique with fallback to initials -->
+      <div class="relative w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0 bg-gray-100">
+        <!-- Show image if valid URL exists -->
+        <img 
+          *ngIf="profileImage && profileImage !== '' && profileImage !== '/assets/img.png' && !imageError"
+          [src]="profileImage" 
+          alt="Profile" 
+          class="absolute inset-0 w-full h-full object-cover"
+          (error)="onImageError($event)"
+          style="object-fit: cover; object-position: center;"
+        />
+        <!-- Show initials as fallback -->
+        <div 
+          *ngIf="!profileImage || profileImage === '' || profileImage === '/assets/img.png' || imageError"
+          class="absolute inset-0 w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-sm md:text-base"
+        >
+          {{ getInitials() }}
+        </div>
+      </div>
       <div class="min-w-0 flex-1">
         <!-- Nom dynamique -->
         <h4 class="text-sm md:text-base font-medium truncate" [style.color]="'#111827'">{{ profileName }}</h4>
