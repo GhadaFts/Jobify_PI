@@ -58,6 +58,14 @@
                     android:clickable="true"
                     android:focusable="true"/>
             </LinearLayout>
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                android:indeterminate="true"/>
 
             <!-- PROFILE IMAGE -->
             <ImageView
@@ -118,6 +126,7 @@
                 android:padding="8dp"/>
 
             <!-- STATS -->
+            <!--
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -168,6 +177,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
+            -->
 
             <!-- BIO -->
             <TextView

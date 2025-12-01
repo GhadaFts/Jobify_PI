@@ -1,6 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Application } from '../../../../../types';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../../../../../services/auth.service';
 
 @Component({
   selector: 'app-application-details-dialog',
@@ -8,17 +10,60 @@ import { Application } from '../../../../../types';
   styleUrls: ['./application-details-dialog.scss'],
   standalone: false
 })
-export class ApplicationDetailsDialog {
+export class ApplicationDetailsDialog implements OnDestroy {
   currentPage: number = 1;
   totalPages: number = 0;
-  pdfUrl: string;
+  pdfUrl: string = '/assets/pdf/test.pdf';
+  private objectUrl?: string;
 
   constructor(
     public dialogRef: MatDialogRef<ApplicationDetailsDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { application: Application }
+    @Inject(MAT_DIALOG_DATA) public data: { application: Application },
+    private http: HttpClient,
+    private authService: AuthService
   ) {
-    // Utiliser le CV du candidat ou un CV par défaut
-    this.pdfUrl =  '/assets/pdf/test.pdf';
+    // Use candidate CV if present, otherwise a default PDF
+    const raw = (data?.application as any)?.cv_link || (data?.application as any)?.cvLink || (data?.application as any)?.cv || '';
+    if (!raw) {
+      this.pdfUrl = '/assets/pdf/test.pdf';
+    } else if (/^https?:\/\//i.test(raw)) {
+      // absolute url - use directly
+      this.pdfUrl = raw;
+    } else {
+      // filename returned by application-service: use authenticated fetch to get a blob
+      this.fetchCvAsBlob(raw).catch((err) => {
+        console.error('Failed to load CV blob, falling back to default PDF', err);
+        this.pdfUrl = '/assets/pdf/test.pdf';
+      });
+    }
+  }
+
+  async fetchCvAsBlob(filename: string): Promise<void> {
+    try {
+      const token = this.authService.getAccessToken();
+      const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+      const url = `http://localhost:8888/application-service/api/cv/view/${encodeURIComponent(filename)}`;
+      const blob = await this.http.get(url, { headers, responseType: 'blob' as 'blob' }).toPromise();
+      // ensure we actually received a Blob
+      if (!blob || !(blob instanceof Blob)) {
+        throw new Error('CV fetch returned no blob');
+      }
+      // create an object URL so the pdf viewer can load it
+      if (this.objectUrl) {
+        URL.revokeObjectURL(this.objectUrl);
+      }
+      this.objectUrl = URL.createObjectURL(blob as Blob);
+      this.pdfUrl = this.objectUrl;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.objectUrl) {
+      URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = undefined;
+    }
   }
 
   close(): void {

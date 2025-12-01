@@ -7,16 +7,14 @@
     android:layout_height="match_parent"
     android:background="#F5F7FA">
 
-    <!-- MAIN CONTENT - Wrapped in ScrollView -->
-    <ScrollView
-        android:id="@+id/scrollViewRoot"
+    <!-- MAIN CONTENT - Use CoordinatorLayout instead of ScrollView -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -86,17 +84,18 @@
                     android:text="Applied (1)" />
             </com.google.android.material.tabs.TabLayout>
 
-            <!-- Job list -->
+            <!-- Job list - Now with match_parent height and proper scrolling -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_jobs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:clipToPadding="false"
                 android:paddingBottom="16dp"/>
 
         </LinearLayout>
-    </ScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <!-- DRAWER MENU -->
     <include layout="@layout/drawer_menu" />

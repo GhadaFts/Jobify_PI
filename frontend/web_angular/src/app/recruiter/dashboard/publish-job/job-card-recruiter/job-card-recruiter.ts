@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { JobOffer, Application } from '../../../../types';
 import { RecruiterJobDetailsDialog } from './recruiter-job-details-dialog/recruiter-job-details-dialog';
@@ -8,6 +8,8 @@ import { InterviewScheduleDialog } from './interview-schedule-dialog/interview-s
 import { TakeActionDialog } from './take-action-dialog/take-action-dialog';
 import { ToastService } from '../../../../services/toast.service';
 import { InterviewsService } from '../../../../services/interviews.service';
+import { BookmarkService } from '../../../../services/bookmark.service';
+import { Subscription } from 'rxjs';
 import {
   AiService,
   JobOfferAIRequest,
@@ -20,31 +22,58 @@ import {
   templateUrl: './job-card-recruiter.html',
   styleUrls: ['./job-card-recruiter.scss'],
 })
-export class JobCardRecruiter {
+export class JobCardRecruiter implements OnChanges {
   @Input() job!: JobOffer;
   @Input() published: boolean = false;
   @Output() publish = new EventEmitter<string>();
   @Output() edit = new EventEmitter<JobOffer>();
   @Output() applicationStatusChange = new EventEmitter<{
-    applicationId: number;
+    applicationId: string;
     newStatus: string;
     interviewData?: any;
   }>();
 
   showApplications = false;
   private statusChangeTimeout: any;
+  // track which application's overflow menu is open (use string ids)
+  openMenuFor: string | null = null;
 
   // Nouvelles propriétés pour AI Ranking et Favoris
   aiRankingEnabled = false;
   showFavoritesOnly = false;
   isRanking = false; // Pour l'animation de chargement
+  private bookmarkSub?: Subscription;
 
   constructor(
     public dialog: MatDialog,
     private interviewsService: InterviewsService,
     private toastService: ToastService,
-    private aiService: AiService
+    private aiService: AiService,
+    private bookmarkService: BookmarkService
   ) {}
+
+  ngOnInit(): void {
+    // Keep application.isFavorite in sync with bookmark cache
+    this.bookmarkSub = this.bookmarkService.bookmarks$.subscribe((set) => {
+      if (!this.job || !this.job.applications) return;
+      const bookmarked = set.has(Number(this.job.id));
+      this.job.applications.forEach((app) => (app.isFavorite = bookmarked));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.bookmarkSub?.unsubscribe();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['job'] && this.job && this.job.applications) {
+      // mark applications as favorite if this job is bookmarked in the service cache
+      const bookmarked = this.bookmarkService.isBookmarked(Number(this.job.id));
+      this.job.applications.forEach((app) => {
+        app.isFavorite = bookmarked;
+      });
+    }
+  }
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
@@ -58,6 +87,18 @@ export class JobCardRecruiter {
     return colors[status] || '#6B7280';
   }
 
+  // Normalize status for comparisons (handle server enums like UPPER_CASE or mixed case)
+  statusEquals(application: Application, status: string): boolean {
+    if (!application || application.status === undefined || application.status === null) return false;
+    return String(application.status).toLowerCase() === status;
+  }
+
+  statusNotIn(application: Application, statuses: string[]): boolean {
+    if (!application || application.status === undefined || application.status === null) return true;
+    const s = String(application.status).toLowerCase();
+    return statuses.indexOf(s) === -1;
+  }
+
   formatCount(count: number): string {
     return count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count.toString();
   }
@@ -67,7 +108,8 @@ export class JobCardRecruiter {
   }
 
   getApplicationStatusClass(status: string): string {
-    switch (status) {
+    const s = (status || '').toLowerCase();
+    switch (s) {
       case 'new':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'under_review':
@@ -88,6 +130,7 @@ export class JobCardRecruiter {
   }
 
   getApplicationStatusText(status: string): string {
+    const s = (status || '').toLowerCase();
     const statusTexts: { [key: string]: string } = {
       new: 'New',
       under_review: 'Under Review',
@@ -97,7 +140,7 @@ export class JobCardRecruiter {
       accepted: 'Accepted',
       rejected: 'Rejected',
     };
-    return statusTexts[status] || status;
+    return statusTexts[s] || status;
   }
 
   formatApplicationDate(dateString: string): string {
@@ -110,8 +153,9 @@ export class JobCardRecruiter {
   }
 
   openApplicationDetails(application: Application): void {
-    if (application.status === 'new') {
-      this.scheduleStatusChange(application.id);
+    // Accept any casing coming from backend (NEW, new, New)
+    if (String(application.status).toLowerCase() === 'new') {
+      this.scheduleStatusChange(String(application.id));
     }
 
     const dialogRef = this.dialog.open(ApplicationDetailsDialog, {
@@ -128,7 +172,10 @@ export class JobCardRecruiter {
     });
   }
 
-  private scheduleStatusChange(applicationId: number): void {
+  private scheduleStatusChange(applicationId: string): void {
+    if (this.statusChangeTimeout) {
+      clearTimeout(this.statusChangeTimeout);
+    }
     this.statusChangeTimeout = setTimeout(() => {
       this.applicationStatusChange.emit({
         applicationId: applicationId,
@@ -147,22 +194,78 @@ export class JobCardRecruiter {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        // Mettre à jour le statut de l'application
-        this.applicationStatusChange.emit({
-          applicationId: application.id,
-          newStatus: 'interview_scheduled',
-          interviewData: result,
+        // Build interview payload expected by backend
+        const scheduledDateTime = new Date(result.interviewDate + 'T' + result.interviewTime);
+
+        // Map frontend interviewType to backend enum values
+        const typeMap: { [key: string]: string } = {
+          online: 'REMOTE',
+          local: 'ON_SITE'
+        };
+
+        const pad = (n: number) => (n < 10 ? '0' + n : n);
+        const y = scheduledDateTime.getFullYear();
+        const mo = pad(scheduledDateTime.getMonth() + 1);
+        const d = pad(scheduledDateTime.getDate());
+        const hh = pad(scheduledDateTime.getHours());
+        const mm = pad(scheduledDateTime.getMinutes());
+        const localDateTime = `${y}-${mo}-${d}T${hh}:${mm}:00`;
+
+        const payload = {
+          applicationId: String(application.id),
+          jobSeekerId: application.jobSeeker?.id,
+          // recruiterId is set server-side from JWT by the interview-service
+          scheduledDate: localDateTime,
+          duration: result.duration,
+          location: result.interviewLocation,
+          interviewType: typeMap[result.interviewType] || 'REMOTE',
+          notes: result.additionalNotes,
+          meetingLink: result.meetingLink
+        };
+
+        // Call backend to persist the interview
+        this.interviewsService.scheduleInterview(payload).subscribe({
+          next: (response) => {
+            // Update application status UI and notify parent
+            this.applicationStatusChange.emit({
+              applicationId: String(application.id),
+              newStatus: 'interview_scheduled',
+              interviewData: response,
+            });
+
+            this.toastService.success('Interview scheduled and saved.');
+            console.log('Interview scheduled persisted:', response);
+          },
+          error: (err) => {
+            console.error('Failed to persist interview:', err);
+            let msg = 'Failed to schedule interview. Please try again.';
+            if (err && err.error && err.error.message) msg = err.error.message;
+            this.toastService.error(msg);
+          }
         });
-
-        // Ajouter l'interview au service
-        this.interviewsService.addInterview({ application, ...result });
-
-        // Afficher le toast de succès
-        this.toastService.success('Interview has been scheduled successfully.');
-
-        console.log('Interview scheduled and added to list:', result);
       }
     });
+  }
+
+  toggleMenu(application: Application): void {
+    const id = String(application.id);
+    this.openMenuFor = this.openMenuFor === id ? null : id;
+  }
+
+  closeMenu(): void {
+    this.openMenuFor = null;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.openMenuFor) return;
+    const target = event.target as HTMLElement;
+    const menuSelector = `[data-app-menu-id="${this.openMenuFor}"]`;
+    const toggleSelector = `[data-app-menu-toggle="${this.openMenuFor}"]`;
+    if (target.closest(menuSelector) || target.closest(toggleSelector)) {
+      return;
+    }
+    this.openMenuFor = null;
   }
 
   openTakeAction(application: Application): void {
@@ -174,7 +277,7 @@ export class JobCardRecruiter {
     dialogRef.afterClosed().subscribe((result: 'accepted' | 'rejected') => {
       if (result) {
         this.applicationStatusChange.emit({
-          applicationId: application.id,
+          applicationId: String(application.id),
           newStatus: result,
         });
       }
@@ -382,9 +485,32 @@ export class JobCardRecruiter {
    */
   toggleFavorite(application: Application, event: Event): void {
     event.stopPropagation(); // Empêcher l'ouverture des détails
-    application.isFavorite = !application.isFavorite;
 
-    const action = application.isFavorite ? 'ajoutée aux' : 'retirée des';
+    // Optimistic UI update
+    const previous = !!application.isFavorite;
+    application.isFavorite = !previous;
+
+    // Use BookmarkService to persist bookmark for this job offer.
+    // Note: backend bookmarks are per jobOfferId. We toggle bookmark for the current job.
+    this.bookmarkService.toggleBookmark(Number(this.job.id)).subscribe({
+      next: () => {
+        const action = application.isFavorite ? 'ajoutée aux' : 'retirée des';
+        this.toastService.success(`Candidature ${action} favoris`);
+      },
+      error: (err) => {
+        // Revert optimistic update on failure
+        application.isFavorite = previous;
+        console.error('Failed to toggle bookmark:', err);
+
+        // Prefer server message if present
+        let serverMsg = err && err.error && err.error.message ? err.error.message : null;
+        let msg = serverMsg || 'Erreur lors de la mise à jour des favoris.';
+        if (err && err.status === 403) {
+          msg = "Action réservée aux candidats. Connectez-vous en tant que job seeker.";
+        }
+        this.toastService.error(msg);
+      }
+    });
   }
 
   /**

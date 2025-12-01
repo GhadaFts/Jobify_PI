@@ -3,8 +3,9 @@ import { JobOffer, Application } from '../../../types';
 import { JobOfferService } from '../../../services/job-offer.service';
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ApplicationService } from '../../../services/application.service';
+import { ApplicationService, ApplicationStatus } from '../../../services/application.service';
 import { ToastService } from '../../../services/toast.service';
+import { UserService } from '../../../services/user.service';
 import { 
   faCheck, 
   faTimes, 
@@ -21,6 +22,8 @@ import {
   styleUrls: ['./publish-job.scss']
 })
 export class PublishJob {
+  // simple in-memory cache to avoid repeated user lookups for the same Keycloak id
+  private seekerCache: Map<string, any> = new Map();
   isPublishing: boolean = false;
   activeTab: string = 'all';
   searchQuery: string = '';
@@ -49,7 +52,7 @@ export class PublishJob {
     status: 'open',
     published: false,
     applicants: 0,
-    posted: 'Just now'
+    posted: 'Just now',
   };
 
   // file upload fields
@@ -62,13 +65,71 @@ export class PublishJob {
     private toastService: ToastService,
     private applicationService: ApplicationService,
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private userService: UserService
   ) {}
 
   jobs: JobOffer[] = [];
   isUpdating: boolean = false;
   ngOnInit(): void {
     this.loadMyJobs();
+  }
+
+  // Normalize a user/jobSeeker object from backend (camelCase) into the
+  // shape expected by the UI templates (snake_case + structured arrays).
+  private normalizeSeeker(user: any, seekerId?: string): any {
+    const u = user || {};
+
+    const mapExperience = (exp: any): any[] => {
+      if (!Array.isArray(exp)) return [];
+      return exp.map((e: any) => {
+        if (!e) return { position: '', company: '', description: '' };
+        if (typeof e === 'string') return { position: '', company: '', description: e };
+        return {
+          position: e.position || e.jobTitle || '',
+          company: e.company || '',
+          description: e.description || e.summary || '',
+          startDate: e.startDate || e.start_date || '',
+          endDate: e.endDate || e.end_date || ''
+        };
+      });
+    };
+
+    const mapEducation = (eds: any): any[] => {
+      if (!Array.isArray(eds)) return [];
+      return eds.map((e: any) => {
+        if (!e) return { degree: '', field: '', school: '', graduationDate: '' };
+        if (typeof e === 'string') return { degree: e, field: '', school: '', graduationDate: '' };
+        return {
+          degree: e.degree || e.title || '',
+          field: e.field || e.area || '',
+          school: e.school || '',
+          graduationDate: e.graduationDate || e.graduation_date || ''
+        };
+      });
+    };
+
+    const normalized = {
+      id: u.id || seekerId || u.keycloakId || null,
+      fullName: u.fullName || u.full_name || u.name || 'Unknown',
+      title: u.title || '',
+      photo_profil:this.userService.getImageUrl(u.profilePicture || u.photo_profil || u.avatar || '') ,
+      github_link: u.githubLink || u.github_link || '',
+      web_link: u.webLink || u.web_link || u.website || '',
+      twitter_link: u.twitterLink || u.twitter_link || '',
+      facebook_link: u.facebookLink || u.facebook_link || '',
+      phone_number: u.phoneNumber || u.phone_number || '',
+      email: u.email || '',
+      nationality: u.nationality || '',
+      date_of_birth: u.dateOfBirth || u.date_of_birth || '',
+      gender: u.gender || '',
+      description: u.description || u.bio || '',
+      skills: Array.isArray(u.skills) ? u.skills : (u.skills ? [u.skills] : []),
+      experience: mapExperience(u.experience || u.experiences || []),
+      education: mapEducation(u.education || u.educations || []),
+    };
+
+    return normalized;
   }
 
   private loadMyJobs(): void {
@@ -117,23 +178,72 @@ export class PublishJob {
                 job.applications = apps || [];
                 job.applicants = (apps && apps.length) || 0;
 
-                // For each application, try to enrich with job seeker profile from auth-service
+                // Normalize application fields and enrich with job seeker profile (cached)
                 job.applications.forEach((app: any) => {
+                  // normalize CV / motivation fields from backend variations
+                  app.motivationLetter = app.motivationLettre || app.motivation_lettre || app.motivationLetter || app.motivation || '';
+                  app.cvLink = app.cvLink || app.cv_link || app.cv || '';
+                  // also provide snake_case aliases the templates expect
+                  app.motivation_lettre = app.motivation_lettre || app.motivationLetter;
+                  app.cv_link = app.cv_link || app.cvLink;
+
                   const seekerId = app.jobSeekerId || app.jobSeeker?.id;
-                  if (!seekerId) return;
+                  if (!seekerId) {
+                    app.jobSeeker = app.jobSeeker || { id: null, fullName: 'Unknown', title: '' };
+                    return;
+                  }
 
-                  // Use stored access token if available
+                  // If the application already contains a jobSeeker object (from server-side join),
+                  // normalize it and cache it to avoid extra network calls.
+                  if (app.jobSeeker && !this.seekerCache.has(seekerId)) {
+                    const norm = this.normalizeSeeker(app.jobSeeker, seekerId);
+                    app.jobSeeker = norm;
+                    this.seekerCache.set(seekerId, norm);
+                    return;
+                  }
+
+                  // If we already resolved this Keycloak id, reuse it
+                  if (this.seekerCache.has(seekerId)) {
+                    app.jobSeeker = this.seekerCache.get(seekerId);
+                    return;
+                  }
+
+                  // Use stored access token if available (for guarded fallback if needed)
                   const token = this.authService.getAccessToken();
-                  const headers = token
-                    ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-                    : new HttpHeaders();
+                  const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
 
-                  // Removed remote profile fetch (auth-service) per request — keep previous minimal info
-                  // Leave minimal jobSeeker info so UI remains stable when profile is missing
-                  app.jobSeeker = app.jobSeeker || { id: seekerId, fullName: 'Unknown', title: '' };
+                  // Call public auth endpoint that resolves by Keycloak id
+                  this.http.get<any>(`http://localhost:8888/auth-service/auth/users/${seekerId}`).subscribe({
+                    next: (user) => {
+                      const norm = this.normalizeSeeker(user, seekerId);
+                      app.jobSeeker = norm;
+                      this.seekerCache.set(seekerId, norm);
+                    },
+                    error: (_err) => {
+                      // Fallback: try guarded `/user/{id}` endpoint with current token (may require recruiter/admin privileges)
+                      if (token) {
+                        this.http.get<any>(`http://localhost:8888/auth-service/user/${seekerId}`, { headers }).subscribe({
+                          next: (user) => {
+                            const norm = this.normalizeSeeker(user, seekerId);
+                            app.jobSeeker = norm;
+                            this.seekerCache.set(seekerId, norm);
+                          },
+                          error: () => {
+                            const unknown = this.normalizeSeeker(null, seekerId);
+                            app.jobSeeker = unknown;
+                            this.seekerCache.set(seekerId, unknown);
+                          }
+                        });
+                      } else {
+                        const unknown = this.normalizeSeeker(null, seekerId);
+                        app.jobSeeker = unknown;
+                        this.seekerCache.set(seekerId, unknown);
+                      }
+                    }
+                  });
                 });
               },
-              error: (err) => {
+              error: (err: any) => {
                 console.warn('Failed to load applications for job', job.id, err);
               }
             });
@@ -269,6 +379,10 @@ export class PublishJob {
       }
     }
   }
+getProfileImageUrl(): string {
+    const profile = this.userService.getCurrentProfile();
+    return this.userService.getImageUrl(profile?.photo_profil);
+  }
 
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -355,31 +469,50 @@ export class PublishJob {
   }
 
   // NOUVELLE MÉTHODE : Gestion des changements de statut des applications
-  handleApplicationStatusChange(event: {applicationId: number, newStatus: string, interviewData?: any}) {
+  handleApplicationStatusChange(event: {applicationId: string, newStatus: string, interviewData?: any}) {
     console.log('Changement de statut d\'application:', event);
     
     // Trouver le job et l'application concernés
     for (const job of this.jobs) {
       if (job.applications) {
-        const application = job.applications.find(a => a.id === event.applicationId);
+        const application = job.applications.find(a => String(a.id) === String(event.applicationId));
         if (application) {
           // Sauvegarder l'ancien statut pour le log
           const oldStatus = application.status;
-          
-          // Mettre à jour le statut
+
+          // Optimistic UI update
           application.status = event.newStatus as any;
-          
+
           // Mettre à jour les données d'entretien si fournies
           if (event.interviewData) {
             application.interviewDate = event.interviewData.interviewDate;
             application.interviewLocation = event.interviewData.location;
             application.interviewNotes = event.interviewData.additionalNotes;
           }
-          
-          // Mettre à jour la date de dernier changement
+
+          // Mettre à jour la date de dernier changement localement
           application.lastStatusChange = new Date().toISOString();
-          
-          console.log(`Statut de l'application ${event.applicationId} mis à jour: ${oldStatus} -> ${event.newStatus}`);
+
+          // Persist to backend (RECRUITER endpoint)
+          const appIdStr = String(application.id);
+          // Map to frontend ApplicationStatus enum when possible
+          const statusEnum = (ApplicationStatus as any)[event.newStatus.toUpperCase()] ?? event.newStatus;
+          this.applicationService.updateApplicationStatus(appIdStr, statusEnum).subscribe({
+            next: (resp) => {
+              // Sync with server
+              application.status = resp.status as any;
+              if ((resp as any).lastStatusChange) application.lastStatusChange = (resp as any).lastStatusChange;
+              this.toastService.success('Application status updated.');
+              console.log(`Statut de l'application ${event.applicationId} confirmé par le serveur: ${oldStatus} -> ${resp.status}`);
+            },
+            error: (err) => {
+              console.error('Failed to update application status', err);
+              this.toastService.error('Failed to update application status.');
+              // revert optimistic change
+              application.status = oldStatus;
+            }
+          });
+
           break;
         }
       }

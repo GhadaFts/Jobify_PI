@@ -6,6 +6,7 @@ import { User, UserSchema } from './schema/user.schema';
 import { UserRole } from './schema/userRole.enum';
 import { RecruiterSchema } from './schema/recruiter.schema';
 import { JobSeekerSchema } from './schema/jobSeeker.schema';
+import { UploadService } from './upload.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { JobSeekerSchema } from './schema/jobSeeker.schema';
     ]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, UploadService],
   exports: [UserService, MongooseModule], // Important for auth
 })
 export class UserModule { }

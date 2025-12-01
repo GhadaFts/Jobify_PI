@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map ,switchMap, catchError, of} from 'rxjs';
 import { JobOffer } from '../types';
+import { ApplicationService } from './application.service';
 
 export interface JobOfferDTO {
   id: number;
@@ -37,12 +38,12 @@ export interface JobSearchFilters {
 export class JobService {
   private apiUrl = 'http://localhost:8888/joboffer-service/api/jobs'; // Gateway URL
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient , private applicationService: ApplicationService) {}
 
   /**
-   * Search jobs with filters
+   * Search jobs with filters and include applicant counts
    */
-  searchJobs(filters: JobSearchFilters = {}): Observable<JobOfferDTO[]> {
+  searchJobs(filters: JobSearchFilters = {}): Observable<JobOffer[]> {
     let params = new HttpParams();
     
     if (filters.title) {
@@ -58,7 +59,60 @@ export class JobService {
       params = params.set('location', filters.location);
     }
 
-    return this.http.get<JobOfferDTO[]>(this.apiUrl, { params });
+    return this.http.get<JobOfferDTO[]>(this.apiUrl, { params }).pipe(
+      switchMap(jobDTOs => {
+        // Get applicant counts for all jobs
+        const jobsWithApplicants$ = jobDTOs.map(jobDTO => 
+          this.getApplicantCountForJob(jobDTO.id).pipe(
+            map(applicantCount => ({
+              ...this.convertToJobOffer(jobDTO),
+              applicants: applicantCount
+            }))
+          )
+        );
+        
+        return forkJoin(jobsWithApplicants$);
+      })
+    );
+  }
+
+  /**
+   * Get applicant count for a specific job
+   */
+  private getApplicantCountForJob(jobId: number): Observable<number> {
+    return this.applicationService.getApplicationsByJobOfferId(jobId).pipe(
+      map(applications => applications.length),
+      catchError(error => {
+        console.error(`Error fetching applicants for job ${jobId}:`, error);
+        return of(0); // Return 0 if there's an error
+      })
+    );
+  }
+
+  /**
+   * Convert backend DTO to frontend JobOffer type
+   */
+  convertToJobOffer(dto: JobOfferDTO): JobOffer {
+    return {
+      id: dto.id.toString(),
+      title: dto.title,
+      company: dto.company,
+      companyLogo: this.getDefaultCompanyLogo(dto.company),
+      location: dto.location,
+      type: dto.type,
+      experience: dto.experience,
+      salary: `${dto.salary} ${dto.currency || 'TND'}`,
+      description: dto.description,
+      skills: dto.skills || [],
+      requirements: dto.requirements || [],
+      posted: this.calculatePostedTime(dto.createdAt),
+      applicants: 0, // This will be overridden by the searchJobs method
+      status: dto.status || 'open',
+      published: dto.published,
+      applications: [],
+      coordinates: this.getCoordinatesForLocation(dto.location),
+      recruiterId: dto.recruiterId
+    };
   }
 
   /**
@@ -103,30 +157,7 @@ export class JobService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  /**
-   * Convert backend DTO to frontend JobOffer type
-   */
-  convertToJobOffer(dto: JobOfferDTO): JobOffer {
-    return {
-      id: dto.id.toString(),
-      title: dto.title,
-      company: dto.company,
-      companyLogo: this.getDefaultCompanyLogo(dto.company),
-      location: dto.location,
-      type: dto.type,
-      experience: dto.experience,
-      salary: `${dto.salary} ${dto.currency || 'TND'}`,
-      description: dto.description,
-      skills: dto.skills || [],
-      requirements: dto.requirements || [],
-      posted: this.calculatePostedTime(dto.createdAt),
-      applicants: 0, // This should come from Application Service
-      status: dto.status || 'open',
-      published: dto.published,
-      applications: [],
-      coordinates: this.getCoordinatesForLocation(dto.location)
-    };
-  }
+
 
   /**
    * Get default company logo based on company name

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { JobOfferDTO, JobService } from '../../../services/job.service';
+import { ApplicationService } from '../../../services/application.service';
 
 interface MostAppliedJob {
   id: string;
@@ -19,23 +21,35 @@ interface JobStatusStat {
   styleUrls: ['./recruiter-sidebar.scss'],
   standalone: false,
 })
-export class RecruiterSidebar {
-  mostAppliedJobs: MostAppliedJob[] = [
-    { id: '1', title: 'Senior Frontend Developer', company: 'Tech Corp', applicants: 156, status: 'hot job' },
-    { id: '2', title: 'Full Stack Engineer', company: 'StartUp Inc', applicants: 89, status: 'actively hiring' },
-    { id: '3', title: 'DevOps Specialist', company: 'Cloud Solutions', applicants: 67, status: 'urgent hiring' },
-    { id: '4', title: 'Product Manager', company: 'Innovate Labs', applicants: 45, status: 'limited openings' },
-    { id: '5', title: 'UX/UI Designer', company: 'Creative Studio', applicants: 32, status: 'open' }
-  ];
+export class RecruiterSidebar implements OnInit {
+  private jobOffers: JobOfferDTO[] = []
+  mostAppliedJobs: MostAppliedJob[] = [];
+  jobStatusStats: JobStatusStat[] = []
 
-  jobStatusStats: JobStatusStat[] = [
-    { status: 'open', count: 12 },
-    { status: 'new', count: 8 },
-    { status: 'hot job', count: 5 },
-    { status: 'limited openings', count: 3 },
-    { status: 'actively hiring', count: 7 },
-    { status: 'urgent hiring', count: 2 }
-  ];
+  constructor(private jobOfferService: JobService, private appService: ApplicationService){}
+
+  ngOnInit(): void {
+    this.jobOfferService.getAllJobs().subscribe(jobs => this.jobOffers = jobs)
+    this.jobOffers.forEach(job => {
+      var applicants = 0
+      this.appService.getApplicationsByJobOfferId(job.id).subscribe(result => applicants = result.length)
+      const mostAppJob: MostAppliedJob = {
+        id: job.id.toString(),
+        title: job.title,
+        company: job.company,
+        status: job.status,
+        applicants: applicants
+      }
+      this.mostAppliedJobs.push(mostAppJob)
+    })
+    this.mostAppliedJobs.sort((a,b) => b.applicants - a.applicants).slice(0,5);
+    this.jobStatusStats = Array.from(
+      this.mostAppliedJobs.reduce((map, job) => {
+        map.set(job.status, (map.get(job.status) || 0) + 1);
+        return map;
+      }, new Map<string, number>())
+    ).map(([status, count]) => ({status,count}))
+  }
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {

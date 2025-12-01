@@ -3,18 +3,32 @@ package com.example.jobify
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.bumptech.glide.Glide
+import com.example.jobify.network.*
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
-import java.util.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 
 class RecruiterProfileActivity : AppCompatActivity() {
 
@@ -42,6 +56,7 @@ class RecruiterProfileActivity : AppCompatActivity() {
     private lateinit var servicesContainer: FlexboxLayout
     private lateinit var txtNoService: TextView
     private lateinit var btnAddService: ImageView
+    private lateinit var progressBar: ProgressBar
 
     // Social links
     private lateinit var socialLinksView: LinearLayout
@@ -50,27 +65,39 @@ class RecruiterProfileActivity : AppCompatActivity() {
     private lateinit var btnGithub: ImageView
     private lateinit var btnFacebook: ImageView
 
+    // Session manager
+    private lateinit var sessionManager: SessionManager
+
     // Edit mode flag
     private var isEditMode = false
+    private var isLoading = false
 
-    // Data
-    private var fullName: String = ""
-    private var photo_profil: String = ""
-    private var twitter_link: String = ""
-    private var web_link: String = ""
-    private var github_link: String = ""
-    private var facebook_link: String = ""
-    private var description: String = ""
-    private var phone_number: String = ""
-    private var nationality: String = ""
-    private var companyAddress: String = ""
-    private var domaine: String = ""
-    private var employees_number: Int = 0
-    private var services: MutableList<String> = mutableListOf()
+    // Data - Store the full profile
+    private var currentProfile: RecruiterProfile? = null
+    private var selectedPhotoUri: Uri? = null
+
+    // Image picker
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedPhotoUri = it
+            // Display preview
+            Glide.with(this)
+                .load(it)
+                .circleCrop()
+                .into(companyImage)
+
+            // Upload immediately
+            uploadProfilePhoto(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recruiter_profile)
+
+        sessionManager = SessionManager(this)
 
         initializeViews()
         loadRecruiterData()
@@ -104,6 +131,7 @@ class RecruiterProfileActivity : AppCompatActivity() {
         servicesContainer = findViewById(R.id.servicesContainer)
         txtNoService = findViewById(R.id.txtNoService)
         btnAddService = findViewById(R.id.btnAddService)
+        progressBar = findViewById(R.id.progressBar)
 
         // Social links
         socialLinksView = findViewById(R.id.socialLinksView)
@@ -142,8 +170,7 @@ class RecruiterProfileActivity : AppCompatActivity() {
         }
 
         btnEditPhoto.setOnClickListener {
-            // TODO: Implement photo picker
-            Toast.makeText(this, "Photo selection coming soon", Toast.LENGTH_SHORT).show()
+            imagePickerLauncher.launch("image/*")
         }
 
         btnAddService.setOnClickListener {
@@ -151,77 +178,159 @@ class RecruiterProfileActivity : AppCompatActivity() {
         }
 
         // Social links clicks
-        btnTwitter.setOnClickListener { openLink(twitter_link) }
-        btnWeb.setOnClickListener { openLink(web_link) }
-        btnGithub.setOnClickListener { openLink(github_link) }
-        btnFacebook.setOnClickListener { openLink(facebook_link) }
+        btnTwitter.setOnClickListener { openLink(currentProfile?.twitter_link) }
+        btnWeb.setOnClickListener { openLink(currentProfile?.web_link) }
+        btnGithub.setOnClickListener { openLink(currentProfile?.github_link) }
+        btnFacebook.setOnClickListener { openLink(currentProfile?.facebook_link) }
     }
 
     private fun loadRecruiterData() {
-        // TODO: Load from API or database
-        // For now, using mock data
-        fullName = "Tech Solutions Inc."
-        nationality = "Tunisia"
-        employees_number = 254
-        description = "Leading technology company specializing in software development and IT consulting services."
-        phone_number = "+216 12 345 678"
-        domaine = "Information Technology"
-        companyAddress = "Tunis, Tunisia"
-        twitter_link = "https://twitter.com/techsolutions"
-        web_link = "https://techsolutions.com"
-        github_link = "https://github.com/techsolutions"
-        facebook_link = "https://facebook.com/techsolutions"
-        services = mutableListOf("Web Development", "Mobile Apps", "Cloud Services", "Consulting")
+        isLoading = true
+        showLoading(true)
 
-        displayRecruiterData()
+        val token = sessionManager.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            showError("Not authenticated. Please login again.")
+            navigateToLogin()
+            return
+        }
+
+        // Load profile data
+        ApiClient.userService.getUserProfile("Bearer $token").enqueue(object : Callback<RecruiterProfile> {
+            override fun onResponse(call: Call<RecruiterProfile>, response: Response<RecruiterProfile>) {
+                isLoading = false
+                showLoading(false)
+
+                if (response.isSuccessful) {
+                    currentProfile = response.body()
+                    currentProfile?.let {
+                        if (it.role.lowercase().replace("_", "") == "recruiter") {
+                            displayRecruiterData(it)
+                            // Load job posts count
+                            loadJobPostsCount()
+                        } else {
+                            showError("This page is only for recruiters")
+                        }
+                    }
+                } else {
+                    when (response.code()) {
+                        401 -> {
+                            showError("Session expired. Please login again.")
+                            navigateToLogin()
+                        }
+                        404 -> showError("Profile not found")
+                        else -> showError("Failed to load profile: ${response.message()}")
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<RecruiterProfile>, t: Throwable) {
+                isLoading = false
+                showLoading(false)
+                Log.e("RecruiterProfile", "Failed to load profile", t)
+                showError("Network error: ${t.message}")
+            }
+        })
     }
 
-    private fun displayRecruiterData() {
-        txtRecruiterName.text = fullName
-        txtCountry.text = nationality
-        txtEmployeesCount.text = employees_number.toString()
-        txtBio.text = description
+    private fun loadJobPostsCount() {
+        // Using coroutine to call suspend function
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.jobService.getMyJobs()
+                if (response.isSuccessful) {
+                    val jobs = response.body()
+                    val jobCount = jobs?.size ?: 0
+
+                    // Update UI on main thread
+                    runOnUiThread {
+                        txtPostsCount.text = jobCount.toString()
+                    }
+
+                    Log.d("RecruiterProfile", "Loaded $jobCount job posts")
+                } else {
+                    Log.e("RecruiterProfile", "Failed to load jobs: ${response.code()}")
+                    // Keep default count (0) if fails
+                    runOnUiThread {
+                        txtPostsCount.text = "0"
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RecruiterProfile", "Error loading job posts", e)
+                // Keep default count (0) if error
+                runOnUiThread {
+                    txtPostsCount.text = "0"
+                }
+            }
+        }
+    }
+
+    private fun displayRecruiterData(profile: RecruiterProfile) {
+        txtRecruiterName.text = profile.fullName
+        txtCountry.text = profile.nationality ?: "Not specified"
+        txtEmployeesCount.text = profile.employees_number?.toString() ?: "0"
+        txtPostsCount.text = "0" // Will be updated by loadJobPostsCount()
+        txtBio.text = profile.description ?: "No description available"
+
+        // Load profile photo
+        if (!profile.photo_profil.isNullOrEmpty()) {
+            val imageUrl = if (profile.photo_profil.startsWith("http")) {
+                profile.photo_profil
+            } else {
+                "http://10.0.2.2:8888/auth-service${profile.photo_profil}"
+            }
+
+            Glide.with(this)
+                .load(imageUrl)
+                .circleCrop()
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
+                .into(companyImage)
+        } else {
+            companyImage.setImageResource(R.drawable.ic_user_placeholder)
+        }
 
         // Phone
-        if (phone_number.isNotEmpty()) {
-            txtPhone.text = phone_number
+        if (!profile.phone_number.isNullOrEmpty()) {
+            txtPhone.text = profile.phone_number
             phoneLayout.visibility = View.VISIBLE
         } else {
             phoneLayout.visibility = View.GONE
         }
 
         // Domaine
-        if (domaine.isNotEmpty()) {
-            txtDomaine.text = domaine
+        if (!profile.domaine.isNullOrEmpty()) {
+            txtDomaine.text = profile.domaine
             domaineLayout.visibility = View.VISIBLE
         } else {
             domaineLayout.visibility = View.GONE
         }
 
         // Address
-        if (companyAddress.isNotEmpty()) {
-            txtAddress.text = companyAddress
+        if (!profile.companyAddress.isNullOrEmpty()) {
+            txtAddress.text = profile.companyAddress
             addressLayout.visibility = View.VISIBLE
         } else {
             addressLayout.visibility = View.GONE
         }
 
-        // Social links - Always show the container if at least one link exists
-        val hasLinks = twitter_link.isNotEmpty() || web_link.isNotEmpty() ||
-                github_link.isNotEmpty() || facebook_link.isNotEmpty()
+        // Social links
+        val hasLinks = !profile.twitter_link.isNullOrEmpty() ||
+                !profile.web_link.isNullOrEmpty() ||
+                !profile.github_link.isNullOrEmpty() ||
+                !profile.facebook_link.isNullOrEmpty()
 
         socialLinksView.visibility = if (hasLinks) View.VISIBLE else View.GONE
-
-        btnTwitter.visibility = if (twitter_link.isNotEmpty()) View.VISIBLE else View.GONE
-        btnWeb.visibility = if (web_link.isNotEmpty()) View.VISIBLE else View.GONE
-        btnGithub.visibility = if (github_link.isNotEmpty()) View.VISIBLE else View.GONE
-        btnFacebook.visibility = if (facebook_link.isNotEmpty()) View.VISIBLE else View.GONE
+        btnTwitter.visibility = if (!profile.twitter_link.isNullOrEmpty()) View.VISIBLE else View.GONE
+        btnWeb.visibility = if (!profile.web_link.isNullOrEmpty()) View.VISIBLE else View.GONE
+        btnGithub.visibility = if (!profile.github_link.isNullOrEmpty()) View.VISIBLE else View.GONE
+        btnFacebook.visibility = if (!profile.facebook_link.isNullOrEmpty()) View.VISIBLE else View.GONE
 
         // Services
-        displayServices()
+        displayServices(profile.service ?: emptyList())
     }
 
-    private fun displayServices() {
+    private fun displayServices(services: List<String>) {
         servicesContainer.removeAllViews()
 
         if (services.isEmpty()) {
@@ -257,25 +366,23 @@ class RecruiterProfileActivity : AppCompatActivity() {
         isEditMode = !isEditMode
 
         if (isEditMode) {
-            // Enter edit mode
             btnEdit.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             btnEditPhoto.visibility = View.VISIBLE
             btnAddService.visibility = View.VISIBLE
             btnSave.visibility = View.VISIBLE
-
-            // Make fields editable
             showEditDialog()
         } else {
-            // Exit edit mode without saving
             btnEdit.setImageResource(R.drawable.ic_edit)
             btnEditPhoto.visibility = View.GONE
             btnAddService.visibility = View.GONE
             btnSave.visibility = View.GONE
-            displayServices()
+            currentProfile?.let { displayServices(it.service ?: emptyList()) }
         }
     }
 
     private fun showEditDialog() {
+        val profile = currentProfile ?: return
+
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_profile, null)
 
         val edtName = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.edtFullName)
@@ -291,35 +398,37 @@ class RecruiterProfileActivity : AppCompatActivity() {
         val edtFacebook = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.edtFacebook)
 
         // Pre-fill current data
-        edtName.setText(fullName)
-        edtPhone.setText(phone_number)
-        edtNationality.setText(nationality)
-        edtAddress.setText(companyAddress)
-        edtDomaine.setText(domaine)
-        edtEmployees.setText(employees_number.toString())
-        edtDescription.setText(description)
-        edtTwitter.setText(twitter_link)
-        edtWeb.setText(web_link)
-        edtGithub.setText(github_link)
-        edtFacebook.setText(facebook_link)
+        edtName.setText(profile.fullName)
+        edtPhone.setText(profile.phone_number ?: "")
+        edtNationality.setText(profile.nationality ?: "")
+        edtAddress.setText(profile.companyAddress ?: "")
+        edtDomaine.setText(profile.domaine ?: "")
+        edtEmployees.setText(profile.employees_number?.toString() ?: "")
+        edtDescription.setText(profile.description ?: "")
+        edtTwitter.setText(profile.twitter_link ?: "")
+        edtWeb.setText(profile.web_link ?: "")
+        edtGithub.setText(profile.github_link ?: "")
+        edtFacebook.setText(profile.facebook_link ?: "")
 
         AlertDialog.Builder(this)
             .setTitle("Edit Profile")
             .setView(dialogView)
             .setPositiveButton("Apply") { _, _ ->
-                fullName = edtName.text.toString()
-                phone_number = edtPhone.text.toString()
-                nationality = edtNationality.text.toString()
-                companyAddress = edtAddress.text.toString()
-                domaine = edtDomaine.text.toString()
-                employees_number = edtEmployees.text.toString().toIntOrNull() ?: 0
-                description = edtDescription.text.toString()
-                twitter_link = edtTwitter.text.toString()
-                web_link = edtWeb.text.toString()
-                github_link = edtGithub.text.toString()
-                facebook_link = edtFacebook.text.toString()
-
-                displayRecruiterData()
+                // Update the current profile with edited data
+                currentProfile = profile.copy(
+                    fullName = edtName.text.toString(),
+                    phone_number = edtPhone.text.toString(),
+                    nationality = edtNationality.text.toString(),
+                    companyAddress = edtAddress.text.toString(),
+                    domaine = edtDomaine.text.toString(),
+                    employees_number = edtEmployees.text.toString().toIntOrNull() ?: 0,
+                    description = edtDescription.text.toString(),
+                    twitter_link = edtTwitter.text.toString(),
+                    web_link = edtWeb.text.toString(),
+                    github_link = edtGithub.text.toString(),
+                    facebook_link = edtFacebook.text.toString()
+                )
+                currentProfile?.let { displayRecruiterData(it) }
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
@@ -342,9 +451,12 @@ class RecruiterProfileActivity : AppCompatActivity() {
             .setView(input)
             .setPositiveButton("Add") { _, _ ->
                 val serviceName = input.text.toString().trim()
-                if (serviceName.isNotEmpty() && !services.contains(serviceName)) {
-                    services.add(serviceName)
-                    displayServices()
+                val currentServices = currentProfile?.service?.toMutableList() ?: mutableListOf()
+
+                if (serviceName.isNotEmpty() && !currentServices.contains(serviceName)) {
+                    currentServices.add(serviceName)
+                    currentProfile = currentProfile?.copy(service = currentServices)
+                    displayServices(currentServices)
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -352,42 +464,190 @@ class RecruiterProfileActivity : AppCompatActivity() {
     }
 
     private fun removeService(service: String) {
-        services.remove(service)
-        displayServices()
+        val currentServices = currentProfile?.service?.toMutableList() ?: return
+        currentServices.remove(service)
+        currentProfile = currentProfile?.copy(service = currentServices)
+        displayServices(currentServices)
+    }
+
+    private fun uploadProfilePhoto(uri: Uri) {
+        val token = sessionManager.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            showError("Not authenticated")
+            return
+        }
+
+        try {
+            // Create a temporary file from URI
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(cacheDir, "profile_photo.jpg")
+            val outputStream = FileOutputStream(file)
+
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            // Create multipart request
+            val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestBody)
+
+            showLoading(true)
+
+            ApiClient.userService.uploadProfilePhoto("Bearer $token", multipartBody)
+                .enqueue(object : Callback<PhotoUploadResponse> {
+                    override fun onResponse(
+                        call: Call<PhotoUploadResponse>,
+                        response: Response<PhotoUploadResponse>
+                    ) {
+                        showLoading(false)
+
+                        if (response.isSuccessful) {
+                            val photoUrl = response.body()?.url
+                            Toast.makeText(
+                                this@RecruiterProfileActivity,
+                                "Photo uploaded successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            // Update current profile with new photo URL
+                            currentProfile = currentProfile?.copy(photo_profil = photoUrl)
+                        } else {
+                            showError("Failed to upload photo: ${response.message()}")
+                        }
+
+                        // Clean up temp file
+                        file.delete()
+                    }
+
+                    override fun onFailure(call: Call<PhotoUploadResponse>, t: Throwable) {
+                        showLoading(false)
+                        Log.e("RecruiterProfile", "Photo upload failed", t)
+                        showError("Failed to upload photo: ${t.message}")
+                        file.delete()
+                    }
+                })
+        } catch (e: Exception) {
+            Log.e("RecruiterProfile", "Error preparing photo upload", e)
+            showError("Error: ${e.message}")
+        }
     }
 
     private fun saveChanges() {
-        // TODO: Save to API or database
-        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+        val profile = currentProfile ?: return
+        val token = sessionManager.getAccessToken()
 
-        isEditMode = false
-        btnEdit.setImageResource(R.drawable.ic_edit)
-        btnEditPhoto.visibility = View.GONE
-        btnAddService.visibility = View.GONE
-        btnSave.visibility = View.GONE
-        displayServices()
+        if (token.isNullOrEmpty()) {
+            showError("Not authenticated")
+            return
+        }
+
+        if (profile.fullName.isBlank()) {
+            showError("Full name is required")
+            return
+        }
+
+        if (profile.email.isBlank()) {
+            showError("Email is required")
+            return
+        }
+
+        showLoading(true)
+
+        val updateRequest = UpdateProfileRequest(
+            fullName = profile.fullName,
+            email = profile.email,
+            twitter_link = profile.twitter_link,
+            web_link = profile.web_link,
+            github_link = profile.github_link,
+            facebook_link = profile.facebook_link,
+            description = profile.description,
+            phone_number = profile.phone_number,
+            nationality = profile.nationality,
+            companyAddress = profile.companyAddress,
+            domaine = profile.domaine,
+            employees_number = profile.employees_number,
+            service = profile.service
+        )
+
+        ApiClient.userService.updateUserProfile("Bearer $token", updateRequest)
+            .enqueue(object : Callback<RecruiterProfile> {
+                override fun onResponse(
+                    call: Call<RecruiterProfile>,
+                    response: Response<RecruiterProfile>
+                ) {
+                    showLoading(false)
+
+                    if (response.isSuccessful) {
+                        currentProfile = response.body()
+                        currentProfile?.let { displayRecruiterData(it) }
+
+                        Toast.makeText(
+                            this@RecruiterProfileActivity,
+                            "Profile updated successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        isEditMode = false
+                        btnEdit.setImageResource(R.drawable.ic_edit)
+                        btnEditPhoto.visibility = View.GONE
+                        btnAddService.visibility = View.GONE
+                        btnSave.visibility = View.GONE
+                    } else {
+                        when (response.code()) {
+                            400 -> showError("Invalid profile data")
+                            401 -> {
+                                showError("Session expired")
+                                navigateToLogin()
+                            }
+                            else -> showError("Failed to update: ${response.message()}")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<RecruiterProfile>, t: Throwable) {
+                    showLoading(false)
+                    Log.e("RecruiterProfile", "Update failed", t)
+                    showError("Network error: ${t.message}")
+                }
+            })
     }
 
-    private fun openLink(url: String) {
-        if (url.isNotEmpty()) {
-            // TODO: Open URL in browser
-            Toast.makeText(this, "Opening: $url", Toast.LENGTH_SHORT).show()
+    private fun openLink(url: String?) {
+        if (!url.isNullOrEmpty()) {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Cannot open link", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    private fun showLoading(show: Boolean) {
+        progressBar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun navigateToLogin() {
+        sessionManager.clearSession()
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        finishAffinity()
     }
 
     private fun performLogout() {
         try {
-            val sessionManager = SessionManager(this)
             sessionManager.clearSession()
-
             Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
 
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
-
             finishAffinity()
-
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Logout error: ${e.message}", Toast.LENGTH_LONG).show()

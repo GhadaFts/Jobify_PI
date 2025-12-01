@@ -1,6 +1,6 @@
-// company-profile-dialog.component.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { RecruiterService } from '../../../../../services/recruiter.service';
 import { Recruiter } from '../../../../../types';
 
 @Component({
@@ -11,31 +11,59 @@ import { Recruiter } from '../../../../../types';
 })
 export class CompanyProfileDialog implements OnInit {
   companyName: string;
+  recruiterId: string;
   recruiter: Recruiter | null = null;
   isLoading: boolean = true;
+  errorMessage: string | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<CompanyProfileDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { companyName: string }
+    @Inject(MAT_DIALOG_DATA) public data: { companyName: string; recruiterId: string },
+    private recruiterService: RecruiterService
   ) {
     this.companyName = data.companyName;
+    this.recruiterId = data.recruiterId;
   }
 
   ngOnInit() {
-    // Simuler le chargement des données du recruteur
     this.loadRecruiterData();
   }
 
-  private loadRecruiterData() {
-    // Simulation de données - dans la réalité, vous feriez un appel API
-    setTimeout(() => {
-      this.recruiter = this.getMockRecruiterData(this.companyName);
+  loadRecruiterData() {
+    if (!this.recruiterId) {
+      this.errorMessage = 'Recruiter information not available';
       this.isLoading = false;
-    }, 1000);
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+    console.log('🔍 Loading recruiter data for ID:', this.recruiterId);
+
+    this.recruiterService.getRecruiterProfile(this.recruiterId).subscribe({
+      next: (recruiter) => {
+        console.log('✅ Recruiter data loaded:', recruiter);
+        this.recruiter = recruiter;
+        this.isLoading = false;
+        this.errorMessage = null;
+      },
+      error: (error) => {
+        console.error('❌ Failed to load recruiter data:', error);
+        this.errorMessage = 'Failed to load company profile. Please try again.';
+        this.isLoading = false;
+        
+        // Fallback to mock data for development
+        if (error.status === 404 || error.status === 403) {
+          console.warn('⚠️ Using fallback mock data');
+          this.recruiter = this.getMockRecruiterData(this.companyName);
+          this.errorMessage = null;
+        }
+      }
+    });
   }
 
   private getMockRecruiterData(companyName: string): Recruiter {
-    // Données mockées basées sur le nom de l'entreprise
+    // Mock data as fallback (same as before)
     const mockData: { [key: string]: Recruiter } = {
       'TekUp': {
         id: 1,
@@ -74,25 +102,6 @@ export class CompanyProfileDialog implements OnInit {
         domaine: 'Agriculture',
         employees_number: 50,
         service: ['Organic Farming', 'Crop Production', 'Agricultural Consulting']
-      },
-      'Tebourba Secondary School': {
-        id: 3,
-        email: 'administration@tebourbaschool.edu.tn',
-        password: 'password',
-        fullName: 'School Administration',
-        role: 'recruiter',
-        photo_profil: 'https://images.unsplash.com/photo-1560452992-e3db5aa3c54e?w=400&h=400&fit=crop',
-        twitter_link: '',
-        web_link: '',
-        github_link: '',
-        facebook_link: '',
-        description: 'Public secondary school committed to providing quality education in Tebourba region.',
-        phone_number: '+216 71 000 000',
-        nationality: 'Tunisian',
-        companyAddress: 'Tebourba Center, Tunisia',
-        domaine: 'Education',
-        employees_number: 35,
-        service: ['Secondary Education', 'Student Development', 'Community Education']
       }
     };
 
