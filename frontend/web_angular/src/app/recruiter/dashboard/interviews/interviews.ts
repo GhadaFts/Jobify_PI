@@ -5,6 +5,9 @@ import { FinalInterview } from './final_interview_type';
 import { ApplicationResponseDTO, ApplicationService } from '../../../services/application.service';
 import { UserService } from '../../../services/user.service';
 import { JobService } from '../../../services/job.service';
+import { forkJoin } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-interviews',
@@ -25,38 +28,46 @@ export class Interviews implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // S'abonner aux mises à jour des interviews
-    this.interviewsService.interviews$.subscribe(interviews => {
-      this.interviews = interviews;
+  this.interviewsService.getRecruiterInterviews()
+    .pipe(
+      switchMap(interviews => {
+        this.interviews = interviews;
+
+        // Build array of async requests
+        const requests = interviews.map(interview => {
+          return forkJoin({
+            application: this.appService.getApplicationById(interview.applicationId),
+            jobSeeker: this.userService.getUserById(interview.jobSeekerId),
+            recruiter: this.userService.getUserById(interview.recruiterId),
+          }).pipe(
+            switchMap(result =>
+              this.jobService.getJobById(result.application.jobOfferId).pipe(
+              map(job => ({
+                  id: interview.id,
+                  application: result.application,
+                  jobSeeker: result.jobSeeker,
+                  recruiter: result.recruiter,
+                  job_title: job.title,
+                  scheduledDate: interview.scheduledDate,
+                  duration: interview.duration,
+                  interviewType: interview.interviewType,
+                  status: interview.status,
+                  createdAt: interview.createdAt,
+                  updatedAt: interview.updatedAt
+                }))
+              )
+            )
+          );
+        });
+
+        return forkJoin(requests);
+      })
+    )
+    .subscribe(finalInterviews => {
+      this.final_interviews = finalInterviews;
     });
-    this.interviews.forEach(interview => {
-      var application: ApplicationResponseDTO | null = null;
-      var recruiter: any | null = null
-      var job_seeker: any | null = null
-      var job_title: string = ""
-      this.appService.getApplicationById(interview.applicationId).subscribe(app =>
-        {application = app;
-          this.jobService.getJobById(app.jobOfferId).subscribe(job => job_title = job.title)
-        }
-      )
-      this.userService.getUserById(interview.jobSeekerId).subscribe(js => job_seeker = js)
-      this.userService.getUserById(interview.recruiterId).subscribe(rec => recruiter = rec)
-      const finalInterview: FinalInterview = {
-        id: interview.id,
-        application: application,
-        jobSeeker: job_seeker,
-        recruiter: recruiter,
-        job_title: job_title,
-        scheduledDate: interview.scheduledDate,
-        duration: interview.duration,
-        interviewType: interview.interviewType,
-        status: interview.status,
-        createdAt: interview.createdAt,
-        updatedAt: interview.updatedAt
-      }
-      this.final_interviews.push(finalInterview)
-    })
-  }
+}
+
 
   get allInterviews(): FinalInterview[] {
     return this.final_interviews;

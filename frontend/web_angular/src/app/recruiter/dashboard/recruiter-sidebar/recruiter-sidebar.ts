@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { JobOfferDTO, JobService } from '../../../services/job.service';
 import { ApplicationService } from '../../../services/application.service';
+import { forkJoin } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 
 interface MostAppliedJob {
-  id: string;
+  id: number;
   title: string;
   company: string;
   applicants: number;
@@ -22,33 +24,46 @@ interface JobStatusStat {
   standalone: false,
 })
 export class RecruiterSidebar implements OnInit {
-  private jobOffers: JobOfferDTO[] = []
   mostAppliedJobs: MostAppliedJob[] = [];
   jobStatusStats: JobStatusStat[] = []
 
   constructor(private jobOfferService: JobService, private appService: ApplicationService){}
 
   ngOnInit(): void {
-    this.jobOfferService.getAllJobs().subscribe(jobs => this.jobOffers = jobs)
-    this.jobOffers.forEach(job => {
-      var applicants = 0
-      this.appService.getApplicationsByJobOfferId(job.id).subscribe(result => applicants = result.length)
-      const mostAppJob: MostAppliedJob = {
-        id: job.id.toString(),
-        title: job.title,
-        company: job.company,
-        status: job.status,
-        applicants: applicants
-      }
-      this.mostAppliedJobs.push(mostAppJob)
-    })
-    this.mostAppliedJobs.sort((a,b) => b.applicants - a.applicants).slice(0,5);
-    this.jobStatusStats = Array.from(
-      this.mostAppliedJobs.reduce((map, job) => {
-        map.set(job.status, (map.get(job.status) || 0) + 1);
-        return map;
-      }, new Map<string, number>())
-    ).map(([status, count]) => ({status,count}))
+    this.jobOfferService
+      .getAllJobs()
+      .pipe(
+        switchMap(jobs => {
+          // Build parallel application count requests
+          const requests = jobs.map(job =>
+            this.appService.getApplicationsByJobOfferId(job.id).pipe(
+              map(applications => ({
+                id: job.id,
+                title: job.title,
+                company: job.company,
+                status: job.status,
+                applicants: applications.length,
+              }))
+            )
+          );
+
+          return forkJoin(requests);
+        })
+      )
+      .subscribe(result => {
+        // 1. Save most applied jobs
+        this.mostAppliedJobs = result
+          .sort((a, b) => b.applicants - a.applicants)
+          .slice(0, 5);
+
+        // 2. Build status stats
+        this.jobStatusStats = Array.from(
+          this.mostAppliedJobs.reduce((map, job) => {
+            map.set(job.status, (map.get(job.status) || 0) + 1);
+            return map;
+          }, new Map<string, number>())
+        ).map(([status, count]) => ({ status, count }));
+      });
   }
 
   getStatusColor(status: string): string {

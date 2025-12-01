@@ -62,7 +62,7 @@ export class InterviewCard {
 
   formatTime(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleTimeString('en-US', {
       hour: "2-digit",
       minute: "2-digit"
     });

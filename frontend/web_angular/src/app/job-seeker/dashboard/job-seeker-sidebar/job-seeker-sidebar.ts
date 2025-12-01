@@ -5,6 +5,8 @@ import { Interview } from '../../../types';
 import { InterviewsService } from '../../../services/interviews.service';
 import { ApplicationService } from '../../../services/application.service';
 import { JobService } from '../../../services/job.service';
+import { switchMap, map } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 interface Company {
   id: string;
@@ -84,32 +86,43 @@ export class JobSeekerSidebar implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.interviewService.getMyUpcomingInterviews().subscribe(interviews => this.myInterviews = interviews)
-    this.myInterviews.forEach(interview => {
-      var company_name = ""
-      this.appService.getApplicationById(interview.applicationId).subscribe(app =>
-        {
-          this.jobService.getJobById(app.jobOfferId).subscribe(job => company_name = job.company)
-        }
+    this.interviewService.getMyUpcomingInterviews()
+      .pipe(
+        switchMap(interviews => {
+          this.myInterviews = interviews;
+
+          // Create one observable per interview
+          const requests = interviews.map(interview =>
+            this.appService.getApplicationById(interview.applicationId).pipe(
+              switchMap(app =>
+                this.jobService.getJobById(app.jobOfferId).pipe(
+                  map(job => ({
+                    id: interview.id,
+                    interviewDate: this.formatInterviewDate(interview.scheduledDate),
+                    interviewTime: this.formatInterviewTime(interview.scheduledDate),
+                    location: interview.location as string,
+                    additionalNotes: interview.notes as string,
+                    duration: interview.duration + " mins",
+                    interviewType: interview.interviewType,
+                    companyName: job.company,
+                  }))
+                )
+              )
+            )
+          );
+
+          return forkJoin(requests);
+        })
       )
-      const notif: InterviewNotification = {
-        id: interview.id,
-        interviewDate: this.formatInterviewDate(interview.scheduledDate),
-        interviewTime: this.formatInterviewTime(interview.scheduledDate),
-        location: interview.location as string,
-        additionalNotes: interview.notes as string,
-        duration: interview.duration + " mins",
-        interviewType: interview.interviewType,
-        companyName: company_name
-      }
-      this.interviewNotifications.push(notif)
-    })
-    this.interviewNotifications.sort((a,b) => b.id - a.id)
+      .subscribe(notifs => {
+        this.interviewNotifications = notifs.sort((a, b) => b.id - a.id);
+      });
   }
+
 
   constructor(private dialog: MatDialog, private interviewService: InterviewsService,
     private appService: ApplicationService, private jobService: JobService
-  ) {}
+  ) { }
 
   // Company Profile Methods
   openCompanyProfile(company: Company) {
@@ -128,7 +141,7 @@ export class JobSeekerSidebar implements OnInit {
   // Interview Notification Methods
   getUpcomingInterviewsCount(): number {
     const today = new Date();
-    return this.interviewNotifications.filter(interview => 
+    return this.interviewNotifications.filter(interview =>
       new Date(interview.interviewDate) >= today
     ).length;
   }
@@ -189,8 +202,8 @@ export class JobSeekerSidebar implements OnInit {
 
   formatInterviewDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
@@ -198,7 +211,7 @@ export class JobSeekerSidebar implements OnInit {
 
   formatInterviewTime(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleTimeString('en-US', {
       "hour": "2-digit",
       "minute": "2-digit"
     });
@@ -210,15 +223,15 @@ export class JobSeekerSidebar implements OnInit {
     } else {
       // Truncate long addresses
       const maxLength = 25;
-      return interview.location.length > maxLength 
-        ? interview.location.substring(0, maxLength) + '...' 
+      return interview.location.length > maxLength
+        ? interview.location.substring(0, maxLength) + '...'
         : interview.location;
     }
   }
 
   isOnlineInterview(interview: InterviewNotification): boolean {
-    return interview.interviewType.toLowerCase().includes('online') || 
-           interview.location.startsWith('http');
+    return interview.interviewType.toLowerCase().includes('online') ||
+      interview.location.startsWith('http');
   }
 
   joinInterview(interview: InterviewNotification) {
