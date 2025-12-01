@@ -8,7 +8,7 @@ import retrofit2.http.*
 data class ConversationContext(
     val phase: String, // "collect_info" | "advice" | "practice"
     val currentStep: String? = null,
-    val userProfile: UserProfileData? = null, // Changé en UserProfileData
+    val userProfile: UserProfileData? = null,
     val questions: List<String>? = null
 )
 
@@ -25,9 +25,8 @@ data class UserProfileData(
 data class ChatRequest(
     val message: String,
     val conversationContext: ConversationContext? = null,
-    val userProfile: UserProfileData? = null // Rendu nullable
+    val userProfile: UserProfileData? = null
 )
-
 
 data class ChatResponse(
     val response: String,
@@ -38,14 +37,76 @@ data class ChatResponse(
     val questions: List<String>? = null
 )
 
-// ===== CV CORRECTION MODELS =====
+// ===== CV CORRECTION MODELS (Renommées) =====
+data class CvExperience(
+    val id: Int? = null,
+    val company: String? = null,
+    val position: String? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val description: String? = null,
+    val isCurrent: Boolean? = null
+)
+
+data class CvEducation(
+    val id: Int? = null,
+    val institution: String? = null,
+    val degree: String? = null,
+    val fieldOfStudy: String? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val description: String? = null
+)
+
+data class CvJobSeekerProfile(
+    val id: Int = 0,
+    val email: String? = null,
+    val password: String? = null,
+    val fullName: String? = null,
+    val role: String? = null,
+    val photoProfil: String? = null,
+    val twitterLink: String? = null,
+    val webLink: String? = null,
+    val githubLink: String? = null,
+    val facebookLink: String? = null,
+    val description: String? = null,
+    val phoneNumber: String? = null,
+    val nationality: String? = null,
+    val skills: List<String> = emptyList(),
+    val experience: List<CvExperience> = emptyList(),
+    val education: List<CvEducation> = emptyList(),
+    val title: String? = null,
+    val dateOfBirth: String? = null,
+    val gender: String? = null
+)
+
+data class CvSuggestion(
+    val id: String? = null,
+    val type: String, // "success", "warning", "info", "missing"
+    val title: String? = null,
+    val message: String? = null
+)
+
+data class CvImprovedSummary(
+    val overallAssessment: String? = null,
+    val strengths: List<String> = emptyList(),
+    val improvements: List<String> = emptyList()
+)
+
+data class CvAnalysisResponseFull(
+    val cvScore: Int,
+    val cvSuggestions: List<CvSuggestion> = emptyList(),
+    val improvedSummary: CvImprovedSummary,
+    val profile: CvJobSeekerProfile
+)
+
 data class CvAnalysisRequest(
     val cvContent: String,
     val jobDescription: String? = null
 )
 
-data class CvAnalysisResponse(
-    val analysis: String,
+data class CvAnalysisResponseLegacy(
+    val analysis: String? = null,
     val suggestions: List<String>? = null,
     val score: Int? = null
 )
@@ -124,10 +185,16 @@ interface AiApiService {
     // ===== CV CORRECTION ENDPOINTS =====
 
     @POST("ai-service/cv-correction/analyze")
-    suspend fun analyzeCv(@Body request: CvAnalysisRequest): Response<CvAnalysisResponse>
+    suspend fun analyzeCvFull(@Body request: CvAnalysisRequest): Response<CvAnalysisResponseFull>
 
     @POST("ai-service/cv-correction/analyze")
-    fun analyzeCvCall(@Body request: CvAnalysisRequest): Call<CvAnalysisResponse>
+    fun analyzeCvFullCall(@Body request: CvAnalysisRequest): Call<CvAnalysisResponseFull>
+
+    @POST("ai-service/cv-correction/analyze")
+    suspend fun analyzeCv(@Body request: CvAnalysisRequest): Response<CvAnalysisResponseLegacy>
+
+    @POST("ai-service/cv-correction/analyze")
+    fun analyzeCvCall(@Body request: CvAnalysisRequest): Call<CvAnalysisResponseLegacy>
 
     // ===== APPLICATION RANKING ENDPOINTS =====
 

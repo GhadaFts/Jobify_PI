@@ -145,5 +145,9 @@ dependencies {
 
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    // PDF extraction
+    implementation("org.apache.pdfbox:pdfbox:2.0.27")
+// Alternative pour iText (si vous préférez)
+    implementation("com.itextpdf:itext7-core:7.2.5")
 }
 // Cache-busting comment to force a full project sync

@@ -27,26 +27,17 @@ class ApplicationDialogActivity : AppCompatActivity() {
 
     private lateinit var jobTitleText: TextView
     private lateinit var companyNameText: TextView
-    private lateinit var btnGenerateCV: Button
-    private lateinit var btnDownloadPDF: Button
     private lateinit var btnUploadCV: Button
     private lateinit var btnSubmitApplication: Button
     private lateinit var btnCancel: Button
     private lateinit var coverLetterInput: TextInputEditText
     private lateinit var errorMessageText: TextView
     private lateinit var successMessageText: TextView
-    private lateinit var cvPreviewCard: CardView
-    private lateinit var cvPreviewText: TextView
-    private lateinit var atsScoreCard: CardView
-    private lateinit var atsScoreText: TextView
-    private lateinit var keywordsContainer: LinearLayout
     private lateinit var uploadedFileText: TextView
     private lateinit var progressBar: ProgressBar
 
     private var jobPost: JobPost? = null
     private var uploadedFileUri: Uri? = null
-    private var generatedCVText: String? = null
-    private var atsScore: Int = 0
     private var cvLink: String? = null
 
     private lateinit var sessionManager: SessionManager
@@ -79,32 +70,17 @@ class ApplicationDialogActivity : AppCompatActivity() {
     private fun initViews() {
         jobTitleText = findViewById(R.id.jobTitleText)
         companyNameText = findViewById(R.id.companyNameText)
-        btnGenerateCV = findViewById(R.id.btnGenerateCV)
-        btnDownloadPDF = findViewById(R.id.btnDownloadPDF)
         btnUploadCV = findViewById(R.id.btnUploadCV)
         btnSubmitApplication = findViewById(R.id.btnSubmitApplication)
         btnCancel = findViewById(R.id.btnCancel)
         coverLetterInput = findViewById(R.id.coverLetterInput)
         errorMessageText = findViewById(R.id.errorMessageText)
         successMessageText = findViewById(R.id.successMessageText)
-        cvPreviewCard = findViewById(R.id.cvPreviewCard)
-        cvPreviewText = findViewById(R.id.cvPreviewText)
-        atsScoreCard = findViewById(R.id.atsScoreCard)
-        atsScoreText = findViewById(R.id.atsScoreText)
-        keywordsContainer = findViewById(R.id.keywordsContainer)
         uploadedFileText = findViewById(R.id.uploadedFileText)
         progressBar = findViewById(R.id.progressBar)
     }
 
     private fun setupListeners() {
-        btnGenerateCV.setOnClickListener {
-            generateAICV()
-        }
-
-        btnDownloadPDF.setOnClickListener {
-            downloadPDF()
-        }
-
         btnUploadCV.setOnClickListener {
             openFilePicker()
         }
@@ -122,106 +98,6 @@ class ApplicationDialogActivity : AppCompatActivity() {
         jobPost?.let { job ->
             jobTitleText.text = job.title
             companyNameText.text = "at ${job.jobPosition}"
-        }
-    }
-
-    // Keep the mock AI CV generation (static, no backend call)
-    private fun generateAICV() {
-        showProgress(true)
-        hideMessages()
-
-        // Simulate AI CV generation (no backend call)
-        android.os.Handler(mainLooper).postDelayed({
-            generateMockCV()
-            showProgress(false)
-            showSuccess("CV generated successfully!")
-
-            // Show CV preview and ATS score
-            cvPreviewCard.visibility = View.VISIBLE
-            atsScoreCard.visibility = View.VISIBLE
-            btnDownloadPDF.visibility = View.VISIBLE
-            btnSubmitApplication.isEnabled = true
-        }, 2000)
-    }
-
-    private fun generateMockCV() {
-        jobPost?.let { job ->
-            generatedCVText = """
-                PROFESSIONAL SUMMARY
-                ==================
-                Experienced professional seeking ${job.title} position with ${job.experience} years of experience.
-                
-                WORK EXPERIENCE
-                ==============
-                ${job.jobPosition}
-                ${job.experience}
-                
-                SKILLS
-                ======
-                ${job.skills.joinToString(", ")}
-                
-                DESCRIPTION
-                ===========
-                ${job.description}
-            """.trimIndent()
-
-            cvPreviewText.text = generatedCVText
-
-            // Mock ATS score (70-95)
-            atsScore = (70..95).random()
-            atsScoreText.text = "$atsScore/100"
-
-            // Set color based on score
-            val scoreColor = when {
-                atsScore >= 80 -> android.graphics.Color.parseColor("#10B981") // green
-                atsScore >= 60 -> android.graphics.Color.parseColor("#F59E0B") // orange
-                else -> android.graphics.Color.parseColor("#EF4444") // red
-            }
-            atsScoreText.setTextColor(scoreColor)
-
-            // Display keywords
-            displayKeywords(job.skills)
-        }
-    }
-
-    private fun displayKeywords(keywords: List<String>) {
-        keywordsContainer.removeAllViews()
-
-        // Create rows with up to 3 chips per row
-        val keywordsList = keywords.take(8)
-        var currentRow: LinearLayout? = null
-
-        keywordsList.forEachIndexed { index, keyword ->
-            // Create new row every 3 items
-            if (index % 3 == 0) {
-                currentRow = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        setMargins(0, 0, 0, 8)
-                    }
-                }
-                keywordsContainer.addView(currentRow)
-            }
-
-            val chip = TextView(this).apply {
-                text = keyword
-                setPadding(16, 8, 16, 8)
-                setBackgroundResource(R.drawable.keyword_chip_background)
-                setTextColor(android.graphics.Color.parseColor("#065F46"))
-                textSize = 12f
-
-                val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, 0, 8, 0)
-                }
-                layoutParams = params
-            }
-            currentRow?.addView(chip)
         }
     }
 
@@ -264,14 +140,6 @@ class ApplicationDialogActivity : AppCompatActivity() {
             }
         }
         return result
-    }
-
-    private fun downloadPDF() {
-        if (generatedCVText != null) {
-            showSuccess("PDF downloaded successfully!")
-        } else {
-            showError("No CV generated yet. Please generate a CV first.")
-        }
     }
 
     // REAL BACKEND INTEGRATION - Submit application with CV upload
@@ -416,7 +284,6 @@ class ApplicationDialogActivity : AppCompatActivity() {
 
     private fun showProgress(show: Boolean) {
         progressBar.visibility = if (show) View.VISIBLE else View.GONE
-        btnGenerateCV.isEnabled = !show
         btnUploadCV.isEnabled = !show
         btnSubmitApplication.isEnabled = !show
     }
