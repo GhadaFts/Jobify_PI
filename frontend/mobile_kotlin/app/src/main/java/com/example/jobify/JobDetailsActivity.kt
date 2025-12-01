@@ -25,7 +25,13 @@ class JobDetailsActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 if (job != null) {
-                    JobDetailsScreen(job = job!!, onNavigateUp = { finish() })
+                    JobDetailsScreen(job = job!!, onNavigateUp = { finish() }, onApplicantClick = { applicant ->
+                        // Open ApplicantDetailsActivity
+                        val intent = Intent(this, ApplicantDetailsActivity::class.java).apply {
+                            putExtra(ApplicantDetailsActivity.EXTRA_APPLICANT, applicant)
+                        }
+                        startActivity(intent)
+                    })
                 } else {
                     // Handle error case where job data is missing
                     finish()

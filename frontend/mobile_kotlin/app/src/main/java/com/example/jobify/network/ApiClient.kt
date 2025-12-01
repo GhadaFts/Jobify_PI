@@ -17,7 +17,16 @@ object ApiClient {
     // For Android Emulator: use 10.0.2.2 (this maps to localhost on your computer)
     // For Physical Device: use your computer's IP address (e.g., 192.168.1.100)
     // The gateway should be running on port 8888
-    private const val BASE_URL = "http://10.0.2.2:8888/"
+    const val BASE_URL = "http://10.0.2.2:8888/"
+
+    // Log the configured base URL at startup so we can quickly detect emulator vs device misconfiguration
+    init {
+        try {
+            android.util.Log.i("ApiClient", "Configured BASE_URL = $BASE_URL")
+        } catch (_: Throwable) {
+            // ignore logging errors during static init
+        }
+    }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -112,4 +121,6 @@ object ApiClient {
     val cvUploadService: CvUploadApiService = retrofit.create(CvUploadApiService::class.java)
     val careerService: CareerApiService = retrofit.create(CareerApiService::class.java)
     val aiService: AiApiService = retrofit.create(AiApiService::class.java)
+    val bookmarkService: BookmarkApiService = retrofit.create(BookmarkApiService::class.java)
+    val interviewService: InterviewApiService = retrofit.create(InterviewApiService::class.java)
 }

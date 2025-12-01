@@ -55,6 +55,7 @@
         <activity android:name=".AICareerAdvisorActivity" />
         <activity android:name=".CvCorrectionActivity" />
         <activity android:name=".InterviewPreparationActivity" />
+        <activity android:name=".ApplicantDetailsActivity" android:exported="false" />
     </application>
 
 </manifest>

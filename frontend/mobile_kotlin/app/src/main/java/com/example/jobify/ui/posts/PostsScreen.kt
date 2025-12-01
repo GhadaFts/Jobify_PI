@@ -41,6 +41,12 @@ fun PostsScreen(
     val showNotPublished by viewModel.showNotPublished.collectAsState()
     val selectedJob by viewModel.selectedJob.collectAsState()
     val jobToEdit by viewModel.jobToEdit.collectAsState()
+    
+    // Load bookmarks when screen is first composed
+    val bookmarkRepository = remember { com.example.jobify.data.BookmarkRepository.getInstance() }
+    LaunchedEffect(Unit) {
+        bookmarkRepository.loadBookmarks()
+    }
 
     selectedJob?.let { JobDetailsDialog(job = it, onDismiss = viewModel::dismissJobDetails) }
     jobToEdit?.let {

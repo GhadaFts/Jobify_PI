@@ -35,11 +35,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -65,9 +68,25 @@ fun JobCard(
     var isPublishing by remember { mutableStateOf(false) }
     var isApplicantsExpanded by remember { mutableStateOf(false) }
     var selectedApplicant by remember { mutableStateOf<com.example.jobify.model.Applicant?>(null) }
-    var favoriteApplicants by remember { mutableStateOf(setOf<String>()) }
     var underReviewApplicants by remember { mutableStateOf(setOf<String>()) }
     var currentJob by remember { mutableStateOf(job) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    
+    // Bookmark repository for managing favorites
+    val bookmarkRepository = remember { com.example.jobify.data.BookmarkRepository.getInstance() }
+    val bookmarkedJobIds by bookmarkRepository.bookmarkedJobIds.collectAsState()
+    
+    // Check if this job is bookmarked
+    val isJobBookmarked = remember(bookmarkedJobIds, job.id) {
+        // Parse job ID - handle both "8" and "8.0" formats
+        val jobId = try {
+            job.id.toDoubleOrNull()?.toLong()
+        } catch (e: Exception) {
+            null
+        }
+        jobId?.let { bookmarkedJobIds.contains(it) } ?: false
+    }
 
     Card(
         modifier = Modifier
@@ -154,52 +173,273 @@ fun JobCard(
                     onApplicantClick = { applicant -> selectedApplicant = applicant },
                     onInterviewClick = { /* TODO: Handle interview scheduling */ },
                     onFavoriteClick = { applicant ->
-                        // Toggle favorite
-                        favoriteApplicants = if (applicant.id in favoriteApplicants) {
-                            favoriteApplicants - applicant.id
-                        } else {
-                            favoriteApplicants + applicant.id
+                        // Toggle bookmark for this job (affects all applicants)
+                        coroutineScope.launch {
+                            // Parse job ID - handle both "8" and "8.0" formats
+                            val jobId = try {
+                                job.id.toDoubleOrNull()?.toLong()
+                            } catch (e: Exception) {
+                                null
+                            }
+                            
+                            jobId?.let { id ->
+                                android.util.Log.d("JobCard", "Toggling bookmark for job ID: $id, current state: $isJobBookmarked")
+                                val wasBookmarked = isJobBookmarked
+                                val success = bookmarkRepository.toggleBookmark(id)
+                                if (success) {
+                                    val action = if (wasBookmarked) "removed from" else "added to"
+                                    android.util.Log.d("JobCard", "Bookmark toggled successfully, new state: ${!wasBookmarked}")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Application $action favorites",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    android.util.Log.e("JobCard", "Failed to toggle bookmark")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Failed to update favorites",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } ?: run {
+                                android.util.Log.e("JobCard", "Failed to parse job ID: ${job.id}")
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Invalid job ID format",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     },
-                    favoriteApplicants = favoriteApplicants,
+                    favoriteApplicants = if (isJobBookmarked) {
+                        // If job is bookmarked, all applicants are favorites
+                        currentJob.applicants.map { it.id }.toSet()
+                    } else {
+                        emptySet()
+                    },
                     underReviewApplicants = underReviewApplicants,
                     onActionClick = { applicant ->
                         // TODO: Handle action click
                     },
                     onActionAccepted = { applicant ->
-                        // Update applicant to accepted
-                        val updatedApplicants = currentJob.applicants.map { app ->
-                            if (app.id == applicant.id) {
-                                app.copy(status = "accepted", isNew = false)
-                            } else {
-                                app
+                        // Update applicant status to accepted via backend
+                        coroutineScope.launch {
+                            try {
+                                android.util.Log.d("JobCard", "Accepting application ${applicant.id}")
+                                val response = com.example.jobify.network.ApiClient.applicationService.updateApplicationStatus(
+                                    id = applicant.id,
+                                    payload = mapOf("status" to "ACCEPTED")
+                                )
+                                
+                                android.util.Log.d("JobCard", "Accept response code: ${response.code()}, success: ${response.isSuccessful}")
+                                if (response.isSuccessful) {
+                                    val responseBody = response.body()
+                                    android.util.Log.d("JobCard", "Application accepted successfully, response: $responseBody")
+                                    // Update local state
+                                    val updatedApplicants = currentJob.applicants.map { app ->
+                                        if (app.id == applicant.id) {
+                                            app.copy(status = "accepted", isNew = false)
+                                        } else {
+                                            app
+                                        }
+                                    }
+                                    currentJob = currentJob.copy(applicants = updatedApplicants)
+                                    underReviewApplicants = underReviewApplicants - applicant.id
+                                    
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Application accepted",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    val errorBody = response.errorBody()?.string()
+                                    android.util.Log.e("JobCard", "Failed to accept application: ${response.code()}, message: ${response.message()}, error: $errorBody")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Failed to accept application: ${response.code()}",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("JobCard", "Error accepting application: ${e.message}", e)
+                                e.printStackTrace()
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Error: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
-                        currentJob = currentJob.copy(applicants = updatedApplicants)
-                        underReviewApplicants = underReviewApplicants - applicant.id
                     },
                     onActionRejected = { applicant ->
-                        // Update applicant to rejected
-                        val updatedApplicants = currentJob.applicants.map { app ->
-                            if (app.id == applicant.id) {
-                                app.copy(status = "rejected", isNew = false)
-                            } else {
-                                app
+                        // Update applicant status to rejected via backend
+                        coroutineScope.launch {
+                            try {
+                                android.util.Log.d("JobCard", "Rejecting application ${applicant.id}")
+                                val response = com.example.jobify.network.ApiClient.applicationService.updateApplicationStatus(
+                                    id = applicant.id,
+                                    payload = mapOf("status" to "REJECTED")
+                                )
+                                
+                                android.util.Log.d("JobCard", "Reject response code: ${response.code()}, success: ${response.isSuccessful}")
+                                if (response.isSuccessful) {
+                                    val responseBody = response.body()
+                                    android.util.Log.d("JobCard", "Application rejected successfully, response: $responseBody")
+                                    // Update local state
+                                    val updatedApplicants = currentJob.applicants.map { app ->
+                                        if (app.id == applicant.id) {
+                                            app.copy(status = "rejected", isNew = false)
+                                        } else {
+                                            app
+                                        }
+                                    }
+                                    currentJob = currentJob.copy(applicants = updatedApplicants)
+                                    underReviewApplicants = underReviewApplicants - applicant.id
+                                    
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Application rejected",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    val errorBody = response.errorBody()?.string()
+                                    android.util.Log.e("JobCard", "Failed to reject application: ${response.code()}, message: ${response.message()}, error: $errorBody")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Failed to reject application: ${response.code()}",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("JobCard", "Error rejecting application: ${e.message}", e)
+                                e.printStackTrace()
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Error: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
-                        currentJob = currentJob.copy(applicants = updatedApplicants)
-                        underReviewApplicants = underReviewApplicants - applicant.id
                     },
                     onInterviewScheduled = { applicant, interviewDetails ->
-                        // Update applicant to interview_scheduled
-                        val updatedApplicants = currentJob.applicants.map { app ->
-                            if (app.id == applicant.id) {
-                                app.copy(status = "interview_scheduled", isNew = false)
-                            } else {
-                                app
+                        // Schedule interview via backend
+                        coroutineScope.launch {
+                            try {
+                                android.util.Log.d("JobCard", "Scheduling interview for application ${applicant.id}")
+                                
+                                // Validate jobSeekerId is present
+                                if (applicant.jobSeekerId.isNullOrEmpty()) {
+                                    android.util.Log.e("JobCard", "Cannot schedule interview: jobSeekerId is missing")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Cannot schedule interview: applicant information incomplete",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@launch
+                                }
+                                
+                                // Parse interview details and build request
+                                // Convert date from "MM/dd/yyyy" to "yyyy-MM-dd"
+                                val dateParts = interviewDetails.date.split("/")
+                                val isoDate = if (dateParts.size == 3) {
+                                    "${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}"
+                                } else {
+                                    interviewDetails.date // fallback
+                                }
+                                
+                                // Convert time from "hh:mm AM/PM" to "HH:mm:ss" (24-hour format)
+                                val timeParts = interviewDetails.time.replace(" AM", "").replace(" PM", "").split(":")
+                                val isPM = interviewDetails.time.contains("PM")
+                                val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 0
+                                val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+                                
+                                val hour24 = when {
+                                    isPM && hour != 12 -> hour + 12
+                                    !isPM && hour == 12 -> 0
+                                    else -> hour
+                                }
+                                
+                                val isoTime = String.format("%02d:%02d:00", hour24, minute)
+                                val scheduledDateTime = "${isoDate}T${isoTime}"
+                                
+                                android.util.Log.d("JobCard", "Converted date/time: ${interviewDetails.date} ${interviewDetails.time} -> $scheduledDateTime")
+                                
+                                // Map interview type
+                                val interviewType = when (interviewDetails.type.lowercase()) {
+                                    "online" -> "REMOTE"
+                                    "local" -> "ON_SITE"
+                                    else -> "REMOTE"
+                                }
+                                
+                                val request = com.example.jobify.network.InterviewRequestDTO(
+                                    applicationId = applicant.id,
+                                    jobSeekerId = applicant.jobSeekerId,
+                                    scheduledDate = scheduledDateTime,
+                                    duration = interviewDetails.duration.toIntOrNull() ?: 60,
+                                    location = interviewDetails.location,
+                                    interviewType = interviewType,
+                                    notes = interviewDetails.notes,
+                                    meetingLink = interviewDetails.meetingLink
+                                )
+                                
+                                val response = com.example.jobify.network.ApiClient.interviewService.scheduleInterview(request)
+                                
+                                android.util.Log.d("JobCard", "Interview schedule response code: ${response.code()}, success: ${response.isSuccessful}")
+                                
+                                if (response.isSuccessful) {
+                                    val responseBody = response.body()
+                                    android.util.Log.d("JobCard", "Interview scheduled successfully, response: $responseBody")
+                                    
+                                    // Update application status to interview_scheduled
+                                    val statusResponse = com.example.jobify.network.ApiClient.applicationService.updateApplicationStatus(
+                                        id = applicant.id,
+                                        payload = mapOf("status" to "INTERVIEW_SCHEDULED")
+                                    )
+                                    
+                                    if (statusResponse.isSuccessful) {
+                                        // Update local state
+                                        val updatedApplicants = currentJob.applicants.map { app ->
+                                            if (app.id == applicant.id) {
+                                                app.copy(status = "interview_scheduled", isNew = false)
+                                            } else {
+                                                app
+                                            }
+                                        }
+                                        currentJob = currentJob.copy(applicants = updatedApplicants)
+                                        
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "Interview scheduled successfully",
+                                            android.widget.Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        android.util.Log.e("JobCard", "Failed to update application status after interview scheduling")
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "Interview scheduled but status update failed",
+                                            android.widget.Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                } else {
+                                    val errorBody = response.errorBody()?.string()
+                                    android.util.Log.e("JobCard", "Failed to schedule interview: ${response.code()}, message: ${response.message()}, error: $errorBody")
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Failed to schedule interview: ${response.code()}",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("JobCard", "Error scheduling interview: ${e.message}", e)
+                                e.printStackTrace()
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Error: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
-                        currentJob = currentJob.copy(applicants = updatedApplicants)
                     }
                 )
             }
@@ -209,54 +449,61 @@ fun JobCard(
                 // Get the current version of the applicant from the job to reflect any status changes
                 val currentApplicant = currentJob.applicants.find { it.id == selectedApplicantItem.id } ?: selectedApplicantItem
 
-                // For now, we'll use a simple mapping - in real app, this would come from API/full profile
+                // Debug: Log the appliedDate value
+                android.util.Log.d("JobCard", "Applicant ${currentApplicant.id} appliedDate: ${currentApplicant.appliedDate} (${java.text.SimpleDateFormat("d MMMM yyyy", java.util.Locale.FRENCH).format(java.util.Date(currentApplicant.appliedDate))})")
+
+                // Map real applicant data from backend to ApplicantProfile
                 val profile = com.example.jobify.model.ApplicantProfile(
                     id = currentApplicant.id,
                     name = currentApplicant.name,
                     title = currentApplicant.title,
-                    location = "Morocco",
-                    phoneNumber = "+212 612-345678",
-                    email = "${currentApplicant.name.lowercase().replace(" ", ".")}@email.com",
-                    dateOfBirth = "May 15, 1990",
-                    gender = "Male",
-                    profileImageUrl = null,
-                    cvUrl = "dummy.pdf",
-                    motivationLetter = "I am very interested in this frontend developer position. With my extensive experience in React and Node.js, I believe I can contribute significantly to your team.",
-                    skills = listOf("React", "TypeScript", "Next.js", "CSS", "Node.js"),
-                    experience = listOf(
+                    location = currentApplicant.location ?: "",
+                    phoneNumber = currentApplicant.phone ?: "",
+                    email = currentApplicant.email ?: "",
+                    dateOfBirth = currentApplicant.dateOfBirth ?: "",
+                    gender = currentApplicant.gender ?: "",
+                    nationality = currentApplicant.nationality ?: "",
+                    status = currentApplicant.status,
+                    profileImageUrl = currentApplicant.profileImageUrl,
+                    cvUrl = currentApplicant.cvLink,
+                    motivationLetter = currentApplicant.motivation ?: "",
+                    skills = currentApplicant.skills,
+                    experience = currentApplicant.experienceList.mapIndexed { index, expStr ->
+                        // Parse experience string format: "position • company startDate - endDate\ndescription"
+                        val lines = expStr.split("\n")
+                        val headerLine = lines.firstOrNull() ?: ""
+                        val description = lines.drop(1).joinToString("\n")
+                        val parts = headerLine.split(" • ")
+                        val position = parts.getOrNull(0) ?: ""
+                        val companyAndDates = parts.getOrNull(1) ?: ""
+                        val companyParts = companyAndDates.split(Regex("\\s+\\d"))
+                        val company = companyParts.firstOrNull() ?: ""
                         com.example.jobify.model.Experience(
-                            id = "exp1",
-                            jobTitle = "Tech Lead",
-                            company = "XYZ Company",
-                            startDate = "January 1, 2020",
-                            endDate = "January 1, 2024",
-                            description = "Led a team of 5 developers on React/Node.js projects"
-                        ),
-                        com.example.jobify.model.Experience(
-                            id = "exp2",
-                            jobTitle = "Frontend Developer",
-                            company = "ABC Corp",
-                            startDate = "January 1, 2018",
-                            endDate = "January 1, 2020",
-                            description = "Web application development with React and Redux"
+                            id = "exp$index",
+                            jobTitle = position,
+                            company = company,
+                            startDate = "",
+                            endDate = "",
+                            description = description
                         )
-                    ),
-                    education = listOf(
+                    },
+                    education = currentApplicant.educationList.mapIndexed { index, eduStr ->
+                        // Parse education string format: "degree en field • school (graduationDate)"
+                        val parts = eduStr.split(" • ")
+                        val degreeField = parts.getOrNull(0) ?: eduStr
+                        val schoolGrad = parts.getOrNull(1) ?: ""
+                        val school = schoolGrad.replace(Regex("\\s*\\([^)]*\\)"), "")
                         com.example.jobify.model.Education(
-                            id = "edu1",
-                            degree = "Master in Computer Science",
-                            institution = "Hassan II University",
-                            graduationDate = "June 1, 2018"
-                        ),
-                        com.example.jobify.model.Education(
-                            id = "edu2",
-                            degree = "Bachelor in Software Engineering",
-                            institution = "ENSA Marrakech",
-                            graduationDate = "June 1, 2016"
+                            id = "edu$index",
+                            degree = degreeField,
+                            institution = school,
+                            graduationDate = ""
                         )
-                    ),
-                    githubUrl = "github.com/user",
-                    websiteUrl = "portfolio.com",
+                    },
+                    githubUrl = currentApplicant.socials["github"],
+                    websiteUrl = currentApplicant.socials["website"],
+                    twitterUrl = currentApplicant.socials["twitter"],
+                    facebookUrl = currentApplicant.socials["facebook"],
                     isNew = currentApplicant.isNew,
                     appliedDate = currentApplicant.appliedDate
                 )
@@ -266,21 +513,52 @@ fun JobCard(
                     onDismiss = { selectedApplicant = null },
                     onContactClick = { /* TODO: Handle contact */ },
                     isUnderReviewStatus = selectedApplicantItem.id in underReviewApplicants,
+                    onDownloadCV = {
+                        profile.cvUrl?.let { cvUrl ->
+                            // Extract filename from URL or use applicant name
+                            val filename = cvUrl.substringAfterLast("/").ifEmpty { "${profile.name.replace(" ", "_")}_CV.pdf" }
+                            coroutineScope.launch {
+                                downloadCV(context, cvUrl, filename)
+                            }
+                        }
+                    },
                     onStatusChanged = { newStatus ->
-                        // Update the applicant status to "Under Review"
-                        // Add the applicant ID to underReviewApplicants set
-                        if (newStatus == "Under Review") {
-                            underReviewApplicants = underReviewApplicants + selectedApplicantItem.id
-
-                            // Update the applicant in the job's applicants list
-                            val updatedApplicants = currentJob.applicants.map { app ->
-                                if (app.id == selectedApplicantItem.id) {
-                                    app.copy(status = "under_review", isNew = false)
+                        // Update the applicant status in backend
+                        coroutineScope.launch {
+                            try {
+                                // Call backend API to update status
+                                val response = com.example.jobify.network.ApiClient.applicationService.updateApplicationStatus(
+                                    id = selectedApplicantItem.id,
+                                    payload = mapOf("status" to newStatus.uppercase())
+                                )
+                                
+                                if (response.isSuccessful) {
+                                    android.util.Log.d("JobCard", "Status updated successfully to $newStatus for application ${selectedApplicantItem.id}")
+                                    
+                                    // Update local state only after successful backend update
+                                    underReviewApplicants = underReviewApplicants + selectedApplicantItem.id
+                                    
+                                    // Update the applicant in the job's applicants list
+                                    val updatedApplicants = currentJob.applicants.map { app ->
+                                        if (app.id == selectedApplicantItem.id) {
+                                            app.copy(status = newStatus.lowercase(), isNew = false)
+                                        } else {
+                                            app
+                                        }
+                                    }
+                                    currentJob = currentJob.copy(applicants = updatedApplicants)
                                 } else {
-                                    app
+                                    android.util.Log.e("JobCard", "Failed to update status: ${response.code()}")
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                        android.widget.Toast.makeText(context, "Failed to update status", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("JobCard", "Error updating status", e)
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                    android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                                 }
                             }
-                            currentJob = currentJob.copy(applicants = updatedApplicants)
                         }
                     },
                     onActionAccepted = {
@@ -472,5 +750,59 @@ private fun getPostedTime(timestamp: Long): String {
         days > 1 -> "$days days ago"
         days == 1L -> "1 day ago"
         else -> "Today"
+    }
+}
+
+private suspend fun downloadCV(context: android.content.Context, cvUrl: String, filename: String) {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+        android.widget.Toast.makeText(context, "Downloading CV...", android.widget.Toast.LENGTH_SHORT).show()
+    }
+    
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+            val apiService = com.example.jobify.network.ApiClient.cvUploadService
+            val response = apiService.downloadCV(cvUrl).execute()
+            
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                
+                // Save to Downloads folder
+                val contentValues = android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+                    put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+                }
+                
+                val uri = context.contentResolver.insert(
+                    android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )
+                
+                uri?.let { fileUri ->
+                    context.contentResolver.openOutputStream(fileUri)?.use { outputStream ->
+                        body.byteStream().use { inputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                    }
+                    
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, "CV downloaded successfully to Downloads", android.widget.Toast.LENGTH_LONG).show()
+                    }
+                } ?: run {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, "Failed to save CV", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    android.widget.Toast.makeText(context, "Failed to download CV", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("JobCard", "Error downloading CV", e)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

@@ -39,17 +39,18 @@ import com.example.jobify.ui.posts.Chip
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun JobDetailsScreen(job: Job, onNavigateUp: () -> Unit) {
+fun JobDetailsScreen(
+    job: Job,
+    onNavigateUp: () -> Unit,
+    onApplicantClick: (com.example.jobify.model.Applicant) -> Unit = {}
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Job Details") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -62,6 +63,7 @@ fun JobDetailsScreen(job: Job, onNavigateUp: () -> Unit) {
                 .padding(16.dp)
         ) {
             item {
+                // Header
                 Text(text = job.title, fontWeight = FontWeight.Bold, fontSize = 24.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = job.company, color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
@@ -77,10 +79,11 @@ fun JobDetailsScreen(job: Job, onNavigateUp: () -> Unit) {
                     DetailInfoChip(icon = Icons.Default.AttachMoney, text = job.salaryRange)
                     DetailInfoChip(icon = Icons.Default.People, text = "${job.applicantsCount} applicants")
                 }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 SectionTitle("Job Description")
-                Text(text = job.shortDescription, fontSize = 16.sp, lineHeight = 24.sp)
+                Text(text = job.shortDescription, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(24.dp))
 
                 SectionTitle("Required Skills")
@@ -94,8 +97,17 @@ fun JobDetailsScreen(job: Job, onNavigateUp: () -> Unit) {
 
                 SectionTitle("Requirements")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    job.requirements.forEach { requirement ->
-                        RequirementItem(text = requirement)
+                    job.requirements.forEach { requirement -> RequirementItem(text = requirement) }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Applicants list
+                if (job.applicants.isNotEmpty()) {
+                    SectionTitle("Applicants")
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        job.applicants.forEach { applicant ->
+                            ApplicantRow(applicant = applicant, onClick = { onApplicantClick(applicant) })
+                        }
                     }
                 }
             }
@@ -104,7 +116,25 @@ fun JobDetailsScreen(job: Job, onNavigateUp: () -> Unit) {
 }
 
 @Composable
-private fun SectionTitle(title: String) {
+fun ApplicantRow(applicant: com.example.jobify.model.Applicant, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = applicant.name, fontWeight = FontWeight.Bold)
+            Text(text = applicant.title, color = Color.Gray)
+        }
+        IconButton(onClick = onClick) {
+            Text(text = "View", color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+@Composable
+fun SectionTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
@@ -114,7 +144,7 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun RequirementItem(text: String) {
+fun RequirementItem(text: String) {
     Row(verticalAlignment = Alignment.Top) {
         Icon(
             imageVector = Icons.Default.Check,
@@ -128,7 +158,7 @@ private fun RequirementItem(text: String) {
 }
 
 @Composable
-private fun DetailInfoChip(icon: ImageVector, text: String) {
+fun DetailInfoChip(icon: ImageVector, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,

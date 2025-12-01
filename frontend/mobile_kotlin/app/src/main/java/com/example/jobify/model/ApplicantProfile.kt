@@ -31,6 +31,8 @@ data class ApplicantProfile(
     val email: String,
     val dateOfBirth: String,
     val gender: String,
+    val nationality: String,
+    val status: String,
     val profileImageUrl: String?,
     val cvUrl: String?,
     val motivationLetter: String,
@@ -39,6 +41,8 @@ data class ApplicantProfile(
     val education: List<Education>,
     val githubUrl: String?,
     val websiteUrl: String?,
+    val twitterUrl: String?,
+    val facebookUrl: String?,
     val isNew: Boolean = true,
     val appliedDate: Long
 ) : Parcelable

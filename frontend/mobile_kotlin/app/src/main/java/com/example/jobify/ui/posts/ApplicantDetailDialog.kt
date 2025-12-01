@@ -43,18 +43,19 @@ fun ApplicantDetailDialog(
     isUnderReviewStatus: Boolean = false, // Track if status has changed to Under Review
     onActionAccepted: () -> Unit = { }, // Callback when action is accepted
     onActionRejected: () -> Unit = { }, // Callback when action is rejected
-    onInterviewScheduled: (InterviewDetails) -> Unit = { } // Callback when interview is scheduled
+    onInterviewScheduled: (InterviewDetails) -> Unit = { }, // Callback when interview is scheduled
+    onDownloadCV: () -> Unit = { } // Callback when download CV is clicked
 ) {
     var statusChanged by remember { mutableStateOf(isUnderReviewStatus) }
     var showActionDialog by remember { mutableStateOf(false) }
     var showInterviewDialog by remember { mutableStateOf(false) }
 
-    // 20-second timer effect - only if applicant is "new"
-    LaunchedEffect(applicantProfile.isNew, statusChanged) {
-        if (applicantProfile.isNew && !statusChanged) {
+    // 20-second timer effect - only if applicant status is "NEW"
+    LaunchedEffect(applicantProfile.status, statusChanged) {
+        if (applicantProfile.status.lowercase() == "new" && !statusChanged) {
             delay(20000) // Wait 20 seconds
             statusChanged = true
-            onStatusChanged("Under Review")
+            onStatusChanged("under_review")
         }
     }
 
@@ -127,33 +128,19 @@ fun ApplicantDetailDialog(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp
                                 )
-                                // Dynamic status badge
-                                if (statusChanged) {
-                                    Surface(
-                                        color = Color(0xFFFCD34D),
-                                        shape = RoundedCornerShape(4.dp)
-                                    ) {
-                                        Text(
-                                            "Under Review",
-                                            color = Color(0xFF92400E),
-                                            fontSize = 8.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                        )
-                                    }
-                                } else if (applicantProfile.isNew) {
-                                    Surface(
-                                        color = Color(0xFF3B82F6),
-                                        shape = RoundedCornerShape(4.dp)
-                                    ) {
-                                        Text(
-                                            "new",
-                                            color = Color.White,
-                                            fontSize = 8.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                        )
-                                    }
+                                // Status badge from backend
+                                val statusData = getApplicationStatusData(applicantProfile.status)
+                                Surface(
+                                    color = statusData.first,
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        statusData.second,
+                                        color = statusData.third,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
                                 }
                             }
                             Text(
@@ -166,6 +153,29 @@ fun ApplicantDetailDialog(
                                 color = Color.Gray,
                                 fontSize = 12.sp
                             )
+                            // Nationality and phone on same line like web
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (applicantProfile.nationality.isNotBlank()) {
+                                    Text(
+                                        applicantProfile.nationality,
+                                        color = Color.Gray,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                                if (applicantProfile.nationality.isNotBlank() && applicantProfile.phoneNumber.isNotBlank()) {
+                                    Text("•", color = Color.Gray, fontSize = 12.sp)
+                                }
+                                if (applicantProfile.phoneNumber.isNotBlank()) {
+                                    Text(
+                                        applicantProfile.phoneNumber,
+                                        color = Color.Gray,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -303,7 +313,7 @@ fun ApplicantDetailDialog(
                             )
                             if (applicantProfile.cvUrl != null) {
                                 Button(
-                                    onClick = { /* TODO: Download CV */ },
+                                    onClick = onDownloadCV,
                                     modifier = Modifier.height(28.dp),
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     colors = ButtonDefaults.buttonColors(
@@ -431,52 +441,102 @@ fun ApplicantDetailDialog(
                         }
                     }
 
-                    // Social Links
-                    if (applicantProfile.githubUrl != null || applicantProfile.websiteUrl != null) {
-                        Column {
+                    // Social Links - Make clickable and add all social media
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Text(
                                 "Social Links",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                if (applicantProfile.githubUrl != null) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Code,
-                                            contentDescription = "GitHub",
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            "GitHub",
-                                            fontSize = 12.sp,
-                                            color = Color(0xFF3B82F6)
-                                        )
-                                    }
+                            if (applicantProfile.githubUrl != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.clickable { /* Open GitHub URL */ }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Code,
+                                        contentDescription = "GitHub",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Text(
+                                        "GitHub",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF3B82F6)
+                                    )
                                 }
-                                if (applicantProfile.websiteUrl != null) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Language,
-                                            contentDescription = "Website",
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            "Website",
-                                            fontSize = 12.sp,
-                                            color = Color(0xFF3B82F6)
-                                        )
-                                    }
+                            }
+                            if (applicantProfile.websiteUrl != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.clickable { /* Open Website URL */ }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Language,
+                                        contentDescription = "Website",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Text(
+                                        "Website",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF3B82F6)
+                                    )
                                 }
+                            }
+                            if (applicantProfile.twitterUrl != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.clickable { /* Open Twitter URL */ }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Language,
+                                        contentDescription = "Twitter",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Text(
+                                        "Twitter",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF3B82F6)
+                                    )
+                                }
+                            }
+                            if (applicantProfile.facebookUrl != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.clickable { /* Open Facebook URL */ }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Language,
+                                        contentDescription = "Facebook",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Text(
+                                        "Facebook",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF3B82F6)
+                                    )
+                                }
+                            }
+                            if (applicantProfile.githubUrl == null && applicantProfile.websiteUrl == null && applicantProfile.twitterUrl == null && applicantProfile.facebookUrl == null) {
+                                Text(
+                                    "No social links",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
                             }
                         }
                     }
@@ -509,8 +569,11 @@ fun ApplicantDetailDialog(
                             Text("Contact Candidate", fontSize = 12.sp, color = Color.White)
                         }
 
-                        // Action button - appears after 20 seconds
-                        if (statusChanged) {
+                        // Action button - appears for under_review or interview_scheduled status
+                        val showActionButton = applicantProfile.status.lowercase() == "under_review" || 
+                                              applicantProfile.status.lowercase() == "interview_scheduled" ||
+                                              statusChanged
+                        if (showActionButton) {
                             Button(
                                 onClick = { showActionDialog = true },
                                 modifier = Modifier
@@ -802,8 +865,11 @@ fun ScheduleInterviewDialog(
     var duration by remember { mutableStateOf("60") }
     var interviewType by remember { mutableStateOf("Local Interview") }
     var location by remember { mutableStateOf("") }
+    var meetingLink by remember { mutableStateOf("") }
     var additionalNotes by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
+    
+    val isOnlineInterview = interviewType == "Online Interview"
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -1074,22 +1140,33 @@ fun ScheduleInterviewDialog(
                         }
                     }
 
-                    // Location
+                    // Location / Meeting Link
                     Column {
                         Text(
-                            "Location *",
+                            if (isOnlineInterview) "Meeting Link *" else "Location *",
                             fontWeight = FontWeight.Medium,
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        OutlinedTextField(
-                            value = location,
-                            onValueChange = { location = it },
-                            placeholder = { Text("e.g. Conference Room A, Office 123, etc.") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(6.dp),
-                            singleLine = true
-                        )
+                        if (isOnlineInterview) {
+                            OutlinedTextField(
+                                value = meetingLink,
+                                onValueChange = { meetingLink = it },
+                                placeholder = { Text("e.g. https://meet.google.com/abc-defg-hij") },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(6.dp),
+                                singleLine = true
+                            )
+                        } else {
+                            OutlinedTextField(
+                                value = location,
+                                onValueChange = { location = it },
+                                placeholder = { Text("e.g. Conference Room A, Office 123, etc.") },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(6.dp),
+                                singleLine = true
+                            )
+                        }
                     }
 
                     // Additional Notes
@@ -1145,23 +1222,24 @@ fun ScheduleInterviewDialog(
                                     ""
                                 }
 
-                                if (interviewDate.isNotEmpty() && formattedTime.isNotEmpty() && location.isNotEmpty()) {
+                                if (interviewDate.isNotEmpty() && formattedTime.isNotEmpty() && 
+                                    ((isOnlineInterview && meetingLink.isNotEmpty()) || (!isOnlineInterview && location.isNotEmpty()))) {
                                     onSchedule(
                                         InterviewDetails(
                                             date = interviewDate,
                                             time = formattedTime,
                                             duration = duration,
                                             type = interviewType,
-                                            location = location,
-                                            notes = additionalNotes
+                                            location = if (isOnlineInterview) meetingLink else location,
+                                            notes = additionalNotes,
+                                            meetingLink = if (isOnlineInterview) meetingLink else ""
                                         )
                                     )
                                 }
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp),
-                            enabled = interviewDate.isNotEmpty() && interviewHour.isNotEmpty() && interviewMinute.isNotEmpty() && location.isNotEmpty(),
+                            modifier = Modifier.height(40.dp),
+                            enabled = interviewDate.isNotEmpty() && interviewHour.isNotEmpty() && interviewMinute.isNotEmpty() && 
+                                ((isOnlineInterview && meetingLink.isNotEmpty()) || (!isOnlineInterview && location.isNotEmpty())),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF3B82F6),
                                 disabledContainerColor = Color(0xFFCBD5E1)
@@ -1194,7 +1272,8 @@ data class InterviewDetails(
     val duration: String,
     val type: String,
     val location: String,
-    val notes: String
+    val notes: String,
+    val meetingLink: String = ""
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

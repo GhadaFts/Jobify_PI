@@ -247,76 +247,19 @@ fun ApplicantCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        // Show "Under Review" badge if status changed
-                        if (isUnderReview) {
-                            Surface(
-                                color = Color(0xFFFCD34D),
-                                shape = RoundedCornerShape(3.dp)
-                            ) {
-                                Text(
-                                    "Under Review",
-                                    color = Color(0xFF92400E),
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                                )
-                            }
-                        } else if (applicant.status == "interview_scheduled") {
-                            // Show "Interview Scheduled" badge in blue
-                            Surface(
-                                color = Color(0xFFDEEBF7),
-                                shape = RoundedCornerShape(3.dp)
-                            ) {
-                                Text(
-                                    "Interview Scheduled",
-                                    color = Color(0xFF1E40AF),
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                                )
-                            }
-                        } else if (applicant.status == "accepted") {
-                            // Show "Accepted" badge in green
-                            Surface(
-                                color = Color(0xFFDCFCE7),
-                                shape = RoundedCornerShape(3.dp)
-                            ) {
-                                Text(
-                                    "Accepted",
-                                    color = Color(0xFF065F46),
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                                )
-                            }
-                        } else if (applicant.status == "rejected") {
-                            // Show "Rejected" badge in red
-                            Surface(
-                                color = Color(0xFFFEE2E2),
-                                shape = RoundedCornerShape(3.dp)
-                            ) {
-                                Text(
-                                    "Rejected",
-                                    color = Color(0xFF7F1D1D),
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                                )
-                            }
-                        } else if (applicant.isNew) {
-                            // Show "New" badge if still new
-                            Surface(
-                                color = Color(0xFF3B82F6),
-                                shape = RoundedCornerShape(3.dp)
-                            ) {
-                                Text(
-                                    "New",
-                                    color = Color.White,
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                                )
-                            }
+                        // Status badge from backend
+                        val statusData = getApplicationStatusData(applicant.status)
+                        Surface(
+                            color = statusData.first,
+                            shape = RoundedCornerShape(3.dp)
+                        ) {
+                            Text(
+                                statusData.second,
+                                color = statusData.third,
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                            )
                         }
                     }
 
@@ -411,8 +354,8 @@ fun ApplicantCard(
                     Text("Interview", fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
 
-                // Action button - appears when status changes to Under Review
-                if (isUnderReview) {
+                // Action button - appears when status is under_review
+                if (isUnderReview || applicant.status.lowercase() == "under_review") {
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { showActionDialog = true },
@@ -705,6 +648,22 @@ fun ApplicantsSection(
 }
 
 fun formatAppliedDate(timestamp: Long): String {
-    val formatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    // Match web Angular format: day numeric, month long, year numeric in French
+    val formatter = SimpleDateFormat("d MMMM yyyy", Locale.FRENCH)
     return formatter.format(Date(timestamp))
+}
+
+// Helper function to get status colors and text matching web implementation
+fun getApplicationStatusData(status: String): Triple<Color, String, Color> {
+    return when (status.lowercase()) {
+        "new" -> Triple(Color(0xFFDBEAFE), "New", Color(0xFF1E40AF))
+        "pending" -> Triple(Color(0xFFFEF3C7), "Pending", Color(0xFF92400E))
+        "under_review" -> Triple(Color(0xFFFEF3C7), "Under Review", Color(0xFF92400E))
+        "interview_scheduled" -> Triple(Color(0xFFE9D5FF), "Interview Scheduled", Color(0xFF6B21A8))
+        "interview_annulled" -> Triple(Color(0xFFF3F4F6), "Interview Annulled", Color(0xFF4B5563))
+        "offer_pending" -> Triple(Color(0xFFCCFBF1), "Offer Pending", Color(0xFF115E59))
+        "accepted" -> Triple(Color(0xFFDCFCE7), "Accepted", Color(0xFF065F46))
+        "rejected" -> Triple(Color(0xFFFEE2E2), "Rejected", Color(0xFF991B1B))
+        else -> Triple(Color(0xFFF3F4F6), status, Color(0xFF4B5563))
+    }
 }

@@ -94,6 +94,13 @@ export class ApplicationDetailsDialog implements OnDestroy {
     return `${this.formatDate(exp.startDate)} - ${endDate}`;
   }
 
+  // Normalize motivation letter field coming either as snake_case or camelCase
+  getMotivation(application: any): string {
+    if (!application) return 'Aucune lettre de motivation fournie.';
+    const motiv = application.motivation_lettre || (application as any).motivationLettre || application.motivation || '';
+    return motiv || 'Aucune lettre de motivation fournie.';
+  }
+
   // Méthodes pour la navigation PDF
   onPdfLoad(pdf: any): void {
     this.totalPages = pdf.numPages;
