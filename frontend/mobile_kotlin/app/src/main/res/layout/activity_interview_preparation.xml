@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="#F5F7FA">
 
-    <!-- MAIN CONTENT -->
     <ScrollView
         android:id="@+id/scrollViewRoot"
         android:layout_width="match_parent"
@@ -16,7 +15,6 @@
         <LinearLayout
             android:orientation="vertical"
             android:padding="16dp"
-            android:gravity="center_horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -24,7 +22,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
 
                 <ImageView
                     android:id="@+id/btnMenu"
@@ -46,65 +45,277 @@
                     android:layout_height="28dp"/>
             </LinearLayout>
 
-            <!-- Header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="16dp">
 
                 <TextView
-                    android:id="@+id/titleInterview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="Interview Preparation"
-                    android:textSize="28sp"
+                    android:textSize="24sp"
                     android:textStyle="bold"
-                    android:textColor="#111827" />
+                    android:textColor="#111827"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="Your personal AI coach guides you step by step to ace your interviews"
                     android:textSize="14sp"
                     android:textColor="#6B7280"
                     android:gravity="center"
-                    android:layout_marginTop="6dp"/>
+                    android:layout_marginTop="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
-            <!-- Card: chat placeholder -->
+            <!-- CHAT CARD -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="500dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="8dp"
                 android:layout_marginBottom="16dp">
 
-                <FrameLayout
-                    android:id="@+id/chatContainer"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/white">
+                    android:background="#FFFFFF">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(chat placeholder)"
-                        android:layout_gravity="center"
-                        android:textColor="#9CA3AF"
-                        android:textSize="16sp"/>
-                </FrameLayout>
+                    <!-- WELCOME SCREEN -->
+                    <LinearLayout
+                        android:id="@+id/welcomeScreen"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/chatbotLogo"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:src="@drawable/chatbot_logo"
+                            android:scaleType="centerCrop"
+                            android:background="@drawable/circle_background"
+                            android:padding="10dp"
+                            android:contentDescription="Chatbot Logo"/>
+
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="-20dp"
+                            android:layout_marginStart="80dp"
+                            android:background="@drawable/status_indicator"/>
+
+                        <TextView
+                            android:text="Coach IA Entretien"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#1F2937"
+                            android:layout_marginTop="24dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:text="Bonjour ! Je suis votre assistant personnel pour la préparation aux entretiens."
+                            android:textSize="14sp"
+                            android:textColor="#6B7280"
+                            android:gravity="center"
+                            android:layout_marginTop="12dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:text="Prêt à décrocher le job de vos rêves ?"
+                            android:textSize="15sp"
+                            android:textColor="#3B82F6"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:layout_marginTop="16dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="24dp">
+
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:layout_margin="4dp"
+                                android:background="@drawable/loading_dot"/>
+
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:layout_margin="4dp"
+                                android:background="@drawable/loading_dot"/>
+
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:layout_margin="4dp"
+                                android:background="@drawable/loading_dot"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:text="Initialisation de votre coach..."
+                            android:textSize="13sp"
+                            android:textColor="#9CA3AF"
+                            android:layout_marginTop="8dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <!-- CHAT CONTAINER -->
+                    <LinearLayout
+                        android:id="@+id/chatContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <!-- Header -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:gravity="center_vertical"
+                            android:background="#FFFFFF"
+                            android:elevation="2dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/chatbot_logo"
+                                android:scaleType="centerCrop"
+                                android:background="@drawable/circle_background_small"
+                                android:padding="4dp"
+                                android:contentDescription="Bot Avatar"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="12dp">
+
+                                <TextView
+                                    android:text="Coach Entretien IA"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#1F2937"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"/>
+
+                                <TextView
+                                    android:text="Préparation personnalisée"
+                                    android:textSize="12sp"
+                                    android:textColor="#6B7280"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:background="@drawable/status_badge"
+                                android:padding="8dp">
+
+                                <View
+                                    android:layout_width="8dp"
+                                    android:layout_height="8dp"
+                                    android:background="@drawable/status_dot"/>
+
+                                <TextView
+                                    android:text="En ligne"
+                                    android:textSize="12sp"
+                                    android:textColor="#059669"
+                                    android:textStyle="bold"
+                                    android:layout_marginStart="6dp"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"/>
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Messages RecyclerView -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/chatRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:padding="8dp"
+                            android:background="#F9FAFB"
+                            android:clipToPadding="false"/>
+
+                        <!-- Loading Indicator -->
+                        <ProgressBar
+                            android:id="@+id/loadingIndicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:visibility="gone"/>
+
+                        <!-- Input Area -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:background="#FFFFFF"
+                            android:elevation="4dp"
+                            android:gravity="center_vertical">
+
+                            <EditText
+                                android:id="@+id/inputMessage"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="Votre réponse ou question..."
+                                android:background="@drawable/input_background"
+                                android:padding="12dp"
+                                android:textSize="14sp"
+                                android:maxLines="3"
+                                android:inputType="textMultiLine|textCapSentences"/>
+
+                            <ImageButton
+                                android:id="@+id/btnSend"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="8dp"
+                                android:src="@android:drawable/ic_menu_send"
+                                android:background="@drawable/send_button_background"
+                                app:tint="#FFFFFF"
+                                android:contentDescription="Send message"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:text="💡 Concentrons-nous sur votre préparation aux entretiens"
+                            android:textSize="11sp"
+                            android:textColor="#9CA3AF"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Info cards vertical -->
+            <!-- Info cards -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
 
-                <!-- Objective -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -119,24 +330,23 @@
                         android:padding="14dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="🎯 Objective"
                             android:textSize="16sp"
                             android:textColor="#0EA5A4"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
                             android:text="Personalized preparation based on your profile and the job position"
                             android:textSize="14sp"
                             android:textColor="#374151"
-                            android:layout_marginTop="8dp"/>
+                            android:layout_marginTop="8dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Tip -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -151,24 +361,23 @@
                         android:padding="14dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="💡 Tip"
                             android:textSize="16sp"
                             android:textColor="#16A34A"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
                             android:text="Responses analysed and practical advice in real time"
                             android:textSize="14sp"
                             android:textColor="#374151"
-                            android:layout_marginTop="8dp"/>
+                            android:layout_marginTop="8dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Result -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -182,33 +391,31 @@
                         android:padding="14dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="🚀 Result"
                             android:textSize="16sp"
                             android:textColor="#7C3AED"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
                             android:text="Boost your chances of success with optimal interview preparation"
                             android:textSize="14sp"
                             android:textColor="#374151"
-                            android:layout_marginTop="8dp"/>
+                            android:layout_marginTop="8dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-
             </LinearLayout>
 
-            <!-- Download PDF -->
+            <!-- PDF Download Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="10dp"
-                android:layout_marginBottom="24dp"
-                android:padding="0dp">
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -218,49 +425,41 @@
                     android:background="@drawable/gradient_card_bg">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="📚 Complete Interview Questions Guide"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="#FFFFFF"/>
+                        android:textColor="#FFFFFF"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Download our free PDF guide with 50+ categorized interview questions."
+                        android:text="Download our free PDF guide with 50+ categorized interview questions and expert tips."
                         android:textSize="14sp"
                         android:textColor="#E6F0FF"
-                        android:layout_marginTop="8dp"/>
-
-                    <LinearLayout
+                        android:layout_marginTop="8dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="14dp">
+                        android:layout_height="wrap_content"/>
 
-                        <Button
-                            android:id="@+id/btnDownloadPdf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Download PDF Guide (free)"
-                            android:paddingLeft="18dp"
-                            android:paddingRight="18dp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
+                    <Button
+                        android:id="@+id/btnDownloadPdf"
+                        android:text="Download PDF Guide (free)"
+                        android:textStyle="bold"
+                        android:layout_marginTop="16dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="📄 PDF Format • ~15 pages"
                         android:textSize="12sp"
                         android:textColor="#DCEEFF"
-                        android:layout_marginTop="10dp"/>
+                        android:layout_marginTop="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
+
     <include layout="@layout/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>
