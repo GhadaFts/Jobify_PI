@@ -5,14 +5,12 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- MAIN CONTENT -->
     <ScrollView
         android:id="@+id/scrollViewRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#F5F7FA"
-        android:layout_marginTop="26dp"
-        >
+        android:layout_marginTop="26dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -21,7 +19,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- HEADER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,143 +45,189 @@
                     android:layout_height="28dp" />
             </LinearLayout>
 
-            <!-- TITLE -->
             <TextView
                 android:text="AI Career Advisor"
                 android:textSize="22sp"
                 android:textStyle="bold"
+                android:textColor="#111827"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp" />
 
-            <!-- SUBTITLE -->
             <TextView
                 android:text="Provide details to receive tailored career advice based on your profile and target market."
                 android:textSize="14sp"
-                android:textColor="#666"
+                android:textColor="#6B7280"
                 android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp" />
 
-
-
-            <!-- COUNTRY -->
             <TextView
-                android:text="Country:"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:textColor="#1F4E5F"
-                android:layout_marginBottom="6dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <EditText
-                android:id="@+id/inputCountry"
-                android:hint="e.g., Tunisia"
+                android:id="@+id/errorMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:background="#FFEBEE"
+                android:padding="12dp"
+                android:textColor="#C62828"
+                android:textSize="14sp"
                 android:layout_marginBottom="16dp"
-                android:background="@android:drawable/edit_text" />
-
-            <!-- EDUCATION -->
-            <TextView
-                android:text="Education:"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:textColor="#1F4E5F"
-                android:layout_marginBottom="6dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <EditText
-                android:id="@+id/inputEducation"
-                android:hint="e.g., Computer Science"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:layout_marginBottom="16dp"
-                android:background="@android:drawable/edit_text" />
-
-            <!-- CERTIFICATE -->
-            <TextView
-                android:text="Certificates:"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:textColor="#1F4E5F"
-                android:layout_marginBottom="6dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <EditText
-                android:id="@+id/inputCertificate"
-                android:hint="e.g., AWS, EFSET C1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:layout_marginBottom="16dp"
-                android:background="@android:drawable/edit_text" />
-
-            <!-- SKILLS -->
-            <TextView
-                android:text="Skills:"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:textColor="#1F4E5F"
-                android:layout_marginBottom="6dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/skillsContainer"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp">
+                android:orientation="vertical"
+                android:background="#FFFFFF"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp"
+                android:elevation="2dp">
+
+                <TextView
+                    android:text="Country *"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#1F4E5F"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <EditText
-                    android:hint="e.g., Kotlin, Java, SQL, UI/UX"
+                    android:id="@+id/inputCountry"
+                    android:hint="e.g., USA, France, Germany, Qatar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp"
+                    android:padding="12dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@android:drawable/edit_text" />
+
+                <TextView
+                    android:text="Education *"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#1F4E5F"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/inputEducation"
+                    android:hint="e.g., Bachelor in Computer Science, MBA, PhD in AI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@android:drawable/edit_text" />
+
+                <TextView
+                    android:text="Certificate *"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#1F4E5F"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/inputCertificate"
+                    android:hint="e.g., AWS Certified, PMP, Google Analytics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@android:drawable/edit_text" />
+
+                <TextView
+                    android:text="Skills (Optional)"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#1F4E5F"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:id="@+id/skillsContainer"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:hint="e.g., Python, SQL, Docker, Machine Learning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:background="@android:drawable/edit_text" />
+                </LinearLayout>
+
+                <TextView
+                    android:text="💡 Separate multiple skills with commas"
+                    android:textSize="12sp"
+                    android:textColor="#6B7280"
+                    android:layout_marginBottom="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/btnAddSkill"
+                    android:text="+ Add Skill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#E0E0E0"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="20dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btnGetAdvice"
+                        android:text="Get AI Career Advice"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:backgroundTint="#FF6B35"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        android:padding="14dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/btnReset"
+                        android:text="Reset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#9E9E9E"
+                        android:textColor="@android:color/white"
+                        android:padding="14dp" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnAddSkill"
-                android:text="+ Add Skill"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#E0E0E0"
-                android:textColor="#333"
-                android:layout_marginBottom="20dp" />
-
-            <!-- SUBMIT -->
-            <Button
-                android:id="@+id/btnGetAdvice"
-                android:text="Get AI Career Advice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#007BFF"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:padding="12dp"
-                android:layout_marginBottom="20dp" />
-
-            <!-- RESULT -->
             <TextView
                 android:id="@+id/tvAdviceResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:textColor="#333"
-                android:padding="12dp"
-                android:layout_marginTop="10dp"
-                android:background="#f1f1f1"
+                android:textColor="#333333"
+                android:padding="16dp"
+                android:background="#FFFFFF"
+                android:elevation="2dp"
+                android:lineSpacingExtra="4dp"
                 android:visibility="gone"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="20dp" />
 
         </LinearLayout>
     </ScrollView>

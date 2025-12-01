@@ -109,4 +109,5 @@ object ApiClient {
     val jobService: JobApiService = retrofit.create(JobApiService::class.java)
     val applicationService: ApplicationApiService = retrofit.create(ApplicationApiService::class.java)
     val cvUploadService: CvUploadApiService = retrofit.create(CvUploadApiService::class.java)
+    val careerService: CareerApiService = retrofit.create(CareerApiService::class.java)
 }
