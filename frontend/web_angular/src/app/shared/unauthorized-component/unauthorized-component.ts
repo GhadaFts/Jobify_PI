@@ -34,7 +34,7 @@ export class UnauthorizedComponent {
   }
 
   goHome() {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/']);
   }
 
   logout() {

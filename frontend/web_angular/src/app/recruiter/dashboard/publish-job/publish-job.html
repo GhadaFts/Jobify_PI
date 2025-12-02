@@ -25,7 +25,7 @@
     >
       <div class="flex gap-3">
         <div class="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-          <img src="/assets/img.png" alt="Profile" class="w-full h-full object-cover" />
+          <img [src]="getProfileImageUrl()" alt="Profile" class="w-full h-full object-cover" />
         </div>
 
         <div class="flex-1 space-y-4">

@@ -78,7 +78,7 @@
           *ngIf="profileImage && profileImage !== '' && profileImage !== '/assets/img.png' && !imageError"
           [src]="profileImage" 
           alt="Profile" 
-          class="absolute inset-0 w-full h-full object-cover"
+          class="w-full h-full object-cover"
           (error)="onImageError($event)"
           style="object-fit: cover; object-position: center;"
         />
