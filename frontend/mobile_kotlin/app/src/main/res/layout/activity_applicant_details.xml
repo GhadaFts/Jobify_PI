@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/applicantName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/applicantTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#666"
+            android:layout_marginTop="4dp"
+            android:text="Title" />
+
+        <TextView
+            android:id="@+id/applicantContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Contact" />
+
+        <TextView
+            android:id="@+id/applicantNationality"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Nationality" />
+
+        <TextView
+            android:id="@+id/applicantDob"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Date of Birth" />
+
+        <TextView
+            android:id="@+id/applicantGender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Gender" />
+
+        <TextView
+            android:id="@+id/applicantLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Location" />
+
+        <TextView
+            android:id="@+id/sectionMotivationLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:text="Motivation" />
+
+        <TextView
+            android:id="@+id/applicantMotivation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/sectionExperienceLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:text="Experience" />
+
+        <LinearLayout
+            android:id="@+id/experienceContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/sectionEducationLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:text="Education" />
+
+        <LinearLayout
+            android:id="@+id/educationContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/sectionSkillsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:text="Skills" />
+
+        <TextView
+            android:id="@+id/applicantSkills"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/sectionSocialsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:text="Socials" />
+
+        <LinearLayout
+            android:id="@+id/socialsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/btnOpenCv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Open CV" />
+
+    </LinearLayout>
+</ScrollView>
