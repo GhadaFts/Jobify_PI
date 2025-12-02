@@ -38,6 +38,7 @@ export class LoginComponent {
   }
 
   ngOnInit(): void {
+    // Don't clear auth data here - let the auth service handle it
     // If user is already logged in, redirect them
     if (this.authService.isAuthenticated()) {
       const user = this.authService.getCurrentUser();
@@ -62,12 +63,21 @@ export class LoginComponent {
       return;
     }
 
+    // Clear any stale auth data before attempting new login
+    console.log('🧹 Clearing any stale auth data before login');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userProfile');
+
     this.isLoading = true;
 
     const credentials: LoginCredentials = {
       email: this.email.trim(),
       password: this.password
     };
+
+    console.log('🔐 Attempting login with:', credentials.email);
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
@@ -152,7 +162,7 @@ export class LoginComponent {
           this.router.navigate(['/job-seeker/dashboard/find-job']);
           break;
         case 'admin':
-          this.router.navigate(['/admin/dashboard']);
+          this.router.navigate(['/admin/analytics']);
           break;
         default:
           this.router.navigate(['/dashboard']);

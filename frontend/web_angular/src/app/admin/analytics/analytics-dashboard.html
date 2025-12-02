@@ -38,11 +38,15 @@
   <!-- Main Content -->
   <div class="dashboard-content">
 
-  <!-- Filters Panel -->
-  <app-filters-panel (filtersChanged)="onFiltersChanged($event)"></app-filters-panel>
-
   <!-- KPI Cards -->
   <app-kpi-cards></app-kpi-cards>
+
+  <!-- Key Metrics Alerts - Top Priority -->
+  <div class="charts-grid">
+    <div class="chart-item full-width">
+      <app-alerts-panel></app-alerts-panel>
+    </div>
+  </div>
 
   <!-- Charts Grid - First Row -->
   <div class="charts-grid">
@@ -52,16 +56,6 @@
   </div>
 
   <!-- Charts Grid - Second Row -->
-  <div class="charts-grid">
-    <div class="chart-item">
-      <app-active-vs-expired-chart></app-active-vs-expired-chart>
-    </div>
-    <div class="chart-item">
-      <app-users-growth-chart></app-users-growth-chart>
-    </div>
-  </div>
-
-  <!-- Charts Grid - Third Row -->
   <div class="charts-grid">
     <div class="chart-item">
       <app-application-funnel-chart></app-application-funnel-chart>
@@ -93,13 +87,6 @@
   <div class="charts-grid">
     <div class="chart-item">
       <app-geo-heatmap-chart></app-geo-heatmap-chart>
-    </div>
-  </div>
-
-  <!-- Charts Grid - Eighth Row (Alerts) -->
-  <div class="charts-grid">
-    <div class="chart-item">
-      <app-alerts-panel></app-alerts-panel>
     </div>
   </div>
 

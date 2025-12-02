@@ -6,6 +6,7 @@ import { User, UserSchema } from './schema/user.schema';
 import { UserRole } from './schema/userRole.enum';
 import { RecruiterSchema } from './schema/recruiter.schema';
 import { JobSeekerSchema } from './schema/jobSeeker.schema';
+import { AdminSchema } from './schema/admin.schema';
 import { UploadService } from './upload.service';
 
 @Module({
@@ -14,6 +15,7 @@ import { UploadService } from './upload.service';
       {
         name: User.name, useFactory: () => {
           const schema = UserSchema;
+          schema.discriminator(UserRole.Admin, AdminSchema);
           schema.discriminator(UserRole.Recruiter, RecruiterSchema);
           schema.discriminator(UserRole.JobSeeker, JobSeekerSchema);
           return schema;

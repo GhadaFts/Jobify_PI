@@ -5,9 +5,8 @@ import { FinalInterview } from './final_interview_type';
 import { ApplicationResponseDTO, ApplicationService } from '../../../services/application.service';
 import { UserService } from '../../../services/user.service';
 import { JobService } from '../../../services/job.service';
-import { forkJoin } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
-
+import { forkJoin, of } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-interviews',
@@ -20,54 +19,135 @@ export class Interviews implements OnInit {
   searchQuery: string = '';
   interviews: Interview[] = [];
   final_interviews: FinalInterview[] = [];
+  isLoading: boolean = true;
+  errorMessage: string = '';
 
-  constructor(private interviewsService: InterviewsService,
+  constructor(
+    private interviewsService: InterviewsService,
     private appService: ApplicationService,
     private userService: UserService,
     private jobService: JobService
   ) {}
 
   ngOnInit(): void {
-  this.interviewsService.getRecruiterInterviews()
-    .pipe(
-      switchMap(interviews => {
-        this.interviews = interviews;
+    this.loadInterviews();
+  }
 
-        // Build array of async requests
-        const requests = interviews.map(interview => {
-          return forkJoin({
-            application: this.appService.getApplicationById(interview.applicationId),
-            jobSeeker: this.userService.getUserById(interview.jobSeekerId),
-            recruiter: this.userService.getUserById(interview.recruiterId),
-          }).pipe(
-            switchMap(result =>
-              this.jobService.getJobById(result.application.jobOfferId).pipe(
-              map(job => ({
-                  id: interview.id,
-                  application: result.application,
-                  jobSeeker: result.jobSeeker,
-                  recruiter: result.recruiter,
-                  job_title: job.title,
-                  scheduledDate: interview.scheduledDate,
-                  duration: interview.duration,
-                  interviewType: interview.interviewType,
-                  status: interview.status,
-                  createdAt: interview.createdAt,
-                  updatedAt: interview.updatedAt
-                }))
-              )
-            )
-          );
-        });
+  private loadInterviews(): void {
+    console.log('🔄 Loading recruiter interviews...');
+    
+    this.interviewsService.getRecruiterInterviews()
+      .pipe(
+        switchMap(interviews => {
+          console.log('✅ Fetched interviews:', interviews);
+          this.interviews = interviews;
 
-        return forkJoin(requests);
-      })
-    )
-    .subscribe(finalInterviews => {
-      this.final_interviews = finalInterviews;
-    });
-}
+          if (!interviews || interviews.length === 0) {
+            console.log('ℹ️ No interviews found');
+            this.isLoading = false;
+            return of([]);
+          }
 
+          // Build array of async requests with error handling
+          const requests = interviews.map(interview => {
+            console.log('🔍 Processing interview:', interview);
+            console.log('  - Application ID:', interview.applicationId);
+            console.log('  - JobSeeker ID:', interview.jobSeekerId);
+            console.log('  - Recruiter ID:', interview.recruiterId);
+
+            return forkJoin({
+              application: this.appService.getApplicationById(interview.applicationId).pipe(
+                catchError(err => {
+                  console.error(`❌ Failed to fetch application ${interview.applicationId}:`, err);
+                  return of(null);
+                })
+              ),
+              jobSeeker: this.userService.getUserById(interview.jobSeekerId).pipe(
+                catchError(err => {
+                  console.error(`❌ Failed to fetch jobSeeker ${interview.jobSeekerId}:`, err);
+                  return of({ fullName: 'Unknown User', email: '' });
+                })
+              ),
+              recruiter: this.userService.getUserById(interview.recruiterId).pipe(
+                catchError(err => {
+                  console.error(`❌ Failed to fetch recruiter ${interview.recruiterId}:`, err);
+                  return of({ fullName: 'Unknown Recruiter', email: '' });
+                })
+              ),
+            }).pipe(
+              switchMap(result => {
+                if (!result.application) {
+                  console.warn('⚠️ Application not found, creating placeholder');
+                  return of({
+                    id: interview.id,
+                    application: null,
+                    jobSeeker: result.jobSeeker,
+                    recruiter: result.recruiter,
+                    job_title: 'Unknown Position',
+                    scheduledDate: interview.scheduledDate,
+                    duration: interview.duration,
+                    interviewType: interview.interviewType,
+                    status: interview.status,
+                    createdAt: interview.createdAt,
+                    updatedAt: interview.updatedAt
+                  } as FinalInterview);
+                }
+
+                return this.jobService.getJobById(result.application.jobOfferId).pipe(
+                  map(job => ({
+                    id: interview.id,
+                    application: result.application,
+                    jobSeeker: result.jobSeeker,
+                    recruiter: result.recruiter,
+                    job_title: job?.title || 'Unknown Position',
+                    scheduledDate: interview.scheduledDate,
+                    duration: interview.duration,
+                    interviewType: interview.interviewType,
+                    status: interview.status,
+                    createdAt: interview.createdAt,
+                    updatedAt: interview.updatedAt
+                  } as FinalInterview)),
+                  catchError(err => {
+                    console.error(`❌ Failed to fetch job ${result.application?.jobOfferId}:`, err);
+                    return of({
+                      id: interview.id,
+                      application: result.application,
+                      jobSeeker: result.jobSeeker,
+                      recruiter: result.recruiter,
+                      job_title: 'Unknown Position',
+                      scheduledDate: interview.scheduledDate,
+                      duration: interview.duration,
+                      interviewType: interview.interviewType,
+                      status: interview.status,
+                      createdAt: interview.createdAt,
+                      updatedAt: interview.updatedAt
+                    } as FinalInterview);
+                  })
+                );
+              }),
+              catchError(err => {
+                console.error('❌ Error processing interview:', err);
+                return of(null);
+              })
+            );
+          });
+
+          return forkJoin(requests);
+        }),
+        catchError(err => {
+          console.error('❌ Failed to fetch recruiter interviews:', err);
+          this.errorMessage = 'Failed to load interviews. Please try again later.';
+          this.isLoading = false;
+          return of([]);
+        })
+      )
+      .subscribe(finalInterviews => {
+        // Filter out null entries
+        this.final_interviews = finalInterviews.filter(interview => interview !== null) as FinalInterview[];
+        console.log('✅ Final interviews loaded:', this.final_interviews);
+        this.isLoading = false;
+      });
+  }
 
   get allInterviews(): FinalInterview[] {
     return this.final_interviews;
@@ -87,22 +167,28 @@ export class Interviews implements OnInit {
 
   get filteredAllInterviews(): FinalInterview[] {
     return this.allInterviews.filter(interview =>
-      interview.jobSeeker.fullName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      interview.job_title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      interview.jobSeeker?.fullName?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      interview.job_title?.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
   }
 
   get filteredUpcomingInterviews(): FinalInterview[] {
     return this.upcomingInterviews.filter(interview =>
-      interview.jobSeeker.fullName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      interview.job_title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      interview.jobSeeker?.fullName?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      interview.job_title?.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
   }
 
   get filteredCompletedInterviews(): FinalInterview[] {
     return this.completedInterviews.filter(interview =>
-      interview.jobSeeker.fullName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      interview.job_title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      interview.jobSeeker?.fullName?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      interview.job_title?.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
+  }
+
+  retryLoad(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.loadInterviews();
   }
 }

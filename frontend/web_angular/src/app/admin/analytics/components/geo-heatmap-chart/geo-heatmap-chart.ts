@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { map } from 'rxjs/operators';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-geo-heatmap-chart',
@@ -11,22 +12,31 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class GeoHeatmapChartComponent implements OnInit {
   chartData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.chartData$ = new Observable();
   }
 
   ngOnInit(): void {
-    this.chartData$ = this.analyticsService.getGeoHeatmap();
+    this.chartData$ = this.analyticsService.getGeographicDistribution().pipe(
+      map(response => response.data || [])
+    );
   }
 
   getMaxJobs(data: any[]): number {
-    return Math.max(...data.map(d => d.jobs));
+    if (!data || data.length === 0) return 1;
+    return Math.max(...data.map(d => d.jobCount || 0));
   }
 
-  getIntensity(jobs: number, max: number): string {
-    const intensity = jobs / max;
-    if (intensity > 0.8) return 'high';
-    if (intensity > 0.5) return 'medium';
+  getMaxApplications(data: any[]): number {
+    if (!data || data.length === 0) return 1;
+    return Math.max(...data.map(d => d.totalApplications || 0));
+  }
+
+  getIntensity(applications: number, max: number): string {
+    if (max === 0) return 'low';
+    const intensity = applications / max;
+    if (intensity > 0.6) return 'high';
+    if (intensity > 0.3) return 'medium';
     return 'low';
   }
 }

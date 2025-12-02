@@ -191,6 +191,7 @@ export class JobCardRecruiter implements OnChanges {
       maxHeight: '90vh',
       data: { application },
     });
+    console.log("application",application.jobSeeker);
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
@@ -210,10 +211,11 @@ export class JobCardRecruiter implements OnChanges {
         const hh = pad(scheduledDateTime.getHours());
         const mm = pad(scheduledDateTime.getMinutes());
         const localDateTime = `${y}-${mo}-${d}T${hh}:${mm}:00`;
+        
 
         const payload = {
           applicationId: String(application.id),
-          jobSeekerId: application.jobSeeker?.id,
+          jobSeekerId: application.jobSeeker?.keycloakId,
           // recruiterId is set server-side from JWT by the interview-service
           scheduledDate: localDateTime,
           duration: result.duration,

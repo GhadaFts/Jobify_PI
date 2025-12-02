@@ -117,7 +117,6 @@ export class AuthService {
 
         // Clear local auth state immediately so stale tokens are not reused
         this.clearAuthData();
-        this.router.navigate(['/home']);
 
         // If there's no refresh token or remote logout will likely fail (expired access token),
         // still return a resolved observable so callers can continue.

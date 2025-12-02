@@ -6,6 +6,7 @@ import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EurekaService } from './common/services/eureka.service';
 import { HealthController } from './common/controllers/health.controller';
+import { AnalyticsController } from './common/controllers/analytics.controller';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -18,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     MongooseModule.forRoot('mongodb://localhost:27017/nest'),
   ],
-  controllers: [AppController, HealthController],
+  controllers: [AppController, HealthController, AnalyticsController],
   providers: [AppService, EurekaService],
 })
 export class AppModule {}

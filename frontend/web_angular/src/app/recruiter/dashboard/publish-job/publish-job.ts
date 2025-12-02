@@ -78,59 +78,61 @@ export class PublishJob {
   // Normalize a user/jobSeeker object from backend (camelCase) into the
   // shape expected by the UI templates (snake_case + structured arrays).
   private normalizeSeeker(user: any, seekerId?: string): any {
-    const u = user || {};
+  const u = user || {};
 
-    const mapExperience = (exp: any): any[] => {
-      if (!Array.isArray(exp)) return [];
-      return exp.map((e: any) => {
-        if (!e) return { position: '', company: '', description: '' };
-        if (typeof e === 'string') return { position: '', company: '', description: e };
-        return {
-          position: e.position || e.jobTitle || '',
-          company: e.company || '',
-          description: e.description || e.summary || '',
-          startDate: e.startDate || e.start_date || '',
-          endDate: e.endDate || e.end_date || ''
-        };
-      });
-    };
+  const mapExperience = (exp: any): any[] => {
+    if (!Array.isArray(exp)) return [];
+    return exp.map((e: any) => {
+      if (!e) return { position: '', company: '', description: '' };
+      if (typeof e === 'string') return { position: '', company: '', description: e };
+      return {
+        position: e.position || e.jobTitle || '',
+        company: e.company || '',
+        description: e.description || e.summary || '',
+        startDate: e.startDate || e.start_date || '',
+        endDate: e.endDate || e.end_date || ''
+      };
+    });
+  };
 
-    const mapEducation = (eds: any): any[] => {
-      if (!Array.isArray(eds)) return [];
-      return eds.map((e: any) => {
-        if (!e) return { degree: '', field: '', school: '', graduationDate: '' };
-        if (typeof e === 'string') return { degree: e, field: '', school: '', graduationDate: '' };
-        return {
-          degree: e.degree || e.title || '',
-          field: e.field || e.area || '',
-          school: e.school || '',
-          graduationDate: e.graduationDate || e.graduation_date || ''
-        };
-      });
-    };
+  const mapEducation = (eds: any): any[] => {
+    if (!Array.isArray(eds)) return [];
+    return eds.map((e: any) => {
+      if (!e) return { degree: '', field: '', school: '', graduationDate: '' };
+      if (typeof e === 'string') return { degree: e, field: '', school: '', graduationDate: '' };
+      return {
+        degree: e.degree || e.title || '',
+        field: e.field || e.area || '',
+        school: e.school || '',
+        graduationDate: e.graduationDate || e.graduation_date || ''
+      };
+    });
+  };
 
-    const normalized = {
-      id: u.id || seekerId || u.keycloakId || null,
-      fullName: u.fullName || u.full_name || u.name || 'Unknown',
-      title: u.title || '',
-      photo_profil:this.userService.getImageUrl(u.profilePicture || u.photo_profil || u.avatar || '') ,
-      github_link: u.githubLink || u.github_link || '',
-      web_link: u.webLink || u.web_link || u.website || '',
-      twitter_link: u.twitterLink || u.twitter_link || '',
-      facebook_link: u.facebookLink || u.facebook_link || '',
-      phone_number: u.phoneNumber || u.phone_number || '',
-      email: u.email || '',
-      nationality: u.nationality || '',
-      date_of_birth: u.dateOfBirth || u.date_of_birth || '',
-      gender: u.gender || '',
-      description: u.description || u.bio || '',
-      skills: Array.isArray(u.skills) ? u.skills : (u.skills ? [u.skills] : []),
-      experience: mapExperience(u.experience || u.experiences || []),
-      education: mapEducation(u.education || u.educations || []),
-    };
+  const normalized = {
+    // ✅ ADD keycloakId field
+    keycloakId: u.keycloakId || seekerId || u.id || null,
+    id: u.id || seekerId || u.keycloakId || null,
+    fullName: u.fullName || u.full_name || u.name || 'Unknown',
+    title: u.title || '',
+    photo_profil: this.userService.getImageUrl(u.profilePicture || u.photo_profil || u.avatar || ''),
+    github_link: u.githubLink || u.github_link || '',
+    web_link: u.webLink || u.web_link || u.website || '',
+    twitter_link: u.twitterLink || u.twitter_link || '',
+    facebook_link: u.facebookLink || u.facebook_link || '',
+    phone_number: u.phoneNumber || u.phone_number || '',
+    email: u.email || '',
+    nationality: u.nationality || '',
+    date_of_birth: u.dateOfBirth || u.date_of_birth || '',
+    gender: u.gender || '',
+    description: u.description || u.bio || '',
+    skills: Array.isArray(u.skills) ? u.skills : (u.skills ? [u.skills] : []),
+    experience: mapExperience(u.experience || u.experiences || []),
+    education: mapEducation(u.education || u.educations || []),
+  };
 
-    return normalized;
-  }
+  return normalized;
+}
 
   private loadMyJobs(): void {
     this.jobService.getMyJobs().subscribe({

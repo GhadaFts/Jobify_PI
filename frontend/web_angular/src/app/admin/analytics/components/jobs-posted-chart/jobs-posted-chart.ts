@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { map, tap } from 'rxjs/operators';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-jobs-posted-chart',
@@ -12,13 +13,37 @@ export class JobsPostedChartComponent implements OnInit {
   chartData$: Observable<any>;
   chartOptions: any;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.chartData$ = new Observable();
     this.initChartOptions();
   }
 
   ngOnInit(): void {
-    this.chartData$ = this.analyticsService.getJobsPostedOverTime();
+    this.chartData$ = this.analyticsService.getJobsOverTime().pipe(
+      tap(data => {
+        console.log('📊 Jobs over time data received:', data);
+      }),
+      map(data => {
+        // Handle both formats: { data: [...] } or direct array
+        if (Array.isArray(data)) {
+          console.log('✅ Data is array, wrapping it');
+          return { data: data };
+        }
+        
+        if (!data.data || data.data.length === 0) {
+          console.warn('⚠️ No jobs data available');
+          return { data: [] };
+        }
+        
+        console.log('✅ Data format correct:', data);
+        return data;
+      })
+    );
+  }
+
+  getMaxCount(data: any[]): number {
+    if (!data || data.length === 0) return 1;
+    return Math.max(...data.map(d => d.count));
   }
 
   private initChartOptions(): void {

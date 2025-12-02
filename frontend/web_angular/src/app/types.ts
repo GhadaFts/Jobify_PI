@@ -32,6 +32,7 @@ export interface JobSeeker extends User {
   title: string;
   date_of_birth: string;
   gender: string;
+  keycloakId?: string;
 }
 export interface Recruiter extends User {
   companyAddress: string;
