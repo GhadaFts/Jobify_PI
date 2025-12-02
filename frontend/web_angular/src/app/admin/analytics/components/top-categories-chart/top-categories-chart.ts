@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { map } from 'rxjs/operators';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-top-categories-chart',
@@ -11,15 +12,17 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class TopCategoriesChartComponent implements OnInit {
   chartData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.chartData$ = new Observable();
   }
 
   ngOnInit(): void {
-    this.chartData$ = this.analyticsService.getTopCategories();
+    this.chartData$ = this.analyticsService.getTopCategories().pipe(
+      map(response => response.data || [])
+    );
   }
 
   getMaxJobs(data: any[]): number {
-    return Math.max(...data.map(d => d.jobs));
+    return Math.max(...data.map(d => d.jobCount || 0));
   }
 }

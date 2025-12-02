@@ -5,6 +5,7 @@ import { Interview } from '../../../types';
 import { InterviewsService } from '../../../services/interviews.service';
 import { ApplicationService } from '../../../services/application.service';
 import { JobService } from '../../../services/job.service';
+import { UserService } from '../../../services/user.service';
 import { switchMap, map } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 
@@ -40,52 +41,31 @@ export class JobSeekerSidebar implements OnInit {
   activeTab: 'companies' | 'interviews' = 'companies';
   interviewNotifications: InterviewNotification[] = []
 
-  featuredCompanies: Company[] = [
-    {
-      id: '1',
-      name: 'TekUp',
-      description: 'Leading technology company specializing in web and mobile development solutions.',
-      logo: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=100&h=100&fit=crop',
-      domain: 'technology',
-      employees: '150 employees',
-      location: 'Tunis Center'
-    },
-    {
-      id: '2',
-      name: 'Tebourba Farming Coop',
-      description: 'Agricultural cooperative specializing in organic farming and sustainable agriculture.',
-      logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
-      domain: 'agriculture',
-      employees: '50 employees',
-      location: 'Tebourba'
-    },
-    {
-      id: '3',
-      name: 'Tebourba Secondary School',
-      description: 'Public secondary school committed to providing quality education.',
-      domain: 'education',
-      employees: '35 employees',
-      location: 'Tebourba Center'
-    },
-    {
-      id: '4',
-      name: 'Tech Solutions SARL',
-      description: 'Innovative software development and IT consulting services.',
-      domain: 'technology',
-      employees: '80 employees',
-      location: 'Ariana'
-    },
-    {
-      id: '5',
-      name: 'MedCare Hospital',
-      description: 'Leading healthcare provider with modern medical facilities.',
-      domain: 'healthcare',
-      employees: '200 employees',
-      location: 'Tunis'
-    }
-  ];
+  featuredCompanies: Company[] = [];
 
   ngOnInit(): void {
+    // Fetch recruiters as featured companies
+    this.userService.getRecruitersForJobSeekers()
+      .subscribe({
+        next: (recruiters) => {
+          this.featuredCompanies = recruiters.map(recruiter => ({
+            id: recruiter.id,
+            name: recruiter.name,
+            description: recruiter.description,
+            logo: recruiter.logo,
+            domain: recruiter.domain,
+            employees: recruiter.employees,
+            location: recruiter.location
+          }));
+        },
+        error: (error) => {
+          console.error('Error fetching recruiters:', error);
+          // Fallback to empty array if fetch fails
+          this.featuredCompanies = [];
+        }
+      });
+
+    // Fetch interviews
     this.interviewService.getMyUpcomingInterviews()
       .pipe(
         switchMap(interviews => {
@@ -121,7 +101,7 @@ export class JobSeekerSidebar implements OnInit {
 
 
   constructor(private dialog: MatDialog, private interviewService: InterviewsService,
-    private appService: ApplicationService, private jobService: JobService
+    private appService: ApplicationService, private jobService: JobService, private userService: UserService
   ) { }
 
   // Company Profile Methods

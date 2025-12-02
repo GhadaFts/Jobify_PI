@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { KpiData } from '../../analytics.types';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-kpi-cards',
@@ -12,7 +12,7 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class KpiCardsComponent implements OnInit {
   kpiData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.kpiData$ = new Observable();
   }
 

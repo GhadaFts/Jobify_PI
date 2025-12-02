@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-alerts-panel',
@@ -11,12 +11,12 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class AlertsPanelComponent implements OnInit {
   alertsData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.alertsData$ = new Observable();
   }
 
   ngOnInit(): void {
-    this.alertsData$ = this.analyticsService.getAlerts();
+    this.alertsData$ = this.analyticsService.getAllAlerts();
   }
 
   getIcon(alert: boolean, change: number): string {

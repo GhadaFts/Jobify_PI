@@ -2,45 +2,9 @@
   <div *ngIf="funnelData$ | async as response" class="chart-wrapper">
     <h3 class="chart-title">Application Funnel</h3>
     <div class="funnel-chart">
-      <!-- Views -->
-      <div class="funnel-stage">
-        <div class="funnel-bar" [style.width]="'100%'">
-          <div class="bar-content">
-            <span class="stage-label">
-              <svg class="stage-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-              </svg>
-              Page Views
-            </span>
-            <span class="stage-value">{{ response.data.views }}</span>
-          </div>
-        </div>
-        <div class="funnel-rate">100%</div>
-      </div>
-
-      <!-- Apply Clicks -->
-      <div class="funnel-stage">
-        <div
-          class="funnel-bar"
-          [style.width]="(response.data.applyClicks / response.data.views * 100) + '%'">
-          <div class="bar-content">
-            <span class="stage-label">
-              <svg class="stage-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4-2h2v20h-2zm4 4h2v16h-2z"/>
-              </svg>
-              Apply Clicks
-            </span>
-            <span class="stage-value">{{ response.data.applyClicks }}</span>
-          </div>
-        </div>
-        <div class="funnel-rate">{{ calculateConversionRate(response.data.applyClicks, response.data.views) }}%</div>
-      </div>
-
       <!-- Applications -->
       <div class="funnel-stage">
-        <div
-          class="funnel-bar"
-          [style.width]="(response.data.applications / response.data.views * 100) + '%'">
+        <div class="funnel-bar" [style.width]="'100%'">
           <div class="bar-content">
             <span class="stage-label">
               <svg class="stage-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -51,14 +15,14 @@
             <span class="stage-value">{{ response.data.applications }}</span>
           </div>
         </div>
-        <div class="funnel-rate">{{ calculateConversionRate(response.data.applications, response.data.views) }}%</div>
+        <div class="funnel-rate">100%</div>
       </div>
 
       <!-- Interviews -->
       <div class="funnel-stage">
         <div
           class="funnel-bar"
-          [style.width]="(response.data.interviews / response.data.views * 100) + '%'">
+          [style.width]="(response.data.interviews / response.data.applications * 100) + '%'">
           <div class="bar-content">
             <span class="stage-label">
               <svg class="stage-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -69,12 +33,12 @@
             <span class="stage-value">{{ response.data.interviews }}</span>
           </div>
         </div>
-        <div class="funnel-rate">{{ calculateConversionRate(response.data.interviews, response.data.views) }}%</div>
+        <div class="funnel-rate">{{ calculateConversionRate(response.data.interviews, response.data.applications) }}%</div>
       </div>
 
       <!-- Hires -->
       <div class="funnel-stage">
-        <div class="funnel-bar" [style.width]="(response.data.hires / response.data.views * 100) + '%'">
+        <div class="funnel-bar" [style.width]="(response.data.hires / response.data.applications * 100) + '%'">
           <div class="bar-content">
             <span class="stage-label">
               <svg class="stage-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -85,22 +49,22 @@
             <span class="stage-value">{{ response.data.hires }}</span>
           </div>
         </div>
-        <div class="funnel-rate">{{ calculateConversionRate(response.data.hires, response.data.views) }}%</div>
+        <div class="funnel-rate">{{ calculateConversionRate(response.data.hires, response.data.applications) }}%</div>
       </div>
     </div>
 
     <div class="funnel-stats">
       <div class="stat-item">
         <span class="stat-label">Overall Conversion</span>
-        <span class="stat-value">{{ calculateConversionRate(response.data.hires, response.data.views) }}%</span>
+        <span class="stat-value">{{ calculateConversionRate(response.data.hires, response.data.applications) }}%</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">Dropoff Rate</span>
-        <span class="stat-value">{{ (100 - calculateConversionRate(response.data.hires, response.data.views)).toFixed(1) }}%</span>
+        <span class="stat-value">{{ (100 - calculateConversionRate(response.data.hires, response.data.applications)).toFixed(1) }}%</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">Total Funnel Volume</span>
-        <span class="stat-value">{{ response.data.views + response.data.applyClicks + response.data.applications + response.data.interviews + response.data.hires | number }}</span>
+        <span class="stat-value">{{ response.data.applications | number }}</span>
       </div>
     </div>
   </div>

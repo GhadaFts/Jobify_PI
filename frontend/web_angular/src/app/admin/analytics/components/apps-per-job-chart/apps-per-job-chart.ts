@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-apps-per-job-chart',
@@ -11,7 +11,7 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class AppsPerJobChartComponent implements OnInit {
   chartData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.chartData$ = new Observable();
   }
 
