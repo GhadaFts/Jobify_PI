@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -15,13 +15,30 @@ import { Router } from '@angular/router';
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  private authService?: AuthService;
 
   constructor(
-    private authService: AuthService,
+    private injector: Injector,
     private router: Router
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    // Lazy load AuthService to avoid circular dependency
+    if (!this.authService) {
+      this.authService = this.injector.get(AuthService);
+    }
+
+    // Skip interceptor logic for auth endpoints (login, register, refresh, etc.)
+    const isAuthEndpoint = request.url.includes('/auth/login') || 
+                          request.url.includes('/auth/register') ||
+                          request.url.includes('/auth/refresh') ||
+                          request.url.includes('/auth/logout');
+    
+    if (isAuthEndpoint) {
+      console.log('⏭️ Skipping interceptor for auth endpoint:', request.url);
+      return next.handle(request);
+    }
+
     // Add access token to request if available
     const accessToken = this.authService.getAccessToken();
     
@@ -71,11 +88,11 @@ export class AuthInterceptor implements HttpInterceptor {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
 
-      const refreshToken = this.authService.getRefreshToken();
+      const refreshToken = this.authService?.getRefreshToken();
 
       if (refreshToken) {
         console.log('🔄 Refreshing token...');
-        return this.authService.refreshToken().pipe(
+        return this.authService!.refreshToken().pipe(
           switchMap((response: any) => {
             this.isRefreshing = false;
             this.refreshTokenSubject.next(response.accessToken);
@@ -86,7 +103,7 @@ export class AuthInterceptor implements HttpInterceptor {
             this.isRefreshing = false;
             console.error('❌ Token refresh failed:', err);
             // If refresh fails, logout user
-            this.authService.logout().subscribe();
+            this.authService?.logout().subscribe();
             this.router.navigate(['/login']);
             return throwError(() => err);
           })
@@ -95,7 +112,7 @@ export class AuthInterceptor implements HttpInterceptor {
         // No refresh token, logout user
         this.isRefreshing = false;
         console.error('❌ No refresh token available');
-        this.authService.logout().subscribe();
+        this.authService?.logout().subscribe();
         this.router.navigate(['/login']);
         return throwError(() => new Error('No refresh token available'));
       }

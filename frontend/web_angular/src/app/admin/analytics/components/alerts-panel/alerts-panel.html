@@ -1,17 +1,102 @@
 <div class="alerts-container">
   <div *ngIf="alertsData$ | async as response" class="alerts-wrapper">
     <h3 class="alerts-title">Key Metrics Alerts</h3>
-    <div class="alerts-list">
-      <div *ngFor="let alert of response.data" class="alert-item" [ngClass]="{ 'alert-critical': alert.alert }">
-        <div class="alert-icon">{{ getIcon(alert.alert, alert.change) }}</div>
-        <div class="alert-content">
-          <span class="alert-metric">{{ alert.metric }}</span>
-          <span class="alert-change" [ngClass]="'change-' + getChangeColor(alert.change)">
-            {{ alert.change > 0 ? '+' : '' }}{{ alert.change }}% vs last period
+    <div class="alerts-grid">
+      <!-- Total Applications -->
+      <div class="alert-card" [ngClass]="{ 'alert-critical': response.data.totalApplications.isAlert }">
+        <div class="alert-header">
+          <span class="alert-icon">{{ getIcon(response.data.totalApplications.isAlert, response.data.totalApplications.percentageChange) }}</span>
+          <span class="alert-badge" [ngClass]="response.data.totalApplications.isAlert ? 'badge-alert' : 'badge-normal'">
+            {{ response.data.totalApplications.isAlert ? 'Alert' : 'Normal' }}
           </span>
         </div>
-        <div class="alert-badge" [ngClass]="alert.alert ? 'badge-alert' : 'badge-normal'">
-          {{ alert.alert ? 'Alert' : 'Normal' }}
+        <div class="alert-content">
+          <h4 class="alert-metric">Total Applications</h4>
+          <div class="alert-value">{{ response.data.totalApplications.current }}</div>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(response.data.totalApplications.percentageChange)">
+            {{ response.data.totalApplications.percentageChange > 0 ? '+' : '' }}{{ response.data.totalApplications.percentageChange }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Job Posts -->
+      <div class="alert-card" [ngClass]="{ 'alert-critical': response.data.jobPosts.isAlert }">
+        <div class="alert-header">
+          <span class="alert-icon">{{ getIcon(response.data.jobPosts.isAlert, response.data.jobPosts.percentageChange) }}</span>
+          <span class="alert-badge" [ngClass]="response.data.jobPosts.isAlert ? 'badge-alert' : 'badge-normal'">
+            {{ response.data.jobPosts.isAlert ? 'Alert' : 'Normal' }}
+          </span>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-metric">Job Posts</h4>
+          <div class="alert-value">{{ response.data.jobPosts.current }}</div>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(response.data.jobPosts.percentageChange)">
+            {{ response.data.jobPosts.percentageChange > 0 ? '+' : '' }}{{ response.data.jobPosts.percentageChange }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- New User Registrations -->
+      <div class="alert-card" [ngClass]="{ 'alert-critical': response.data.newUsers.isAlert }">
+        <div class="alert-header">
+          <span class="alert-icon">{{ getIcon(response.data.newUsers.isAlert, response.data.newUsers.percentageChange) }}</span>
+          <span class="alert-badge" [ngClass]="response.data.newUsers.isAlert ? 'badge-alert' : 'badge-normal'">
+            {{ response.data.newUsers.isAlert ? 'Alert' : 'Normal' }}
+          </span>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-metric">New User Registrations</h4>
+          <div class="alert-value">{{ response.data.newUsers.current }}</div>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(response.data.newUsers.percentageChange)">
+            {{ response.data.newUsers.percentageChange > 0 ? '+' : '' }}{{ response.data.newUsers.percentageChange }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Interview Completions -->
+      <div class="alert-card" [ngClass]="{ 'alert-critical': response.data.interviews.isAlert }">
+        <div class="alert-header">
+          <span class="alert-icon">{{ getIcon(response.data.interviews.isAlert, response.data.interviews.percentageChange) }}</span>
+          <span class="alert-badge" [ngClass]="response.data.interviews.isAlert ? 'badge-alert' : 'badge-normal'">
+            {{ response.data.interviews.isAlert ? 'Alert' : 'Normal' }}
+          </span>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-metric">Interview Completions</h4>
+          <div class="alert-value">{{ response.data.interviews.current }}</div>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(response.data.interviews.percentageChange)">
+            {{ response.data.interviews.percentageChange > 0 ? '+' : '' }}{{ response.data.interviews.percentageChange }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Hiring Rate -->
+      <div class="alert-card" [ngClass]="{ 'alert-critical': response.data.hiringRate.isAlert }">
+        <div class="alert-header">
+          <span class="alert-icon">{{ getIcon(response.data.hiringRate.isAlert, response.data.hiringRate.percentageChange) }}</span>
+          <span class="alert-badge" [ngClass]="response.data.hiringRate.isAlert ? 'badge-alert' : 'badge-normal'">
+            {{ response.data.hiringRate.isAlert ? 'Alert' : 'Normal' }}
+          </span>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-metric">Hiring Rate</h4>
+          <div class="alert-value">{{ response.data.hiringRate.current | number:'1.1-1' }}%</div>
+          <span class="alert-change" [ngClass]="'change-' + getChangeColor(response.data.hiringRate.percentageChange)">
+            {{ response.data.hiringRate.percentageChange > 0 ? '+' : '' }}{{ response.data.hiringRate.percentageChange | number:'1.1-1' }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Average Applications per Job -->
+      <div class="alert-card">
+        <div class="alert-header">
+          <span class="alert-icon">📊</span>
+          <span class="alert-badge badge-normal">Normal</span>
+        </div>
+        <div class="alert-content">
+          <h4 class="alert-metric">Avg Applications/Job</h4>
+          <div class="alert-value">-</div>
+          <span class="alert-change change-negative">Coming Soon</span>
         </div>
       </div>
     </div>

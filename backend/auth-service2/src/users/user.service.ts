@@ -89,4 +89,46 @@ export class UserService {
       .exec();
     return result;
   }
+
+  async getTotalUsers(): Promise<number> {
+    return await this.userModel.countDocuments({ deleted: false }).exec();
+  }
+
+  async getNewUsersLast7Days(): Promise<number> {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    return await this.userModel.countDocuments({
+      deleted: false,
+      createdAt: { $gte: sevenDaysAgo }
+    }).exec();
+  }
+
+  async getUsersAlert(days: number): Promise<any> {
+    const now = new Date();
+    const currentPeriodStart = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const previousPeriodStart = new Date(now.getTime() - days * 2 * 24 * 60 * 60 * 1000);
+    const previousPeriodEnd = currentPeriodStart;
+
+    const currentPeriodCount = await this.userModel.countDocuments({
+      deleted: false,
+      createdAt: { $gte: currentPeriodStart, $lte: now }
+    }).exec();
+
+    const previousPeriodCount = await this.userModel.countDocuments({
+      deleted: false,
+      createdAt: { $gte: previousPeriodStart, $lte: previousPeriodEnd }
+    }).exec();
+
+    const percentageChange = previousPeriodCount === 0 
+      ? (currentPeriodCount > 0 ? 100 : 0)
+      : ((currentPeriodCount - previousPeriodCount) / previousPeriodCount) * 100;
+
+    return {
+      current: currentPeriodCount,
+      previous: previousPeriodCount,
+      percentageChange: Math.round(percentageChange * 10) / 10,
+      isAlert: percentageChange < -5
+    };
+  }
 }

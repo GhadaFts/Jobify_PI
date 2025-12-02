@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MockAnalyticsService } from '../../services/mock-analytics.service';
+import { map } from 'rxjs/operators';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-top-companies-chart',
@@ -11,25 +12,27 @@ import { MockAnalyticsService } from '../../services/mock-analytics.service';
 export class TopCompaniesChartComponent implements OnInit {
   chartData$: Observable<any>;
 
-  constructor(private analyticsService: MockAnalyticsService) {
+  constructor(private analyticsService: AnalyticsService) {
     this.chartData$ = new Observable();
   }
 
   ngOnInit(): void {
-    this.chartData$ = this.analyticsService.getTopCompanies();
+    this.chartData$ = this.analyticsService.getTopCompanies().pipe(
+      map(response => response.data || [])
+    );
   }
 
   getMaxApps(data: any): number {
     if (!data || !Array.isArray(data) || data.length === 0) return 1;
-    return Math.max(...data.map((d: any) => d.applicationCount || 0));
+    return Math.max(...data.map((d: any) => d.totalApplications || 0));
   }
 
   getAvgAppsPerJob(company: any): string {
-    if (!company || company.jobCount === 0) return '0.0';
-    return (company.applicationCount / company.jobCount).toFixed(1);
+    if (!company) return '0.0';
+    return company.avgAppsPerJob?.toFixed(1) || '0.0';
   }
 
-  getProgressWidth(applicationCount: number, maxApps: number): string {
-    return ((applicationCount || 0) / maxApps * 100) + '%';
+  getProgressWidth(totalApplications: number, maxApps: number): string {
+    return ((totalApplications || 0) / maxApps * 100) + '%';
   }
 }

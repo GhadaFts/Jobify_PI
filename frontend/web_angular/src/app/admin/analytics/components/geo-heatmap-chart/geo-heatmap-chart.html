@@ -1,13 +1,13 @@
 <div class="chart-container">
-  <div *ngIf="chartData$ | async as response" class="chart-wrapper">
+  <div *ngIf="chartData$ | async as locations" class="chart-wrapper">
     <h3 class="chart-title">Geographic Distribution</h3>
     <div class="heatmap-grid">
-      <div *ngFor="let region of response.data" class="heatmap-cell" [ngClass]="'intensity-' + getIntensity(region.jobs, getMaxJobs(response.data))">
+      <div *ngFor="let location of locations" class="heatmap-cell" [ngClass]="'intensity-' + getIntensity(location.totalApplications, getMaxApplications(locations))">
         <div class="cell-content">
-          <span class="region-name">{{ region.region }}</span>
+          <span class="region-name">{{ location.location }}</span>
           <div class="metrics">
-            <span class="jobs-count">{{ region.jobs }} jobs</span>
-            <span class="apps-count">{{ region.applications }} apps</span>
+            <span class="jobs-count">{{ location.jobCount }} jobs</span>
+            <span class="apps-count">{{ location.totalApplications }} apps</span>
           </div>
         </div>
       </div>
