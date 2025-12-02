@@ -1,5 +1,6 @@
 package com.example.jobify.network
 
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -75,4 +76,16 @@ interface InterviewApiService {
      */
     @DELETE("/interview-service/api/interviews/{id}")
     suspend fun cancelInterview(@Path("id") id: Long): Response<Void>
+
+    /**
+     * Get job seeker's upcoming interviews (NON-SUSPEND version for callbacks)
+     */
+    @GET("/interview-service/api/interviews/my-interviews/upcoming")
+    fun getMyUpcomingInterviews(): Call<List<InterviewResponseDTO>>
+
+    /**
+     * Get job seeker's upcoming interviews (SUSPEND version for coroutines)
+     */
+    @GET("/interview-service/api/interviews/my-interviews/upcoming")
+    suspend fun getMyUpcomingInterviewsSuspend(): Response<List<InterviewResponseDTO>>
 }

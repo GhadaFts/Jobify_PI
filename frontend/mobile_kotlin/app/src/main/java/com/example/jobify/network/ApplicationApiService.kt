@@ -13,6 +13,10 @@ interface ApplicationApiService {
     @GET("application-service/api/applications/{id}")
     suspend fun getApplicationById(@Path("id") id: String): Response<Map<String, Any>>
 
+    // Get application by ID (NON-SUSPEND version for callbacks)
+    @GET("application-service/api/applications/{id}")
+    fun getApplicationByIdCall(@Path("id") id: String): Call<Map<String, Any>>
+
     // Get applications by job offer ID (RECRUITER/ADMIN only)
     @GET("application-service/api/applications/joboffer/{jobOfferId}")
     suspend fun getByJobOffer(@Path("jobOfferId") jobOfferId: String): Response<List<Map<String, Any>>>

@@ -1,6 +1,7 @@
 package com.example.jobify.network
 
 import okhttp3.MultipartBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -26,4 +27,12 @@ interface JobApiService {
     @Multipart
     @POST("joboffer-service/api/uploads/company-logo")
     suspend fun uploadLogo(@Part file: MultipartBody.Part): Response<Map<String, Any>>
+
+    // Get job by ID (NON-SUSPEND version for callbacks)
+    @GET("joboffer-service/api/jobs/{id}")
+    fun getJobById(@Path("id") id: String): Call<Map<String, Any>>
+
+    // Get job by ID (SUSPEND version for coroutines)
+    @GET("joboffer-service/api/jobs/{id}")
+    suspend fun getJobByIdSuspend(@Path("id") id: String): Response<Map<String, Any>>
 }

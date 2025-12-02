@@ -56,6 +56,9 @@ class ProfileActivity : BaseDrawerActivity() {
     private var isDarkMode = false
     private lateinit var rootLayout: ScrollView
     private var isLoading = false
+    
+    // Interview data - loaded from backend
+    private var interviewNotifications: MutableList<InterviewNotification> = mutableListOf()
 
     // Image picker
     private val imagePickerLauncher = registerForActivityResult(
@@ -66,43 +69,16 @@ class ProfileActivity : BaseDrawerActivity() {
         }
     }
 
-    // Mock interview notifications (you can load these from backend later)
-    private val interviewNotifications = listOf(
-        InterviewNotification(
-            id = "1",
-            companyName = "TekUp",
-            interviewDate = "Nov 21, 2025",
-            interviewTime = "1:00 AM",
-            location = "Online Meeting",
-            additionalNotes = "Please have your portfolio ready. Technical assessment will include live coding.",
-            duration = "60 mins",
-            interviewType = "Online",
-            isCompleted = true,
-            meetingLink = "https://meet.google.com/tekup-interview-link"
-        ),
-        InterviewNotification(
-            id = "2",
-            companyName = "Tech Solutions SARL",
-            interviewDate = "Jan 12, 2026",
-            interviewTime = "2:30 PM",
-            location = "Tech Park, Ariana, Tunisia",
-            additionalNotes = "Bring your ID and previous work samples. Dress code: Business casual.",
-            duration = "45 mins",
-            interviewType = "Local",
-            isCompleted = false
-        )
-    )
-
     data class InterviewNotification(
-        val id: String,
+        val id: Long,
         val companyName: String,
-        val interviewDate: String,
+        val interviewDate: String, // ISO format from backend
         val interviewTime: String,
         val location: String,
         val additionalNotes: String,
         val duration: String,
         val interviewType: String,
-        val isCompleted: Boolean,
+        val isCompleted: Boolean = false,
         val meetingLink: String = ""
     )
 
@@ -115,6 +91,7 @@ class ProfileActivity : BaseDrawerActivity() {
         initViews()
         setupListeners()
         loadProfileData()
+        loadInterviewNotifications()
     }
 
     private fun initViews() {
@@ -313,6 +290,218 @@ class ProfileActivity : BaseDrawerActivity() {
         }
     }
 
+    /**
+     * Load interview notifications from backend following the Angular workflow:
+     * 1. Get all upcoming interviews for job seeker
+     * 2. For each interview, fetch the application details
+     * 3. For each application, fetch the job details to get company name
+     * 4. Map all data into InterviewNotification format
+     * 5. Display in dialog with proper formatting
+     */
+    private fun loadInterviewNotifications() {
+        val token = sessionManager.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            Log.w("ProfileActivity", "No token available for loading interviews")
+            return
+        }
+
+        // Clear previous interviews to avoid duplicates
+        interviewNotifications.clear()
+
+        // Step 1: Get all upcoming interviews
+        ApiClient.interviewService.getMyUpcomingInterviews().enqueue(object : Callback<List<InterviewResponseDTO>> {
+            override fun onResponse(call: Call<List<InterviewResponseDTO>>, response: Response<List<InterviewResponseDTO>>) {
+                if (!response.isSuccessful || response.body() == null) {
+                    Log.e("ProfileActivity", "Failed to load interviews: ${response.code()}")
+                    interviewNotifications.clear()
+                    return
+                }
+
+                val interviews = response.body() ?: emptyList()
+                Log.d("ProfileActivity", "Loaded ${interviews.size} upcoming interviews")
+
+                if (interviews.isEmpty()) {
+                    interviewNotifications.clear()
+                    return
+                }
+
+                // Step 2 & 3: For each interview, fetch application and job details
+                var completedRequests = 0
+
+                interviews.forEach { interview ->
+                    // Fetch application details
+                    ApiClient.applicationService.getApplicationByIdCall(interview.applicationId)
+                        .enqueue(object : Callback<Map<String, Any>> {
+                            override fun onResponse(
+                                call: Call<Map<String, Any>>,
+                                response: Response<Map<String, Any>>
+                            ) {
+                                if (!response.isSuccessful || response.body() == null) {
+                                    Log.e("ProfileActivity", "Failed to load application: ${interview.applicationId}")
+                                    completedRequests++
+                                    checkAllInterviewsLoaded(completedRequests, interviews.size)
+                                    return
+                                }
+
+                                val application = response.body()!!
+                                // Handle jobOfferId - could be String, Long, or Double
+                                val jobOfferId = when (val id = application["jobOfferId"]) {
+                                    is String -> id
+                                    is Number -> id.toLong().toString()
+                                    else -> return@onResponse
+                                }
+                                
+                                Log.d("ProfileActivity", "Extracted jobOfferId: $jobOfferId from application")
+
+                                // Fetch job details to get company name
+                                ApiClient.jobService.getJobById(jobOfferId)
+                                    .enqueue(object : Callback<Map<String, Any>> {
+                                        override fun onResponse(
+                                            call: Call<Map<String, Any>>,
+                                            response: Response<Map<String, Any>>
+                                        ) {
+                                            if (response.isSuccessful && response.body() != null) {
+                                                val job = response.body()!!
+                                                val companyName = job["company"] as? String ?: "Unknown Company"
+
+                                                // Step 4: Map data into InterviewNotification
+                                                val notification = mapInterviewToNotification(
+                                                    interview = interview,
+                                                    companyName = companyName
+                                                )
+
+                                                interviewNotifications.add(notification)
+                                                Log.d("ProfileActivity", "Added notification for $companyName")
+                                            } else {
+                                                Log.e("ProfileActivity", "Failed to load job: $jobOfferId")
+                                            }
+
+                                            completedRequests++
+                                            checkAllInterviewsLoaded(completedRequests, interviews.size)
+                                        }
+
+                                        override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                                            Log.e("ProfileActivity", "Failed to fetch job details", t)
+                                            completedRequests++
+                                            checkAllInterviewsLoaded(completedRequests, interviews.size)
+                                        }
+                                    })
+                            }
+
+                            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                                Log.e("ProfileActivity", "Failed to fetch application details", t)
+                                completedRequests++
+                                checkAllInterviewsLoaded(completedRequests, interviews.size)
+                            }
+                        })
+                }
+            }
+
+            override fun onFailure(call: Call<List<InterviewResponseDTO>>, t: Throwable) {
+                Log.e("ProfileActivity", "Failed to load interviews", t)
+                interviewNotifications.clear()
+            }
+        })
+    }
+
+    /**
+     * Check if all interview data has been loaded, to avoid race conditions
+     */
+    private fun checkAllInterviewsLoaded(completed: Int, total: Int) {
+        if (completed == total) {
+            Log.d("ProfileActivity", "All interviews loaded: ${interviewNotifications.size}")
+            // Sort by date, most recent first
+            interviewNotifications.sortByDescending { it.interviewDate }
+        }
+    }
+
+    /**
+     * Map InterviewResponseDTO to InterviewNotification with formatted dates
+     * Following the same logic as Angular's job-seeker-sidebar.ts
+     */
+    private fun mapInterviewToNotification(
+        interview: InterviewResponseDTO,
+        companyName: String
+    ): InterviewNotification {
+        val isoDateTime = interview.scheduledDate // ISO format from backend
+        val interviewDate = formatInterviewDate(isoDateTime)
+        val interviewTime = formatInterviewTime(isoDateTime)
+
+        // Determine if interview is completed based on date
+        val isCompleted = isInterviewCompleted(isoDateTime)
+
+        return InterviewNotification(
+            id = interview.id,
+            companyName = companyName,
+            interviewDate = interviewDate, // Formatted: "Jan 15, 2024"
+            interviewTime = interviewTime, // Formatted: "02:30 PM"
+            location = interview.location ?: "Not specified",
+            additionalNotes = interview.notes ?: "",
+            duration = "${interview.duration} mins",
+            interviewType = getInterviewTypeDisplay(interview),
+            isCompleted = isCompleted,
+            meetingLink = interview.meetingLink ?: ""
+        )
+    }
+
+    /**
+     * Check if interview is in the past
+     */
+    private fun isInterviewCompleted(isoDateTime: String): Boolean {
+        return try {
+            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val interviewDate = dateFormat.parse(isoDateTime) ?: return false
+            val now = Calendar.getInstance().time
+            interviewDate.before(now)
+        } catch (e: Exception) {
+            Log.e("ProfileActivity", "Error parsing date: $isoDateTime", e)
+            false
+        }
+    }
+
+    /**
+     * Format ISO datetime to display date: "Jan 15, 2024"
+     */
+    private fun formatInterviewDate(isoDateTime: String): String {
+        return try {
+            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val date = inputFormat.parse(isoDateTime) ?: return isoDateTime
+
+            val outputFormat = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            outputFormat.format(date)
+        } catch (e: Exception) {
+            Log.e("ProfileActivity", "Error formatting date: $isoDateTime", e)
+            isoDateTime
+        }
+    }
+
+    /**
+     * Format ISO datetime to display time: "02:30 PM"
+     */
+    private fun formatInterviewTime(isoDateTime: String): String {
+        return try {
+            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val date = inputFormat.parse(isoDateTime) ?: return isoDateTime
+
+            val outputFormat = java.text.SimpleDateFormat("hh:mm a", Locale.getDefault())
+            outputFormat.format(date)
+        } catch (e: Exception) {
+            Log.e("ProfileActivity", "Error formatting time: $isoDateTime", e)
+            isoDateTime
+        }
+    }
+
+    /**
+     * Get human-readable interview type from InterviewType enum
+     */
+    private fun getInterviewTypeDisplay(interview: InterviewResponseDTO): String {
+        return when (interview.interviewType.uppercase()) {
+            "REMOTE", "VIDEO", "ONLINE" -> "Online Interview"
+            "ON_SITE", "IN_PERSON", "LOCAL" -> "Local Interview"
+            else -> interview.interviewType
+        }
+    }
+
     private fun uploadProfilePhoto(uri: Uri) {
         val token = sessionManager.getAccessToken()
         if (token.isNullOrEmpty()) {
@@ -383,7 +572,14 @@ class ProfileActivity : BaseDrawerActivity() {
             // Open edit profile activity or show edit dialog
             Toast.makeText(this, "Edit profile feature - coming soon", Toast.LENGTH_SHORT).show()
         }
-        btnNotification.setOnClickListener { showInterviewNotificationsDialog() }
+        btnNotification.setOnClickListener { 
+            // Reload interviews before showing dialog to ensure latest data
+            loadInterviewNotifications()
+            // Longer delay to allow nested API calls to complete (3 calls per interview)
+            Handler(Looper.getMainLooper()).postDelayed({
+                showInterviewNotificationsDialog()
+            }, 2000)  // 2 second delay for nested API calls
+        }
 
         // Click on profile image to change
         profileImage.setOnClickListener {
@@ -395,6 +591,8 @@ class ProfileActivity : BaseDrawerActivity() {
     }
 
     private fun showInterviewNotificationsDialog() {
+        Log.d("ProfileActivity", "showInterviewNotificationsDialog called with ${interviewNotifications.size} interviews")
+        
         val dialogView = layoutInflater.inflate(R.layout.dialog_interview_notifications, null)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -402,61 +600,125 @@ class ProfileActivity : BaseDrawerActivity() {
             .create()
 
         val container = dialogView.findViewById<LinearLayout>(R.id.notificationsContainer)
+        
+        if (container == null) {
+            Log.e("ProfileActivity", "notificationsContainer is null in dialog layout")
+            Toast.makeText(this, "Error loading dialog", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        interviewNotifications.forEach { notification ->
-            val notificationCard = layoutInflater.inflate(R.layout.item_interview_notification, container, false)
+        // Clear any existing views
+        container.removeAllViews()
 
-            notificationCard.findViewById<TextView>(R.id.tvCompanyName).text = notification.companyName
-            notificationCard.findViewById<TextView>(R.id.tvDuration).text = notification.duration
-            notificationCard.findViewById<TextView>(R.id.tvType).text = notification.interviewType
-            notificationCard.findViewById<TextView>(R.id.tvDate).text = notification.interviewDate
-            notificationCard.findViewById<TextView>(R.id.tvTime).text = notification.interviewTime
-            notificationCard.findViewById<TextView>(R.id.tvLocation).text = notification.location
-            notificationCard.findViewById<TextView>(R.id.tvNotes).text = notification.additionalNotes
+        // Check if there are any interviews
+        if (interviewNotifications.isEmpty()) {
+            Log.d("ProfileActivity", "No interviews to display")
+            val emptyView = TextView(this)
+            emptyView.text = "No upcoming interviews scheduled"
+            emptyView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+            emptyView.setPadding(32, 64, 32, 64)
+            emptyView.setTextColor(Color.parseColor("#999999"))
+            emptyView.textSize = 16f
+            container.addView(emptyView)
+        } else {
+            Log.d("ProfileActivity", "Displaying ${interviewNotifications.size} interviews")
+            // Display all interview notifications
+            interviewNotifications.forEach { notification ->
+                Log.d("ProfileActivity", "Adding notification: ${notification.companyName}")
+                val notificationCard = layoutInflater.inflate(R.layout.item_interview_notification, container, false)
 
-            val btnJoin = notificationCard.findViewById<Button>(R.id.btnJoin)
-            val tvCompleted = notificationCard.findViewById<TextView>(R.id.tvCompleted)
-            val btnDetails = notificationCard.findViewById<Button>(R.id.btnDetails)
-            val typeIcon = notificationCard.findViewById<ImageView>(R.id.iconType)
+                try {
+                    notificationCard.findViewById<TextView>(R.id.tvCompanyName).text = notification.companyName
+                    notificationCard.findViewById<TextView>(R.id.tvDuration).text = notification.duration
+                    notificationCard.findViewById<TextView>(R.id.tvType).text = notification.interviewType
+                    notificationCard.findViewById<TextView>(R.id.tvDate).text = notification.interviewDate
+                    notificationCard.findViewById<TextView>(R.id.tvTime).text = notification.interviewTime
+                    notificationCard.findViewById<TextView>(R.id.tvLocation).text = notification.location
+                    notificationCard.findViewById<TextView>(R.id.tvNotes).text = notification.additionalNotes
 
-            if (notification.isCompleted) {
-                btnJoin.visibility = View.GONE
-                tvCompleted.visibility = View.VISIBLE
-                tvCompleted.text = "Completed"
-            } else {
-                btnJoin.visibility = View.VISIBLE
-                tvCompleted.visibility = View.GONE
-            }
+                    val btnJoin = notificationCard.findViewById<Button>(R.id.btnJoin)
+                    val tvCompleted = notificationCard.findViewById<TextView>(R.id.tvCompleted)
+                    val btnDetails = notificationCard.findViewById<Button>(R.id.btnDetails)
+                    val typeIcon = notificationCard.findViewById<ImageView>(R.id.iconType)
 
-            if (notification.interviewType == "Online") {
-                typeIcon.setImageResource(R.drawable.ic_videocam)
-            } else {
-                typeIcon.setImageResource(R.drawable.ic_location)
-            }
-
-            if (notification.interviewType == "Online" && !notification.isCompleted) {
-                btnJoin.setOnClickListener {
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(notification.meetingLink))
-                        startActivity(intent)
-                        dialog.dismiss()
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Cannot open link: ${e.message}", Toast.LENGTH_LONG).show()
+                    if (notification.isCompleted) {
+                        btnJoin.visibility = View.GONE
+                        tvCompleted.visibility = View.VISIBLE
+                        tvCompleted.text = "Completed"
+                    } else {
+                        btnJoin.visibility = View.VISIBLE
+                        tvCompleted.visibility = View.GONE
                     }
+
+                    // Determine icon based on interview type
+                    if (notification.interviewType.contains("Online", ignoreCase = true)) {
+                        typeIcon.setImageResource(R.drawable.ic_videocam)
+                    } else {
+                        typeIcon.setImageResource(R.drawable.ic_location)
+                    }
+
+                    // Set up join button for online interviews
+                    if (notification.interviewType.contains("Online", ignoreCase = true) && !notification.isCompleted) {
+                        if (notification.meetingLink.isNotEmpty()) {
+                            btnJoin.setOnClickListener {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(notification.meetingLink))
+                                    startActivity(intent)
+                                    dialog.dismiss()
+                                } catch (e: Exception) {
+                                    Toast.makeText(this, "Cannot open link: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        } else {
+                            btnJoin.isEnabled = false
+                            btnJoin.alpha = 0.5f
+                            btnJoin.text = "No link"
+                        }
+                    } else {
+                        btnJoin.isEnabled = false
+                        btnJoin.alpha = 0.5f
+                    }
+
+                    // Show interview details
+                    btnDetails.setOnClickListener {
+                        showInterviewDetailsDialog(notification)
+                    }
+
+                    container.addView(notificationCard)
+                    Log.d("ProfileActivity", "Successfully added notification card")
+                } catch (e: Exception) {
+                    Log.e("ProfileActivity", "Error adding notification card", e)
                 }
-            } else {
-                btnJoin.isEnabled = false
-                btnJoin.alpha = 0.5f
             }
-
-            btnDetails.setOnClickListener {
-                Toast.makeText(this, "Details for ${notification.companyName}", Toast.LENGTH_SHORT).show()
-            }
-
-            container.addView(notificationCard)
         }
 
         dialog.show()
+    }
+
+    /**
+     * Show detailed view of an interview
+     */
+    private fun showInterviewDetailsDialog(notification: InterviewNotification) {
+        val details = """
+Interview Details
+
+Company: ${notification.companyName}
+Date: ${notification.interviewDate}
+Time: ${notification.interviewTime}
+Duration: ${notification.duration}
+Type: ${notification.interviewType}
+Location: ${notification.location}
+${if (notification.meetingLink.isNotEmpty()) "Meeting Link: ${notification.meetingLink}\n" else ""}
+Notes: ${if (notification.additionalNotes.isNotEmpty()) notification.additionalNotes else "No additional notes"}
+Status: ${if (notification.isCompleted) "Completed" else "Scheduled"}
+        """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle("${notification.companyName} - Interview")
+            .setMessage(details)
+            .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun getRandomColor(): Int {
