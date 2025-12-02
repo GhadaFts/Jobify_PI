@@ -15,9 +15,20 @@
     </ul>
 
     <!-- Mobile menu button -->
-    <button class="md:hidden text-2xl text-jobiBlue">
-        <i class="fas fa-bars"></i>
+    <button class="md:hidden text-2xl text-jobiBlue" (click)="toggleMobileMenu()">
+        <i class="fas" [ngClass]="{'fa-bars': !isMobileMenuOpen, 'fa-times': isMobileMenuOpen}"></i>
     </button>
+
+    <!-- Mobile Menu -->
+    <div class="md:hidden absolute top-full left-0 w-full bg-white shadow-lg" *ngIf="isMobileMenuOpen">
+        <ul class="flex flex-col py-4">
+            <li><a routerLink="/" class="block px-6 py-3 text-black hover:text-jobiBlue hover:bg-gray-50" (click)="closeMobileMenu()">Home</a></li>
+            <li><a href="#features" class="block px-6 py-3 text-black hover:text-jobiBlue hover:bg-gray-50" (click)="closeMobileMenu()">Features</a></li>
+            <li><a href="#how-it-works" class="block px-6 py-3 text-black hover:text-jobiBlue hover:bg-gray-50" (click)="closeMobileMenu()">How It Works</a></li>
+            <li><a routerLink="/login" class="block px-6 py-3 text-black hover:text-jobiBlue hover:bg-gray-50" (click)="closeMobileMenu()">Login</a></li>
+            <li><a routerLink="/signup" class="block px-6 py-3 text-black hover:text-jobiBlue hover:bg-gray-50" (click)="closeMobileMenu()">Register</a></li>
+        </ul>
+    </div>
 </nav>
 
 <!-- HERO SECTION -->
@@ -49,10 +60,35 @@
         </div>
     </div>
 
-    <!-- RIGHT SIDE IMAGE - Hidden on mobile -->
+    <!-- RIGHT SIDE IMAGE CAROUSEL WITH FLIP ANIMATION -->
     <div class="hidden md:flex justify-center md:justify-end">
-        <img src="assets/hero-image.png" alt="Hero Image"
-            class="w-[300px] sm:w-[380px] md:w-[500px] rounded-2xl shadow-lg border border-jobiGray" />
+        <div class="relative w-[300px] sm:w-[380px] md:w-[500px] h-[300px] sm:h-[380px] md:h-[500px]">
+            <!-- Image container with flip animation -->
+            <div class="flip-carousel">
+                <!-- Image 1 -->
+                <div class="flip-slide" [ngClass]="{'active': currentSlide === 0}">
+                    <img src="assets/landing1.jpg" alt="Jobify AI Recruitment"
+                        class="w-full h-full rounded-2xl shadow-lg border border-jobiGray object-cover" />
+                </div>
+                <!-- Image 2 -->
+                <div class="flip-slide" [ngClass]="{'active': currentSlide === 1}">
+                    <img src="assets/landing2.jpg" alt="Jobify Smart Matching"
+                        class="w-full h-full rounded-2xl shadow-lg border border-jobiGray object-cover" />
+                </div>
+                <!-- Image 3 -->
+                <div class="flip-slide" [ngClass]="{'active': currentSlide === 2}">
+                    <img src="assets/landing3.png" alt="Jobify CV Builder"
+                        class="w-full h-full rounded-2xl shadow-lg border border-jobiGray object-cover" />
+                </div>
+                <!-- Image 4 -->
+                <div class="flip-slide" [ngClass]="{'active': currentSlide === 3}">
+                    <img src="assets/landing4.jpg" alt="Jobify Career Growth"
+                        class="w-full h-full rounded-2xl shadow-lg border border-jobiGray object-cover" />
+                </div>
+            </div>
+            
+            
+        </div>
     </div>
 </section>
 
@@ -76,7 +112,7 @@
                 class="relative bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
 
                 <!-- Overflow Avatar - Hidden on mobile -->
-                <img src="../../../assets/Helping a partner-rafiki.svg" alt="Avatar"
+                <img src="assets/Helping a partner-rafiki.svg" alt="Avatar"
                     class="hidden md:block absolute -bottom-4 -right-10 w-48 h-auto pointer-events-none select-none">
 
                 <div class="max-w-md">
@@ -85,9 +121,8 @@
                     </h3>
 
                     <p class="text-gray-600 text-sm leading-relaxed mb-6">
-                        Holding social tokens allows the individual to gain access to benefits including
-                        annual and seasonal content, private communities, direct access to celebrity,
-                        early access to tickets, and more.
+                        Access powerful AI tools to build your career. Create professional CVs, 
+                        prepare for interviews with AI simulations, and get matched with your dream job.
                     </p>
 
                     <ul class="space-y-3 mb-6 md:mb-8">
@@ -121,7 +156,7 @@
                 class="relative bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
 
                 <!-- Overflow Avatar - Hidden on mobile -->
-                <img src="../../../assets/Onboarding-rafiki.svg" alt="Avatar"
+                <img src="assets/Onboarding-rafiki.svg" alt="Avatar"
                     class="hidden md:block absolute -bottom-4 -right-10 w-48 h-auto pointer-events-none select-none">
 
                 <div class="max-w-md">
@@ -130,9 +165,8 @@
                     </h3>
 
                     <p class="text-gray-600 text-sm leading-relaxed mb-6">
-                        Holding social tokens allows the individual to gain access to benefits including
-                        annual and seasonal content, private communities, direct access to celebrity,
-                        early access to tickets, and more.
+                        Streamline your hiring process with intelligent tools. Find the perfect candidates,
+                        automate screening, and make data-driven hiring decisions.
                     </p>
 
                     <ul class="space-y-3 mb-6 md:mb-8">

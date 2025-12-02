@@ -66,7 +66,7 @@ export class JobSeekerSidebar implements OnInit {
       });
 
     // Fetch interviews
-    this.interviewService.getMyUpcomingInterviews()
+    let interviews=this.interviewService.getMyUpcomingInterviews()
       .pipe(
         switchMap(interviews => {
           this.myInterviews = interviews;
@@ -90,6 +90,8 @@ export class JobSeekerSidebar implements OnInit {
               )
             )
           );
+          console.log('Interview notification interviews:', interviews);
+         
 
           return forkJoin(requests);
         })
