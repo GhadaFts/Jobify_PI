@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.jobify.LoginActivity
 import com.example.jobify.R
 import com.example.jobify.SessionManager
@@ -42,8 +43,9 @@ fun RecruiterDrawerContent(
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
 
-    // Get user name from session
-    val userName = sessionManager.getUserName() ?: "Sarah Johnson"
+    // Get user data from session
+    val userName = sessionManager.getUserName() ?: "Recruiter"
+    val userPhoto = sessionManager.getUserPhoto()
 
     Column(
         modifier = Modifier
@@ -122,7 +124,7 @@ fun RecruiterDrawerContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Bottom Profile
-        RecruiterProfileSection(userName = userName)
+        RecruiterProfileSection(userName = userName, userPhoto = userPhoto)
 
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -169,7 +171,7 @@ private fun DrawerMenuItem(
 }
 
 @Composable
-private fun RecruiterProfileSection(userName: String) {
+private fun RecruiterProfileSection(userName: String, userPhoto: String?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,14 +201,31 @@ private fun RecruiterProfileSection(userName: String) {
                     .clip(CircleShape),
                 color = Color(0xFFE5E7EB)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.applicant),
-                    contentDescription = "Recruiter Profile",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                if (!userPhoto.isNullOrEmpty()) {
+                    val imageUrl = if (userPhoto.startsWith("http")) {
+                        userPhoto
+                    } else {
+                        "http://10.0.2.2:8888/auth-service$userPhoto"
+                    }
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = "Recruiter Profile",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.ic_user_placeholder)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_user_placeholder),
+                        contentDescription = "Recruiter Profile",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
 
             Column(

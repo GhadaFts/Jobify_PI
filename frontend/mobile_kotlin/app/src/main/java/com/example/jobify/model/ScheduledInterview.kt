@@ -15,27 +15,13 @@ data class ScheduledInterview(
     val interviewType: String, // "Local Interview" or "Online Interview"
     val location: String,
     val duration: String, // in minutes
-    val notes: String = ""
+    val notes: String = "",
+    val status: String = "scheduled", // "scheduled", "completed", "cancelled"
+    val backendStatus: String = "SCHEDULED" // Backend status: "SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"
 ) : Parcelable {
-    // Calculate status based on interview date
-    fun getStatus(): String {
-        return try {
-            val dateFormat = java.text.SimpleDateFormat("MM/dd/yyyy", java.util.Locale.getDefault())
-            val interviewDate = dateFormat.parse(date)
-            val today = java.util.Calendar.getInstance().apply {
-                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                set(java.util.Calendar.MINUTE, 0)
-                set(java.util.Calendar.SECOND, 0)
-            }.time
-
-            if (interviewDate != null && interviewDate.before(today)) {
-                "completed"
-            } else {
-                "scheduled"
-            }
-        } catch (_: Exception) {
-            "scheduled"
-        }
+    // Check if interview can be cancelled
+    fun isCancellable(): Boolean {
+        return status == "scheduled" && backendStatus in listOf("SCHEDULED", "RESCHEDULED")
     }
 }
 

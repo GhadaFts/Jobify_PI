@@ -495,86 +495,213 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
+            <!-- Header -->
             <TextView
-                android:text="Main"
-                android:textSize="14sp"
-                android:textColor="#9AA1A8"
-                android:paddingVertical="8dp"
+                android:text="Jobify"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1F2937"
+                android:paddingVertical="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
+            <TextView
+                android:text="Recruiter Portal"
+                android:textSize="12sp"
+                android:textColor="#9CA3AF"
+                android:paddingBottom="24dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Publish Job -->
             <LinearLayout
-                android:id="@+id/menuHomeLayout"
+                android:id="@+id/menuPublishJobLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:gravity="center_vertical"
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_home"
-                    android:contentDescription="@string/home_icon"/>
+                    android:src="@drawable/ic_edit"
+                    android:contentDescription="publish job icon"/>
 
                 <TextView
-                    android:id="@+id/menuHome"
-                    android:text="@string/posts"
+                    android:text="Publish Job"
                     android:textSize="16sp"
-                    android:textColor="#1F4E5F"
+                    android:textColor="#374151"
+                    android:textStyle="bold"
                     android:layout_marginStart="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="12dp"/>
+
+            <!-- Interviews -->
+            <LinearLayout
+                android:id="@+id/menuInterviewsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_interview"
+                    android:contentDescription="interviews icon"/>
+
+                <TextView
+                    android:text="Interviews"
+                    android:textSize="16sp"
+                    android:textColor="#374151"
+                    android:textStyle="bold"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Spacer -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:minHeight="200dp"/>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="#E5E7EB"/>
+
+            <!-- Settings (Profile) -->
             <LinearLayout
                 android:id="@+id/menuProfileLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:gravity="center_vertical"
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_profile"/>
+                    android:src="@drawable/ic_profile"
+                    android:contentDescription="settings icon"/>
 
                 <TextView
-                    android:id="@+id/menuProfile"
-                    android:text="Profile"
+                    android:text="Settings"
                     android:textSize="16sp"
-                    android:textColor="#1F4E5F"
+                    android:textColor="#374151"
+                    android:textStyle="bold"
                     android:layout_marginStart="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="12dp"/>
+
+            <!-- Logout -->
             <LinearLayout
                 android:id="@+id/menuLogoutLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:gravity="center_vertical"
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_logout"/>
+                    android:src="@drawable/ic_logout"
+                    android:contentDescription="logout icon"/>
 
                 <TextView
-                    android:id="@+id/menuLogout"
-                    android:text="Log out"
+                    android:text="Logout"
                     android:textSize="16sp"
-                    android:textColor="#1F4E5F"
+                    android:textColor="#374151"
+                    android:textStyle="bold"
                     android:layout_marginStart="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp"/>
+
+            <!-- Profile Section at Bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E5E7EB"/>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="12dp"/>
+
+            <LinearLayout
+                android:id="@+id/drawerProfileSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="4dp"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/drawerProfileImage"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_user_placeholder"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/drawerProfileName"
+                        android:text="Recruiter"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#1F2937"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:text="Recruitment\nManager"
+                        android:textSize="11sp"
+                        android:textColor="#9CA3AF"
+                        android:lineSpacingMultiplier="1.0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp"/>
         </LinearLayout>
     </ScrollView>
 

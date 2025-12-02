@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
@@ -33,10 +34,13 @@ import com.example.jobify.model.ScheduledInterview
 fun InterviewsScreen(
     modifier: Modifier = Modifier,
     scheduledInterviews: List<ScheduledInterview> = emptyList(),
-    onRefresh: () -> Unit = {}
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    onRefresh: () -> Unit = {},
+    onCancelInterview: (String) -> Unit = {}
 ) {
     // Use passed interviews list
-    val interviews = remember {
+    val interviews = remember(scheduledInterviews) {
         mutableStateListOf<ScheduledInterview>().apply {
             addAll(scheduledInterviews)
         }
@@ -94,13 +98,15 @@ fun InterviewsScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val scheduledCount = interviews.count { it.getStatus() == "scheduled" }
-            val completedCount = interviews.count { it.getStatus() == "completed" }
+            val scheduledCount = interviews.count { it.status == "scheduled" }
+            val completedCount = interviews.count { it.status == "completed" }
+            val cancelledCount = interviews.count { it.status == "cancelled" }
 
             listOf(
-                "all" to "All Interviews (${interviews.size})",
+                "all" to "All (${interviews.size})",
                 "upcoming" to "Upcoming ($scheduledCount)",
-                "completed" to "Completed ($completedCount)"
+                "completed" to "Completed ($completedCount)",
+                "cancelled" to "Cancelled ($cancelledCount)"
             ).forEach { (filter, label) ->
                 Surface(
                     modifier = Modifier
@@ -123,29 +129,120 @@ fun InterviewsScreen(
             }
         }
 
-        // Interviews list
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            val filteredInterviews = when (selectedFilter) {
-                "upcoming" -> interviews.filter { it.getStatus() == "scheduled" }
-                "completed" -> interviews.filter { it.getStatus() == "completed" }
-                else -> interviews
-            }.filter { it.candidateName.contains(searchText, ignoreCase = true) }
+        // Show loading, error, or interviews list
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF3B82F6))
+                        Text(
+                            "Loading interviews...",
+                            fontSize = 14.sp,
+                            color = Color(0xFF6B7280)
+                        )
+                    }
+                }
+            }
+            errorMessage != null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            "Failed to load interviews",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFEF4444)
+                        )
+                        Text(
+                            errorMessage,
+                            fontSize = 14.sp,
+                            color = Color(0xFF6B7280)
+                        )
+                        Button(
+                            onClick = onRefresh,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF3B82F6)
+                            )
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+            interviews.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            "No interviews scheduled",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF6B7280)
+                        )
+                        Text(
+                            "Interviews will appear here when you schedule them",
+                            fontSize = 14.sp,
+                            color = Color(0xFF9CA3AF)
+                        )
+                    }
+                }
+            }
+            else -> {
+                // Interviews list
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val filteredInterviews = when (selectedFilter) {
+                        "upcoming" -> interviews.filter { it.status == "scheduled" }
+                        "completed" -> interviews.filter { it.status == "completed" }
+                        "cancelled" -> interviews.filter { it.status == "cancelled" }
+                        else -> interviews
+                    }.filter { it.candidateName.contains(searchText, ignoreCase = true) }
 
-            items(filteredInterviews) { interview ->
-                InterviewItem(interview)
+                    items(filteredInterviews) { interview ->
+                        InterviewItem(
+                            interview = interview,
+                            onCancel = { onCancelInterview(interview.id) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun InterviewItem(interview: ScheduledInterview) {
-    val status = interview.getStatus()
+private fun InterviewItem(
+    interview: ScheduledInterview,
+    onCancel: () -> Unit = {}
+) {
+    val status = interview.status
+    var showCancelDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -204,14 +301,16 @@ private fun InterviewItem(interview: ScheduledInterview) {
                     color = when (status) {
                         "scheduled" -> Color(0xFFFEF3C7)
                         "completed" -> Color(0xFFDCFCE7)
+                        "cancelled" -> Color(0xFFFEE2E2)
                         else -> Color(0xFFF5F5F5)
                     },
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         when (status) {
-                            "scheduled" -> "In Progress"
+                            "scheduled" -> "Upcoming"
                             "completed" -> "Completed"
+                            "cancelled" -> "Cancelled"
                             else -> "Pending"
                         },
                         fontSize = 11.sp,
@@ -219,6 +318,7 @@ private fun InterviewItem(interview: ScheduledInterview) {
                         color = when (status) {
                             "scheduled" -> Color(0xFF92400E)
                             "completed" -> Color(0xFF065F46)
+                            "cancelled" -> Color(0xFF991B1B)
                             else -> Color(0xFF6B7280)
                         },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -259,7 +359,61 @@ private fun InterviewItem(interview: ScheduledInterview) {
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            // Cancel button (only for scheduled interviews)
+            if (interview.isCancellable()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedButton(
+                    onClick = { showCancelDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFEF4444)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color(0xFFEF4444)
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cancel",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Cancel Interview",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         }
+    }
+
+    // Cancel confirmation dialog
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = { Text("Cancel Interview") },
+            text = { Text("Are you sure you want to cancel this interview with ${interview.candidateName}?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelDialog = false
+                        onCancel()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFEF4444)
+                    )
+                ) {
+                    Text("Yes, Cancel")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCancelDialog = false }) {
+                    Text("No, Keep It")
+                }
+            }
+        )
     }
 }
 

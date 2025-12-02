@@ -19,6 +19,7 @@ class SessionManager(context: Context) {
         private const val KEY_TOKEN_EXPIRY = "token_expiry"
         private const val KEY_KEYCLOAK_ID = "keycloak_id"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_PHOTO = "user_photo"
     }
 
     // Save complete user session with tokens (for API login)
@@ -147,6 +148,19 @@ class SessionManager(context: Context) {
     // Get user email
     fun getUserEmail(): String? {
         return prefs.getString(KEY_USER_EMAIL, null)
+    }
+    
+    // Save user photo
+    fun saveUserPhoto(photoUrl: String?) {
+        prefs.edit().apply {
+            putString(KEY_USER_PHOTO, photoUrl)
+            apply()
+        }
+    }
+    
+    // Get user photo
+    fun getUserPhoto(): String? {
+        return prefs.getString(KEY_USER_PHOTO, null)
     }
 
     // Clear session (logout)

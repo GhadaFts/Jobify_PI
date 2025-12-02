@@ -39,6 +39,10 @@ class RecruiterProfileActivity : AppCompatActivity() {
     private lateinit var menuProfile: LinearLayout
     private lateinit var menuLogout: LinearLayout
     private lateinit var btnSave: Button
+    
+    // Drawer profile views
+    private lateinit var drawerProfileImage: ImageView
+    private lateinit var drawerProfileName: TextView
 
     // Views
     private lateinit var companyImage: ImageView
@@ -114,6 +118,10 @@ class RecruiterProfileActivity : AppCompatActivity() {
         menuProfile = findViewById(R.id.menuProfileLayout)
         menuLogout = findViewById(R.id.menuLogoutLayout)
         btnSave = findViewById(R.id.btnSave)
+        
+        // Drawer profile
+        drawerProfileImage = findViewById(R.id.drawerProfileImage)
+        drawerProfileName = findViewById(R.id.drawerProfileName)
 
         // Profile views
         companyImage = findViewById(R.id.companyImage)
@@ -144,19 +152,33 @@ class RecruiterProfileActivity : AppCompatActivity() {
     private fun setupDrawerMenu() {
         btnMenu.setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
 
+        // Publish Job
+        findViewById<LinearLayout>(R.id.menuPublishJobLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            Handler(Looper.getMainLooper()).postDelayed({
+                startActivity(Intent(this, PostsActivity::class.java))
+            }, 250)
+        }
+
+        // Interviews
+        findViewById<LinearLayout>(R.id.menuInterviewsLayout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            Handler(Looper.getMainLooper()).postDelayed({
+                startActivity(Intent(this, InterviewsActivity::class.java))
+            }, 250)
+        }
+
+        // Settings (Profile) - Already on this page
         menuProfile.setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
+        // Logout
         menuLogout.setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             Handler(Looper.getMainLooper()).postDelayed({
                 performLogout()
             }, 250)
-        }
-
-        findViewById<LinearLayout>(R.id.menuHomeLayout).setOnClickListener {
-            startActivity(Intent(this, JobOpportunitiesActivity::class.java))
         }
     }
 
@@ -271,6 +293,12 @@ class RecruiterProfileActivity : AppCompatActivity() {
         txtEmployeesCount.text = profile.employees_number?.toString() ?: "0"
         txtPostsCount.text = "0" // Will be updated by loadJobPostsCount()
         txtBio.text = profile.description ?: "No description available"
+        
+        // Update drawer profile name
+        drawerProfileName.text = profile.fullName
+        
+        // Save photo to session manager
+        sessionManager.saveUserPhoto(profile.photo_profil)
 
         // Load profile photo
         if (!profile.photo_profil.isNullOrEmpty()) {
@@ -280,14 +308,24 @@ class RecruiterProfileActivity : AppCompatActivity() {
                 "http://10.0.2.2:8888/auth-service${profile.photo_profil}"
             }
 
+            // Load into main profile image
             Glide.with(this)
                 .load(imageUrl)
                 .circleCrop()
                 .placeholder(R.drawable.ic_user_placeholder)
                 .error(R.drawable.ic_user_placeholder)
                 .into(companyImage)
+                
+            // Load into drawer profile image
+            Glide.with(this)
+                .load(imageUrl)
+                .circleCrop()
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
+                .into(drawerProfileImage)
         } else {
             companyImage.setImageResource(R.drawable.ic_user_placeholder)
+            drawerProfileImage.setImageResource(R.drawable.ic_user_placeholder)
         }
 
         // Phone
