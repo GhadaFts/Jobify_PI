@@ -178,4 +178,24 @@ export class UserController {
 
     return publicProfile;
   }
-}
+
+  @Get('recruiters/list')
+  async getRecruitersForJobSeekers() {
+    const recruiters = await this.userService.getRecruiters();
+    
+    // Limit to 5 and map to public profile format
+    return recruiters.slice(0, 5).map(recruiter => ({
+      id: recruiter._id.toString(),
+      name: recruiter['fullName'],
+      description: recruiter['description'] || 'Recruiting company',
+      logo: recruiter['photo_profil'],
+      domain: recruiter['domaine'] || 'Technology',
+      employees: `${recruiter['employees_number'] || 0} employees`,
+      location: recruiter['companyAddress'] || 'Not specified',
+      phone_number: recruiter['phone_number'],
+      web_link: recruiter['web_link'],
+      facebook_link: recruiter['facebook_link'],
+      twitter_link: recruiter['twitter_link'],
+      github_link: recruiter['github_link'],
+    }));
+  }}
