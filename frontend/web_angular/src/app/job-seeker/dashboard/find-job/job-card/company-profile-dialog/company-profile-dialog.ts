@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { RecruiterService } from '../../../../../services/recruiter.service';
 import { Recruiter } from '../../../../../types';
-
+import { UserService } from '../../../../../services/user.service';
 @Component({
   selector: 'app-company-profile-dialog',
   templateUrl: './company-profile-dialog.html',
@@ -19,7 +19,8 @@ export class CompanyProfileDialog implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<CompanyProfileDialog>,
     @Inject(MAT_DIALOG_DATA) public data: { companyName: string; recruiterId: string },
-    private recruiterService: RecruiterService
+    private recruiterService: RecruiterService,
+    private userService: UserService
   ) {
     this.companyName = data.companyName;
     this.recruiterId = data.recruiterId;
@@ -44,6 +45,8 @@ export class CompanyProfileDialog implements OnInit {
       next: (recruiter) => {
         console.log('✅ Recruiter data loaded:', recruiter);
         this.recruiter = recruiter;
+        //get recruiter image 
+        this.recruiter.photo_profil = this.userService.getImageUrl(recruiter.photo_profil);
         this.isLoading = false;
         this.errorMessage = null;
       },
