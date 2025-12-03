@@ -105,17 +105,24 @@ data class Education(
 data class UpdateProfileRequest(
     val fullName: String,
     val email: String,
-    val twitter_link: String?,
-    val web_link: String?,
-    val github_link: String?,
-    val facebook_link: String?,
-    val description: String?,
-    val phone_number: String?,
-    val nationality: String?,
-    val companyAddress: String?,
-    val domaine: String?,
-    val employees_number: Int?,
-    val service: List<String>?
+    val title: String? = null,
+    val gender: String? = null,
+    val date_of_birth: String? = null,
+    val photo_profil: String? = null,
+    val twitter_link: String? = null,
+    val web_link: String? = null,
+    val github_link: String? = null,
+    val facebook_link: String? = null,
+    val description: String? = null,
+    val phone_number: String? = null,
+    val nationality: String? = null,
+    val companyAddress: String? = null,
+    val domaine: String? = null,
+    val employees_number: Int? = null,
+    val service: List<String>? = null,
+    val skills: List<String>? = null,
+    val experience: List<Experience>? = null,
+    val education: List<Education>? = null
 )
 
 data class PhotoUploadResponse(
