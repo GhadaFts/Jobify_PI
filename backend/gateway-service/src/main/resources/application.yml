@@ -135,3 +135,21 @@ resilience4j:
         sliding-window-size: 10
         wait-duration-in-open-state: 10s
         permitted-number-of-calls-in-half-open-state: 3
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  prometheus:
+    metrics:
+      export:
+        enabled: true
