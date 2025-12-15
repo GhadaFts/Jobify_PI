@@ -1,76 +1,13 @@
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        issuer-uri: http://localhost:8080/realms/jobify-realm
-server:
-  port: 8888
-  address: 0.0.0.0
-
 spring:
   application:
     name: gateway-service
-  cloud:
-    gateway:
-      routes:
-        - id: interview-service
-          uri: lb://INTERVIEW-SERVICE
-          predicates:
-            - Path=/interview-service/**
-          filters:
-            - StripPrefix=1
 
-        - id: ai-service
-          uri: lb://AI-SERVICE
-          predicates:
-            - Path=/ai-service/**
-          filters:
-            - StripPrefix=1
+  config:
+    import: optional:configserver:http://localhost:8889
 
-        - id: auth-service
-          uri: lb://AUTH-SERVICE
-          predicates:
-            - Path=/auth-service/**
-          filters:
-            - StripPrefix=1
-
-        - id: application-service
-          uri: lb://APPLICATION-SERVICE
-          predicates:
-            - Path=/application-service/**
-          filters:
-            - StripPrefix=1
-
-        - id: joboffer-service
-          uri: lb://JOBOFFER-SERVICE
-          predicates:
-            - Path=/joboffer-service/**
-          filters:
-            - StripPrefix=1
-
-        - id: career-advice
-          uri: lb://CAREER-ADVICE  # Utilise le load balancing via Eureka
-          predicates:
-            - Path=/career-advice/**
-          filters:
-            - StripPrefix=1
-
-      # Remove globalcors from here
-
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
-
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
+server:
+  port: 8888
+  address: 0.0.0.0
 
 logging:
   level:
