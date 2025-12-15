@@ -11,8 +11,14 @@ import com.jobify.interview.feign.UserFeignClient;
 import com.jobify.interview.repository.InterviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -35,15 +41,18 @@ public class InterviewService {
 
         // Validate interview data
         validateInterviewData(requestDTO);
-        /*
+
+        // Get JWT token from SecurityContext
+        String token = getAuthorizationToken();
+
         // Verify application exists
         try {
-            applicationFeignClient.getApplicationById(requestDTO.getApplicationId());
+            applicationFeignClient.getById(requestDTO.getApplicationId(), token);
         } catch (Exception e) {
+            log.error("Failed to fetch application: {}", e.getMessage());
             throw new InvalidInterviewDataException("Application not found: " + requestDTO.getApplicationId());
         }
 
-         */
         // Check for existing active interviews
         List<InterviewStatus> activeStatuses = Arrays.asList(
                 InterviewStatus.SCHEDULED,
@@ -67,7 +76,8 @@ public class InterviewService {
         try {
             applicationFeignClient.updateStatus(
                     requestDTO.getApplicationId(),
-                    "INTERVIEW_SCHEDULED"
+                    "INTERVIEW_SCHEDULED",
+                    token  // ✅ Add token here too
             );
         } catch (Exception e) {
             log.error("Failed to update application status", e);
@@ -80,6 +90,22 @@ public class InterviewService {
         return mapToResponseDTO(savedInterview);
     }
 
+    // ✅ Add this helper method at the bottom of your service class
+    private String getAuthorizationToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        log.info("Authentication type: {}", authentication != null ? authentication.getClass().getName() : "null");
+
+        if (authentication instanceof JwtAuthenticationToken) {
+            JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
+            String token = "Bearer " + jwtToken.getToken().getTokenValue();
+            log.info("Token extracted: {}", token.substring(0, Math.min(20, token.length())) + "...");
+            return token;
+        }
+
+        log.error("No JWT authentication found in SecurityContext");
+        throw new RuntimeException("No authentication token found");
+    }
     @Transactional(readOnly = true)
     public InterviewResponseDTO getInterviewById(Long id) {
         log.info("Fetching interview with ID: {}", id);
