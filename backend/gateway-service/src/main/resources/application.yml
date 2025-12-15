@@ -1,17 +1,8 @@
 spring:
   application:
     name: gateway-service
-
   config:
     import: optional:configserver:http://localhost:8889
-
-server:
-  port: 8888
-  address: 0.0.0.0
-
-spring:
-  application:
-    name: gateway-service
   cloud:
     gateway:
       routes:
@@ -71,7 +62,7 @@ spring:
                 fallbackUri: forward:/fallback/joboffer-service
 
         - id: career-advice
-          uri: lb://CAREER-ADVICE  # Utilise le load balancing via Eureka
+          uri: lb://CAREER-ADVICE
           predicates:
             - Path=/career-advice/**
           filters:
@@ -81,8 +72,6 @@ spring:
                 name: careerAdviceCB
                 fallbackUri: forward:/fallback/career-advice
 
-      # Remove globalcors from here
-
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
@@ -90,6 +79,10 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+
+server:
+  port: 8888
+  address: 0.0.0.0
 
 eureka:
   client:
