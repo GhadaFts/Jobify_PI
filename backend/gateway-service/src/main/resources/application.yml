@@ -19,6 +19,10 @@ spring:
             - Path=/interview-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: interviewServiceCB
+                fallbackUri: forward:/fallback/interview
 
         - id: ai-service
           uri: lb://AI-SERVICE
@@ -76,3 +80,13 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     org.springframework.cloud.loadbalancer: DEBUG
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      interviewServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
