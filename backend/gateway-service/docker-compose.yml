@@ -1,0 +1,46 @@
+services:
+  my-prometheus:
+    image: prom/prometheus:latest
+    container_name: my-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring
+
+  my-tempo:
+    image: grafana/tempo:latest
+    container_name: my-tempo
+    ports:
+      - "4200:4200"
+      - "9411:9411"
+    volumes:
+      - ./docker/tempo/tempo.yml:/etc/tempo.yaml
+    command:
+      - '-config.file=/etc/tempo.yaml'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "4000:4000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SERVER_HTTP_PORT=4000
+    volumes:
+      - ./docker/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    networks:
+      - monitoring
+    depends_on:
+      - my-prometheus
+      - my-tempo
+
+networks:
+  monitoring:
+    driver: bridge

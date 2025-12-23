@@ -12,6 +12,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.example.jobify.databinding.ActivityJobSeekerProfileInitialBinding
+import com.example.jobify.network.ApiClient
+import com.example.jobify.network.UpdateProfileRequest
+import com.example.jobify.network.PhotoUploadResponse
+import com.example.jobify.network.RecruiterProfile
+import com.example.jobify.network.Experience
+import com.example.jobify.network.Education
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,17 +27,14 @@ import com.google.android.material.textfield.TextInputEditText
 import android.widget.EditText
 import android.widget.Button
 import android.widget.TextView
-import com.example.jobify.network.ApiClient
-import com.example.jobify.model.PhotoUploadResponse
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.io.FileOutputStream
-import android.util.Log
 
 
 class JobSeekerProfileInitialActivity : AppCompatActivity() {
@@ -40,6 +43,8 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private var currentStep = 1
     private var imageUri: Uri? = null
+    private var profileId: Long? = null  // Store profile ID for future updates
+    private var isNewProfilePhoto = false  // Track if photo needs uploading
     private val skills = mutableListOf<String>()
     private val experiences = mutableListOf<Experience>()
     private val educations = mutableListOf<Education>()
@@ -60,6 +65,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             imageUri = result.data?.data
+            isNewProfilePhoto = true  // Mark that new photo needs uploading
             binding.ivProfilePhoto.setImageURI(imageUri)
             binding.ivProfilePhoto.visibility = View.VISIBLE
             binding.ivUploadIcon.visibility = View.GONE
@@ -184,14 +190,16 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         // Save and complete
         binding.btnSaveComplete.setOnClickListener {
             if (validatePersonalInfo()) {
-                goToStep(4)
+                submitProfile()
+            } else {
+                Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()
             }
         }
 
         // Browse jobs
         binding.btnBrowseJobs.setOnClickListener {
             if (validatePersonalInfo()) {
-                saveProfileToBackend()
+                submitProfile()
             } else {
                 Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()
             }
@@ -370,7 +378,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
             val endDate = inputEndDate.text.toString()
 
             if (validateExperienceFields(position, company, startDate, endDate)) {
-                val experience = Experience(position, company, address, startDate, endDate)
+                val experience = Experience(position, company, startDate, endDate, address)
                 experiences.add(experience)
                 displayExperiences()
                 Toast.makeText(this, "Experience added successfully", Toast.LENGTH_SHORT).show()
@@ -404,7 +412,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
             val endDate = inputEduEnd.text.toString()
 
             if (validateEducationFields(university, degree, field, startDate, endDate)) {
-                val education = Education(university, degree, field, "$startDate - $endDate")
+                val education = Education(degree, field, university, "$startDate - $endDate")
                 educations.add(education)
                 displayEducations()
                 Toast.makeText(this, "Education added successfully", Toast.LENGTH_SHORT).show()
@@ -526,182 +534,138 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         return true
     }
 
-
-
-    data class Experience(
-        var position: String,
-        var company: String,
-        var startDate: String,
-        var endDate: String,
-        var description: String
-    )
-
-    data class Education(
-        var school: String,
-        var degree: String,
-        var field: String,
-        var graduationDate: String
-    )
-
-    private fun uploadProfilePhoto(uri: Uri) {
-        if (isLoading) return
-        setLoading(true)
-
-        try {
-            val inputStream = contentResolver.openInputStream(uri)
-            val file = File(cacheDir, "profile_photo_${System.currentTimeMillis()}.jpg")
-            val outputStream = FileOutputStream(file)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
-
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-            val token = sessionManager.getAccessToken()
-            if (token == null) {
-                Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
-                navigateToLogin()
-                return
-            }
-
-            ApiClient.userService.uploadProfilePhoto("Bearer $token", body).enqueue(object : Callback<PhotoUploadResponse> {
-                override fun onResponse(call: Call<PhotoUploadResponse>, response: Response<PhotoUploadResponse>) {
-                    setLoading(false)
-                    if (response.isSuccessful) {
-                        uploadedPhotoUrl = response.body()?.url
-                        Log.d("PhotoUpload", "Photo uploaded successfully: $uploadedPhotoUrl")
-                        Toast.makeText(this@JobSeekerProfileInitialActivity, "Photo uploaded successfully", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Log.e("PhotoUpload", "Upload failed: ${response.code()} - ${response.message()}")
-                        Toast.makeText(this@JobSeekerProfileInitialActivity, "Failed to upload photo", Toast.LENGTH_SHORT).show()
-                    }
-                    file.delete()
-                }
-
-                override fun onFailure(call: Call<PhotoUploadResponse>, t: Throwable) {
-                    setLoading(false)
-                    Log.e("PhotoUpload", "Upload error: ${t.message}", t)
-                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Error uploading photo: ${t.message}", Toast.LENGTH_SHORT).show()
-                    file.delete()
-                }
-            })
-        } catch (e: Exception) {
-            setLoading(false)
-            Log.e("PhotoUpload", "Error preparing file: ${e.message}", e)
-            Toast.makeText(this, "Error preparing photo: ${e.message}", Toast.LENGTH_SHORT).show()
+    /**
+     * Sequential profile submission: Upload photo (if new) → Update profile
+     * Mirrors Angular profile-initial.ts submitProfile() pattern
+     */
+    private fun submitProfile() {
+        Toast.makeText(this, "Submitting profile...", Toast.LENGTH_SHORT).show()
+        
+        // If new photo selected, upload it first
+        if (isNewProfilePhoto && imageUri != null) {
+            uploadProfilePhoto()
+        } else {
+            // No new photo, proceed directly to profile update
+            updateUserProfile(null)
         }
     }
 
-    private fun saveProfileToBackend() {
-        if (isLoading) return
-        setLoading(true)
-
-        val token = sessionManager.getAccessToken()
-        if (token == null) {
-            Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
-            navigateToLogin()
+    /**
+     * Upload profile photo and chain to profile update
+     */
+    private fun uploadProfilePhoto() {
+        val file = uriToFile(imageUri!!) ?: run {
+            Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Collect all form data
-        val fullName = binding.etFullName.text.toString().trim()
-        val title = binding.etTitle.text.toString().trim()
-        val nationality = if (binding.spinnerNationality.selectedItemPosition > 0) {
-            binding.spinnerNationality.selectedItem.toString()
-        } else ""
-        val countryCode = binding.etCountryCode.text.toString().trim()
-        val phone = binding.etPhone.text.toString().trim()
-        val gender = if (binding.spinnerGender.selectedItemPosition > 0) {
-            binding.spinnerGender.selectedItem.toString()
-        } else ""
-        val dateOfBirth = binding.etDateOfBirth.text.toString().trim()
-        val biography = binding.etBiography.text.toString().trim()
-        val portfolioLink = binding.etPortfolio.text.toString().trim()
-        val githubLink = binding.etGithub.text.toString().trim()
-        val twitterLink = binding.etTwitter.text.toString().trim()
-        val facebookLink = binding.etFacebook.text.toString().trim()
+        // Determine media type based on file extension
+        val mediaType = when {
+            file.name.endsWith(".png", ignoreCase = true) -> "image/png".toMediaTypeOrNull()
+            file.name.endsWith(".jpg", ignoreCase = true) -> "image/jpeg".toMediaTypeOrNull()
+            file.name.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg".toMediaTypeOrNull()
+            else -> "image/jpeg".toMediaTypeOrNull() // Default to JPEG
+        }
 
-        // Build profile update request
-        val profileData = mutableMapOf<String, Any>(
-            "name" to fullName,
-            "titre" to title,
-            "nationality" to nationality,
-            "phone" to "$countryCode$phone",
-            "gender" to gender,
-            "date_of_birth" to dateOfBirth,
-            "biography" to biography,
-            "portfolio_link" to portfolioLink,
-            "github_link" to githubLink,
-            "twitter_link" to twitterLink,
-            "facebook_link" to facebookLink,
-            "skills" to skills,
-            "experiences" to experiences.map {
-                mapOf(
-                    "position" to it.position,
-                    "company" to it.company,
-                    "description" to it.description,
-                    "startDate" to it.startDate,
-                    "endDate" to it.endDate
-                )
-            },
-            "educations" to educations.map {
-                mapOf(
-                    "school" to it.school,
-                    "degree" to it.degree,
-                    "field" to it.field,
-                    "graduationDate" to it.graduationDate
-                )
-            }
-        )
+        val requestFile = file.asRequestBody(mediaType)
+        val photoPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        Log.d("ProfileSave", "Saving profile: $profileData")
+        val token = "Bearer " + SessionManager(this).getAccessToken()
 
-        ApiClient.userService.updateUserProfile("Bearer $token", profileData).enqueue(object : Callback<Map<String, Any>> {
-            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
-                setLoading(false)
+        ApiClient.userService.uploadProfilePhoto(token, photoPart).enqueue(object : Callback<PhotoUploadResponse> {
+            override fun onResponse(call: Call<PhotoUploadResponse>, response: Response<PhotoUploadResponse>) {
                 if (response.isSuccessful) {
-                    val userData = response.body()
-                    Log.d("ProfileSave", "Profile saved successfully: $userData")
-                    
-                    // Save photo URL to session if present in response
-                    userData?.get("photo_profil")?.let { photoUrl ->
-                        sessionManager.saveUserPhoto(photoUrl.toString())
-                        Log.d("ProfileSave", "Photo URL saved to session: $photoUrl")
-                    }
-                    
-                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Profile saved successfully!", Toast.LENGTH_SHORT).show()
-                    
-                    // Navigate to job seeker dashboard
-                    val intent = Intent(this@JobSeekerProfileInitialActivity, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
+                    val photoUrl = response.body()?.url
+                    // After successful upload, update profile with photo URL
+                    updateUserProfile(photoUrl)
                 } else {
-                    Log.e("ProfileSave", "Save failed: ${response.code()} - ${response.message()}")
-                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Failed to save profile: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@JobSeekerProfileInitialActivity, 
+                        "Photo upload failed", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
-                setLoading(false)
-                Log.e("ProfileSave", "Save error: ${t.message}", t)
-                Toast.makeText(this@JobSeekerProfileInitialActivity, "Error saving profile: ${t.message}", Toast.LENGTH_SHORT).show()
+            override fun onFailure(call: Call<PhotoUploadResponse>, t: Throwable) {
+                Toast.makeText(this@JobSeekerProfileInitialActivity, 
+                    "Photo upload error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun setLoading(loading: Boolean) {
-        isLoading = loading
-        binding.btnBrowseJobs.isEnabled = !loading
-        binding.btnSaveComplete.isEnabled = !loading
+    /**
+     * Update user profile with field mapping to backend names
+     * @param photoUrl The uploaded photo URL (null if using existing photo)
+     */
+    private fun updateUserProfile(photoUrl: String?) {
+        val nationality = binding.spinnerNationality.selectedItem.toString()
+        val countryCode = countryCodeMap[nationality] ?: ""
+        val phoneNumber = countryCode + binding.etPhone.text.toString()
+
+        val payload = UpdateProfileRequest(
+            fullName = binding.etFullName.text.toString(),
+            email = SessionManager(this).getUserEmail() ?: "",  // Keep existing email
+            title = binding.etTitle.text.toString(),
+            nationality = nationality,
+            phone_number = phoneNumber,
+            gender = binding.spinnerGender.selectedItem.toString(),
+            date_of_birth = binding.etDateOfBirth.text.toString(),
+            photo_profil = photoUrl,  // Use uploaded URL if available
+            description = binding.etBiography.text?.toString() ?: "",  // Biography → description
+            web_link = binding.etPortfolio.text?.toString() ?: "",     // Portfolio → web_link
+            github_link = binding.etGithub.text?.toString() ?: "",
+            twitter_link = binding.etTwitter.text?.toString() ?: "",
+            facebook_link = binding.etFacebook.text?.toString() ?: "",
+            skills = skills.toList(),
+            experience = experiences.toList(),
+            education = educations.toList()
+        )
+
+        val token = "Bearer " + SessionManager(this).getAccessToken()
+
+        ApiClient.userService.updateUserProfile(token, payload).enqueue(object : Callback<RecruiterProfile> {
+            override fun onResponse(call: Call<RecruiterProfile>, response: Response<RecruiterProfile>) {
+                if (response.isSuccessful) {
+                    val profile = response.body()
+                    if (profile != null) {
+                        profileId = profile.id  // Store ID for future updates
+                        Toast.makeText(this@JobSeekerProfileInitialActivity, 
+                            "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                        // Navigate to job opportunities
+                        val intent = Intent(this@JobSeekerProfileInitialActivity, JobOpportunitiesActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                } else {
+                    Toast.makeText(this@JobSeekerProfileInitialActivity, 
+                        "Failed to update profile", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<RecruiterProfile>, t: Throwable) {
+                Toast.makeText(this@JobSeekerProfileInitialActivity, 
+                    "Profile update error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
-    private fun navigateToLogin() {
-        sessionManager.clearSession()
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+    /**
+     * Convert URI to File for upload
+     * Handles content URIs from MediaStore
+     */
+    private fun uriToFile(uri: Uri): File? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri) ?: return null
+            val fileName = "profile_${System.currentTimeMillis()}.jpg"
+            val file = File(cacheDir, fileName)
+            
+            file.outputStream().use { fileOut ->
+                inputStream.use { fileIn ->
+                    fileIn.copyTo(fileOut)
+                }
+            }
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }

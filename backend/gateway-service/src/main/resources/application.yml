@@ -1,15 +1,8 @@
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        issuer-uri: http://localhost:8080/realms/jobify-realm
-server:
-  port: 8888
-  address: 0.0.0.0
-
 spring:
   application:
     name: gateway-service
+  config:
+    import: optional:configserver:http://localhost:8889
   cloud:
     gateway:
       routes:
@@ -19,6 +12,10 @@ spring:
             - Path=/interview-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: interviewServiceCB
+                fallbackUri: forward:/fallback/interview
 
         - id: ai-service
           uri: lb://AI-SERVICE
@@ -26,6 +23,10 @@ spring:
             - Path=/ai-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: aiServiceCB
+                fallbackUri: forward:/fallback/ai-service
 
         - id: auth-service
           uri: lb://AUTH-SERVICE
@@ -33,6 +34,10 @@ spring:
             - Path=/auth-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: authServiceCB
+                fallbackUri: forward:/fallback/auth-service
 
         - id: application-service
           uri: lb://APPLICATION-SERVICE
@@ -40,6 +45,10 @@ spring:
             - Path=/application-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: appServiceCB
+                fallbackUri: forward:/fallback/application-service
 
         - id: joboffer-service
           uri: lb://JOBOFFER-SERVICE
@@ -47,15 +56,21 @@ spring:
             - Path=/joboffer-service/**
           filters:
             - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: jobofferServiceCB
+                fallbackUri: forward:/fallback/joboffer-service
 
         - id: career-advice
-          uri: lb://CAREER-ADVICE  # Utilise le load balancing via Eureka
+          uri: lb://CAREER-ADVICE
           predicates:
             - Path=/career-advice/**
           filters:
             - StripPrefix=1
-
-      # Remove globalcors from here
+            - name: CircuitBreaker
+              args:
+                name: careerAdviceCB
+                fallbackUri: forward:/fallback/career-advice
 
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
@@ -64,6 +79,10 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+
+server:
+  port: 8888
+  address: 0.0.0.0
 
 eureka:
   client:
@@ -76,3 +95,61 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     org.springframework.cloud.loadbalancer: DEBUG
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      interviewServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+      aiServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+      careerAdviceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+      authServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+      appServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+      jobofferServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 10
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  prometheus:
+    metrics:
+      export:
+        enabled: true

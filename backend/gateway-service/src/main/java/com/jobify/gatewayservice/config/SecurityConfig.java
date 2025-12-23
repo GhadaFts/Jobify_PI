@@ -41,7 +41,8 @@ public class SecurityConfig {
                 "http://10.0.2.2:*",          // Android emulator
                 "capacitor://localhost",       // Capacitor (Ionic)
                 "ionic://localhost",           // Ionic
-                "http://localhost"             // Mobile local
+                "http://localhost"   ,
+                "*"// Mobile local
         ));
 
         // CRITICAL: Must be true for Authorization headers

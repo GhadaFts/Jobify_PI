@@ -65,7 +65,7 @@ export class Interviews implements OnInit {
               jobSeeker: this.userService.getUserById(interview.jobSeekerId).pipe(
                 catchError(err => {
                   console.error(`❌ Failed to fetch jobSeeker ${interview.jobSeekerId}:`, err);
-                  return of({ fullName: 'Unknown User', email: '' });
+                  return of({ fullName: 'Unknown User', email: '', photo_profil: null });
                 })
               ),
               recruiter: this.userService.getUserById(interview.recruiterId).pipe(
@@ -76,52 +76,74 @@ export class Interviews implements OnInit {
               ),
             }).pipe(
               switchMap(result => {
-                if (!result.application) {
-                  console.warn('⚠️ Application not found, creating placeholder');
-                  return of({
-                    id: interview.id,
-                    application: null,
-                    jobSeeker: result.jobSeeker,
-                    recruiter: result.recruiter,
-                    job_title: 'Unknown Position',
-                    scheduledDate: interview.scheduledDate,
-                    duration: interview.duration,
-                    interviewType: interview.interviewType,
-                    status: interview.status,
-                    createdAt: interview.createdAt,
-                    updatedAt: interview.updatedAt
-                  } as FinalInterview);
+                // Now fetch the photo URL after we have the jobSeeker data
+                let photoUrl: string | null = null;
+                
+                if (result.jobSeeker?.photo_profil) {
+                  try {
+                    photoUrl = this.userService.getImageUrl(result.jobSeeker.photo_profil);
+                  } catch (err) {
+                    console.error(`❌ Failed to fetch photo for jobSeeker ${interview.jobSeekerId}:`, err);
+                  }
                 }
 
-                return this.jobService.getJobById(result.application.jobOfferId).pipe(
-                  map(job => ({
-                    id: interview.id,
-                    application: result.application,
-                    jobSeeker: result.jobSeeker,
-                    recruiter: result.recruiter,
-                    job_title: job?.title || 'Unknown Position',
-                    scheduledDate: interview.scheduledDate,
-                    duration: interview.duration,
-                    interviewType: interview.interviewType,
-                    status: interview.status,
-                    createdAt: interview.createdAt,
-                    updatedAt: interview.updatedAt
-                  } as FinalInterview)),
-                  catchError(err => {
-                    console.error(`❌ Failed to fetch job ${result.application?.jobOfferId}:`, err);
-                    return of({
-                      id: interview.id,
-                      application: result.application,
-                      jobSeeker: result.jobSeeker,
-                      recruiter: result.recruiter,
-                      job_title: 'Unknown Position',
-                      scheduledDate: interview.scheduledDate,
-                      duration: interview.duration,
-                      interviewType: interview.interviewType,
-                      status: interview.status,
-                      createdAt: interview.createdAt,
-                      updatedAt: interview.updatedAt
-                    } as FinalInterview);
+                return of(photoUrl).pipe(
+                  switchMap(photoUrl => {
+                    // Attach the photo URL to the jobSeeker object
+                    const jobSeekerWithPhoto = {
+                      ...result.jobSeeker,
+                      photoUrl: photoUrl,
+                      profilePicture: photoUrl
+                    };
+
+                    if (!result.application) {
+                      console.warn('⚠️ Application not found, creating placeholder');
+                      return of({
+                        id: interview.id,
+                        application: null,
+                        jobSeeker: jobSeekerWithPhoto,
+                        recruiter: result.recruiter,
+                        job_title: 'Unknown Position',
+                        scheduledDate: interview.scheduledDate,
+                        duration: interview.duration,
+                        interviewType: interview.interviewType,
+                        status: interview.status,
+                        createdAt: interview.createdAt,
+                        updatedAt: interview.updatedAt
+                      } as FinalInterview);
+                    }
+
+                    return this.jobService.getJobById(result.application.jobOfferId).pipe(
+                      map(job => ({
+                        id: interview.id,
+                        application: result.application,
+                        jobSeeker: jobSeekerWithPhoto,
+                        recruiter: result.recruiter,
+                        job_title: job?.title || 'Unknown Position',
+                        scheduledDate: interview.scheduledDate,
+                        duration: interview.duration,
+                        interviewType: interview.interviewType,
+                        status: interview.status,
+                        createdAt: interview.createdAt,
+                        updatedAt: interview.updatedAt
+                      } as FinalInterview)),
+                      catchError(err => {
+                        console.error(`❌ Failed to fetch job ${result.application?.jobOfferId}:`, err);
+                        return of({
+                          id: interview.id,
+                          application: result.application,
+                          jobSeeker: jobSeekerWithPhoto,
+                          recruiter: result.recruiter,
+                          job_title: 'Unknown Position',
+                          scheduledDate: interview.scheduledDate,
+                          duration: interview.duration,
+                          interviewType: interview.interviewType,
+                          status: interview.status,
+                          createdAt: interview.createdAt,
+                          updatedAt: interview.updatedAt
+                        } as FinalInterview);
+                      })
+                    );
                   })
                 );
               }),

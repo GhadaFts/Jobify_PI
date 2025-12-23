@@ -6,6 +6,8 @@ import { GeocodingService } from '../../../services/geocoding.service';
 import { JobService, JobOfferDTO } from '../../../services/job.service';
 import { LocalBookmarkService } from '../../../services/bookmark.service';
 import { ApplicationService, ApplicationResponseDTO } from '../../../services/application.service';
+import { RecruiterService } from '../../../services/recruiter.service';
+import { UserService } from '../../../services/user.service';
 
 // Local interface for application data used in UI
 interface ApplicationData {
@@ -76,7 +78,9 @@ export class FindJob implements OnInit, OnDestroy {
     private geocodingService: GeocodingService,
     private jobService: JobService,
     private bookmarkService: LocalBookmarkService,
-    private applicationService: ApplicationService
+    private applicationService: ApplicationService,
+    private recruiterService: RecruiterService,
+    private userService: UserService
   ) { }
 
   ngOnInit() {
@@ -135,6 +139,7 @@ export class FindJob implements OnInit, OnDestroy {
       .subscribe({
         next: (jobs: JobOffer[]) => {
           this.jobs = jobs;
+
           this.isLoadingJobs = false;
           console.log(`✅ Loaded ${this.jobs.length} jobs from backend`);
           // You can also log applicant counts to verify they're working:
