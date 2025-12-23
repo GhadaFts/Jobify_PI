@@ -21,16 +21,30 @@ import com.google.android.material.textfield.TextInputEditText
 import android.widget.EditText
 import android.widget.Button
 import android.widget.TextView
+import com.example.jobify.network.ApiClient
+import com.example.jobify.model.PhotoUploadResponse
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
+import android.util.Log
 
 
 class JobSeekerProfileInitialActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityJobSeekerProfileInitialBinding
+    private lateinit var sessionManager: SessionManager
     private var currentStep = 1
     private var imageUri: Uri? = null
     private val skills = mutableListOf<String>()
     private val experiences = mutableListOf<Experience>()
     private val educations = mutableListOf<Education>()
+    private var uploadedPhotoUrl: String? = null
+    private var isLoading = false
 
     private val countryCodeMap = mapOf(
         "French" to "+33",
@@ -49,6 +63,9 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
             binding.ivProfilePhoto.setImageURI(imageUri)
             binding.ivProfilePhoto.visibility = View.VISIBLE
             binding.ivUploadIcon.visibility = View.GONE
+            
+            // Upload photo immediately
+            imageUri?.let { uploadProfilePhoto(it) }
         }
     }
 
@@ -57,7 +74,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         binding = ActivityJobSeekerProfileInitialBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        sessionManager = SessionManager(this)
         setupUI()
         setupListeners()
         updateStepUI()
@@ -174,8 +191,7 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         // Browse jobs
         binding.btnBrowseJobs.setOnClickListener {
             if (validatePersonalInfo()) {
-                // Navigate to dashboard
-                finish()
+                saveProfileToBackend()
             } else {
                 Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()
             }
@@ -526,4 +542,166 @@ class JobSeekerProfileInitialActivity : AppCompatActivity() {
         var field: String,
         var graduationDate: String
     )
+
+    private fun uploadProfilePhoto(uri: Uri) {
+        if (isLoading) return
+        setLoading(true)
+
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(cacheDir, "profile_photo_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+            val token = sessionManager.getAccessToken()
+            if (token == null) {
+                Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                navigateToLogin()
+                return
+            }
+
+            ApiClient.userService.uploadProfilePhoto("Bearer $token", body).enqueue(object : Callback<PhotoUploadResponse> {
+                override fun onResponse(call: Call<PhotoUploadResponse>, response: Response<PhotoUploadResponse>) {
+                    setLoading(false)
+                    if (response.isSuccessful) {
+                        uploadedPhotoUrl = response.body()?.url
+                        Log.d("PhotoUpload", "Photo uploaded successfully: $uploadedPhotoUrl")
+                        Toast.makeText(this@JobSeekerProfileInitialActivity, "Photo uploaded successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.e("PhotoUpload", "Upload failed: ${response.code()} - ${response.message()}")
+                        Toast.makeText(this@JobSeekerProfileInitialActivity, "Failed to upload photo", Toast.LENGTH_SHORT).show()
+                    }
+                    file.delete()
+                }
+
+                override fun onFailure(call: Call<PhotoUploadResponse>, t: Throwable) {
+                    setLoading(false)
+                    Log.e("PhotoUpload", "Upload error: ${t.message}", t)
+                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Error uploading photo: ${t.message}", Toast.LENGTH_SHORT).show()
+                    file.delete()
+                }
+            })
+        } catch (e: Exception) {
+            setLoading(false)
+            Log.e("PhotoUpload", "Error preparing file: ${e.message}", e)
+            Toast.makeText(this, "Error preparing photo: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun saveProfileToBackend() {
+        if (isLoading) return
+        setLoading(true)
+
+        val token = sessionManager.getAccessToken()
+        if (token == null) {
+            Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+            navigateToLogin()
+            return
+        }
+
+        // Collect all form data
+        val fullName = binding.etFullName.text.toString().trim()
+        val title = binding.etTitle.text.toString().trim()
+        val nationality = if (binding.spinnerNationality.selectedItemPosition > 0) {
+            binding.spinnerNationality.selectedItem.toString()
+        } else ""
+        val countryCode = binding.etCountryCode.text.toString().trim()
+        val phone = binding.etPhone.text.toString().trim()
+        val gender = if (binding.spinnerGender.selectedItemPosition > 0) {
+            binding.spinnerGender.selectedItem.toString()
+        } else ""
+        val dateOfBirth = binding.etDateOfBirth.text.toString().trim()
+        val biography = binding.etBiography.text.toString().trim()
+        val portfolioLink = binding.etPortfolio.text.toString().trim()
+        val githubLink = binding.etGithub.text.toString().trim()
+        val twitterLink = binding.etTwitter.text.toString().trim()
+        val facebookLink = binding.etFacebook.text.toString().trim()
+
+        // Build profile update request
+        val profileData = mutableMapOf<String, Any>(
+            "name" to fullName,
+            "titre" to title,
+            "nationality" to nationality,
+            "phone" to "$countryCode$phone",
+            "gender" to gender,
+            "date_of_birth" to dateOfBirth,
+            "biography" to biography,
+            "portfolio_link" to portfolioLink,
+            "github_link" to githubLink,
+            "twitter_link" to twitterLink,
+            "facebook_link" to facebookLink,
+            "skills" to skills,
+            "experiences" to experiences.map {
+                mapOf(
+                    "position" to it.position,
+                    "company" to it.company,
+                    "description" to it.description,
+                    "startDate" to it.startDate,
+                    "endDate" to it.endDate
+                )
+            },
+            "educations" to educations.map {
+                mapOf(
+                    "school" to it.school,
+                    "degree" to it.degree,
+                    "field" to it.field,
+                    "graduationDate" to it.graduationDate
+                )
+            }
+        )
+
+        Log.d("ProfileSave", "Saving profile: $profileData")
+
+        ApiClient.userService.updateUserProfile("Bearer $token", profileData).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                setLoading(false)
+                if (response.isSuccessful) {
+                    val userData = response.body()
+                    Log.d("ProfileSave", "Profile saved successfully: $userData")
+                    
+                    // Save photo URL to session if present in response
+                    userData?.get("photo_profil")?.let { photoUrl ->
+                        sessionManager.saveUserPhoto(photoUrl.toString())
+                        Log.d("ProfileSave", "Photo URL saved to session: $photoUrl")
+                    }
+                    
+                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Profile saved successfully!", Toast.LENGTH_SHORT).show()
+                    
+                    // Navigate to job seeker dashboard
+                    val intent = Intent(this@JobSeekerProfileInitialActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Log.e("ProfileSave", "Save failed: ${response.code()} - ${response.message()}")
+                    Toast.makeText(this@JobSeekerProfileInitialActivity, "Failed to save profile: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                setLoading(false)
+                Log.e("ProfileSave", "Save error: ${t.message}", t)
+                Toast.makeText(this@JobSeekerProfileInitialActivity, "Error saving profile: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun setLoading(loading: Boolean) {
+        isLoading = loading
+        binding.btnBrowseJobs.isEnabled = !loading
+        binding.btnSaveComplete.isEnabled = !loading
+    }
+
+    private fun navigateToLogin() {
+        sessionManager.clearSession()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
 }

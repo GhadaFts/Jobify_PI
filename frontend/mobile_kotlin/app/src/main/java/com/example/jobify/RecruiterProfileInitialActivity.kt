@@ -386,14 +386,19 @@ class RecruiterProfileInitialActivity : AppCompatActivity() {
 
                     if (response.isSuccessful) {
                         val profile = response.body()
+                        
+                        // Save photo URL to session - use uploaded URL or response photo
+                        val photoUrl = uploadedPhotoUrl ?: profile?.photo_profil
+                        photoUrl?.let { 
+                            sessionManager.saveUserPhoto(it)
+                            Log.d("ProfileInitial", "Photo URL saved to session: $it")
+                        }
+                        
                         Toast.makeText(
                             this@RecruiterProfileInitialActivity,
                             "Profile saved successfully!",
                             Toast.LENGTH_SHORT
                         ).show()
-                        
-                        // Save photo URL to session if available
-                        profile?.photo_profil?.let { sessionManager.saveUserPhoto(it) }
                         
                         // Navigate to dashboard
                         startActivity(Intent(this@RecruiterProfileInitialActivity, PostsActivity::class.java))
