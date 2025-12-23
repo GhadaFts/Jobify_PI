@@ -1,6 +1,6 @@
 [versions]
-agp = "8.13.1"
-kotlin = "2.0.21"
+agp = "8.5.2"
+kotlin = "1.9.23"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -25,5 +25,4 @@ filament-android = { group = "com.google.ar.sceneform", name = "filament-android
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
